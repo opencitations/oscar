@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <title>Search</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="/Library/WebServer/Documents/search/static/css/bootstrap.min.css" rel="stylesheet" />
+
+        <!-- Font Awesome -->
+        <link href="/Library/WebServer/Documents/search/static/css/font-awesome.min.css" rel="stylesheet" />
+
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <link href="/Library/WebServer/Documents/search/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
+
+        <!-- Custom styles for this template -->
+        <link href="/Library/WebServer/Documents/search/static/css/cover.css" rel="stylesheet" />
+        <link href="/Library/WebServer/Documents/search/static/css/search.css" rel="stylesheet" />
+
+    </head>
+    <body>
+
+
+
+        <div class="cover-container">
+
+
+            <input id="input_box" name="input_box" type="text" class="form-control oc-purple" placeholder="Search...">
+            <div class="input-group-btn">
+              <button class="btn btn-default oc-purple" type="submit" onclick="on_click();"><i class="glyphicon glyphicon-search"></i></button>
+            </div>
+
+            <div class="cover">
+
+                <!-- The search page skeleton -->
+                <!--==========================-->
+                <div id="search" class="search">
+                  <div id="search_header" class="search-header">
+                    <div id="rows_per_page"></div>
+                    <div id="sort_results"></div>
+                  </div>
+                  <div id="search_body" class="search-body">
+                    <div id="search_filters" class="search-filters">
+                      <div id="limit_results"></div>
+                      <div id="filter_btns"></div>
+                      <div id="filter_values_list"></div>
+                    </div>
+                    <div id="search_results" class="search-results"></div>
+                  </div>
+                </div>
+                <!--==========================-->
+
+            </div>
+
+        </div>
+
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="/Library/WebServer/Documents/search/static/js/jquery.min.js"><![CDATA[ ]]></script>
+        <script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"><\/script>')</script>
+        <script src="/Library/WebServer/Documents/search/static/js/bootstrap.min.js"><![CDATA[ ]]></script>
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <script src="/Library/WebServer/Documents/search/static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
+
+        <script type="text/javascript" src="/Library/WebServer/Documents/search/static/js/search-conf.js"></script>
+        <script type="text/javascript" src="/Library/WebServer/Documents/search/static/js/search.js"></script>
+        <script>
+          function on_click() {
+            var input_box = document.getElementById("input_box");
+            //console.log(input_box.value);
+            if (input_box.value != "") {
+                search.do_sparql_query(input_box.value);
+            }
+          }
+        </script>
+
+    </body>
+</html>
