@@ -58,6 +58,10 @@ var search = (function () {
 				var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
 				var global_r = new RegExp("<VAR>", "g");
 				sparql_query = sparql_query.replace(global_r, "'"+qtext+"'");
+				//in case there is a url variable
+				global_r = new RegExp("<URL-VAR>", "g");
+				sparql_query = sparql_query.replace(global_r, qtext);
+				//console.log(sparql_query);
 
 				//use this url to contact the sparql_endpoint triple store
 				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
@@ -73,7 +77,7 @@ var search = (function () {
 	    				success: function( res_data ) {
 									htmldom.loader(false);
 									htmldom.remove_footer();
-									//console.log(JSON.parse(JSON.stringify(res_data)));
+									console.log(JSON.parse(JSON.stringify(res_data)));
 									_init_data(rule,res_data);
 
 									_build_filter_sec();
