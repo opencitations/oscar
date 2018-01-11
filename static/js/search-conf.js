@@ -47,7 +47,7 @@ var search_conf = {
     {
       "name":"orcid",
       "category": "author",
-      "regex":"[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}$",
+      "regex":"[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4}$",
       "query": [
         "SELECT ?author_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
               "?lit bds:search <VAR> . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
@@ -175,7 +175,7 @@ var search_conf = {
         {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true, "default": {"order": "desc"}} },
         {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"doc","prefix":""}},
         {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "int", "min": 8, "sort": "sum", "order": "desc"}, "link":{"field":"author_iri","prefix":""}},
-        {"value":"in_cits", "title": "Cited by", "column_width":"13%","type": "text", "sort":{"value": true}}
+        {"value":"in_cits", "title": "Cited by", "column_width":"13%","type": "int", "sort":{"value": true}}
       ],
       "group_by": {"keys":["doc"], "concats":["author"]}
     },
@@ -186,7 +186,7 @@ var search_conf = {
         {"value":"short_iri", "title": "Corpus ID","column_width":"25%", "type": "text", "link":{"field":"author_iri","prefix":""}},
         {"value":"author", "title": "Author","column_width":"35%", "type": "text","filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "desc"}, "sort": {"value": true, "default": {"order": "desc"}}},
         {"value":"orcid", "title": "ORCID","column_width":"25%", "type": "text", "link":{"field":"orcid","prefix":"https://orcid.org/"}},
-        {"value":"num_docs", "title": "Works","column_width":"15%", "type": "text"}
+        {"value":"num_docs", "title": "Works","column_width":"15%", "type": "int"}
       ]
     }
   ],
