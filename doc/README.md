@@ -1,3 +1,5 @@
+# The Configuration file: 
+
 ## The Rules:
 The search execution is based on the fact that the input should belong to a specific rule which will handle it. So the system need to find this specific rule from a list and apply its policies. In order to do this you need to define a **rules** key inside the configuration file, which will have an array of several rule entries as value. Here we show an example:
 ```js
