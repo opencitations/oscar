@@ -191,3 +191,18 @@ You can associate a link to the values in a specific column of the results retri
     ...
 ]
 ```
+
+### Group by the category results:
+In case we want to group by the results obtained from the sparql query.  
+**How:** define a **group\_by** key inside ur category, which will have an object as values, the object parameters are: **keys** an array of fields that will represent the keys on which the table will be grouped on, **concats** an array of fields you wish to concatenate.  
+**Example:** the group by policies of the document category  
+```js
+"categories":  [
+    {
+        "name":"document",
+        "group_by": {"keys":["doc"], "concats":["author"]},
+        ...
+    }
+    ...
+]
+```
