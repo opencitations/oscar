@@ -101,4 +101,93 @@ For each different rule you should define the sparql query to execute on the tri
 ]
 ```
 
+## The Categories:
+Each one of the rules previously defined should specify a category, the category of the rule determine which results need to be extracted from the query and the polices that should be applied on them. In order to do this, a **categories** key inside the configuration file must be included, which will have an array of several category entries as value. Here we show an example:
+```js
+"categories":  [
+    {<CATEGORY-ENTRY>},
+    {<CATEGORY-ENTRY>},
+    ...
+]
+```
+Each category entry have several internal keys which defines it (attributes), here we list all the possible keys. 
 
+### Name:
+A representative name for the category. This value should be mentioned in the specific rule-entry.category which will generate results belonging to this specific category. 
+
+**How:** assign a string value to the **name** key.
+
+**Example:** a document category:
+```js
+"categories":  [
+    {
+        "name":"document",
+        ...
+    }
+    ...
+]
+```
+
+### The results columns:
+For each category you can specify the columns that you want to visualize in the table of results. In this case the columns are a subset of fields extracted from the sparql query selections.  
+**How:** define a **fields** key inside ur category, which will have an array of several field entries as value.  
+**Example:** the fields of the document category
+```js
+"categories":  [
+    {
+        "name":"document",
+        "fields": [
+            {<FIELD-ENTRY>},
+            {<FIELD-ENTRY>},
+            ...
+        ],
+        ...
+    }
+    ...
+]
+```
+Each field entry have several internal keys which defines it (attributes), here we list all the possible keys. 
+
+#### The Value:  
+The field I want from the query. This value should exactly match the variable name inside the query.  
+**How:** assign a string value to the **value** key.
+
+#### The column title:  
+The header name of the column. This enable users to define an alternative title for the field selected.  
+**How:** assign a string value to the **title** key.
+
+#### The column width:  
+Specify the width of the column. Note that the sum of column widths for all the field entries should be 100%.  
+**How:** assign a percentage value to the **column_width** key.
+
+#### Column values type:  
+Specify the type of column values. For instance 'text' or 'int'.  
+**How:** assign a string value to the **type** key.
+
+#### Sort the column:  
+In case you want the interface enable the sorting of this column (desc and asc).  
+**How:** define a **sort** key, which will have as value a new object, with attributes: **value:true** and in case you want to let this field be the default value to sort the table according a **"default": {"order": YOUR-DEFAULT-ORDER}** key need to be placed inside the sort obj.
+
+#### Filtering options:  
+In case you want the interface enable the filtering operations on this column.
+**How:** define a **filter** key, which will have as value a new object, with internal attributes that define how its values should be listed: **type\_sort** indicate the type of the value i am using to sort the list (e.g: int or text), **min** will contain the number of elements to visualize per page, **sort** specify the value i am using to sort the elements (two possible alternatives: 'value' or 'sum'), **order** the order of the elements (two possible values: "desc" or "asc").
+
+#### Associate a link to the values in the column:  
+You can associate a link to the values in a specific column of the results retrieved, by specifying the column which contains the link values. Note that the column of links is also contained in the results obtained. A link object can contain these attributes: **field**: the column of the links (from the query results), **prefixx**: in case you want to add a fixed text before the link, you should specify its value here.
+
+
+
+**Example:** a field entry contaning all the options described above
+```js
+"categories":  [
+    {
+        "name":"document",
+        "fields": [
+            {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true, "default": {"order": "desc"}}, "filter":{"type_sort": "int", "min": 8, "sort": "sum", "order": "desc"}, "link":{"field":"author_iri","prefix":""}},
+            ...
+        ],
+        ...
+    }
+    ...
+]
+```
