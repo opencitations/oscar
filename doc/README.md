@@ -12,10 +12,8 @@ The search execution is based on the fact that the input should belong to a spec
 Each rule entry have several internal keys which defines it (attributes), here we list all the possible keys. 
 
 ### Name:
-A representative name for the rule. This value does not have any effect on the execution.
-
-**How:** assign a string value to the **name** key.
-
+A representative name for the rule. This value does not have any effect on the execution.  
+**How:** assign a string value to the **name** key.  
 **Example:** a rule for the DOI detection:
 ```js
 "rules":  [
@@ -28,10 +26,8 @@ A representative name for the rule. This value does not have any effect on the e
 ```
 
 ### Results category:
-Each rule will retrieve results that should be classified in categories. This will enable the system to view the information needed according to the category the current category it belongs to. Next on this documentation we will describe how a category should be defined. 
-
-**How:** assign a string value to the **category** key.
-
+Each rule will retrieve results that should be classified in categories. This will enable the system to view the information needed according to the category the current category it belongs to. Next on this documentation we will describe how a category should be defined.  
+**How:** assign a string value to the **category** key.  
 **Example:** a rule which retrieves results as a document category:
 ```js
 "rules":  [
@@ -45,10 +41,8 @@ Each rule will retrieve results that should be classified in categories. This wi
 ```
 
 ### Rule-entry detection:
-In order to retrieve the correct information for a specific textual searching input you need to know the search intent: what kind of information I am looking for. A search operation refers to a category C if its textual format matches a specific regular expression. 
-
-**How:** each different rule entry can specify this by assigning a regular expression value to the **regex** key
-
+In order to retrieve the correct information for a specific textual searching input you need to know the search intent: what kind of information I am looking for. A search operation refers to a category C if its textual format matches a specific regular expression.  
+**How:** each different rule entry can specify this by assigning a regular expression value to the **regex** key  
 **Example:** a rule definition for the document category:
 ```js
 "rules":  [
@@ -63,10 +57,8 @@ In order to retrieve the correct information for a specific textual searching in
 ```
 
 ### The SPARQL query:
-For each different rule you should define the sparql query to execute on the triple store. 
-
-**How:** assign to the **query** key the query textual body, the value is represented as an array of strings, an array is used in order to make the configuration file easier to visually comprehend and modify. 
-
+For each different rule you should define the sparql query to execute on the triple store.  
+**How:** assign to the **query** key the query textual body, the value is represented as an array of strings, an array is used in order to make the configuration file easier to visually comprehend and modify.  
 **Example:** a query definition for the rule "doi":
 ```js
 "rules":  [
@@ -115,10 +107,8 @@ Each one of the rules previously defined should specify a category, the category
 Each category entry have several internal keys which defines it (attributes), here we list all the possible keys. 
 
 ### Name:
-A representative name for the category. This value should be mentioned in the specific rule-entry.category which will generate results belonging to this specific category. 
-
-**How:** assign a string value to the **name** key.
-
+A representative name for the category. This value should be mentioned in the specific rule-entry.category which will generate results belonging to this specific category.  
+**How:** assign a string value to the **name** key.  
 **Example:** a document category:
 ```js
 "categories":  [
