@@ -26,7 +26,7 @@ A representative name for the rule. This value does not have any effect on the e
 ```
 
 ### Results category:
-Each rule will retrieve results that should be classified in categories. This will enable the system to view the information needed according to the category the current category it belongs to. Next on this documentation we will describe how a category should be defined.  
+Each rule will retrieve results that should be classified in categories. This will enable the system to view the information needed according to the category the current rule belongs to. Next on this documentation we will describe how a category should be defined.  
 **How:** assign a string value to the **category** key.  
 **Example:** a rule which retrieves results as a document category:
 ```js
@@ -43,7 +43,7 @@ Each rule will retrieve results that should be classified in categories. This wi
 ### Rule-entry detection:
 In order to retrieve the correct information for a specific textual searching input you need to know the search intent: what kind of information I am looking for. A search operation refers to a category C if its textual format matches a specific regular expression.  
 **How:** each different rule entry can specify this by assigning a regular expression value to the **regex** key  
-**Example:** a rule definition for the document category:
+**Example:** a rule definition for the rule 'doi':
 ```js
 "rules":  [
     {
@@ -107,7 +107,7 @@ Each one of the rules previously defined should specify a category, the category
 Each category entry have several internal keys which defines it (attributes), here we list all the possible keys. 
 
 ### Name:
-A representative name for the category. This value should be mentioned in the specific rule-entry.category which will generate results belonging to this specific category.  
+A representative name for the category. This value is mentioned in rule-entries that aim in generating results belonging to this specific category.  
 **How:** assign a string value to the **name** key.  
 **Example:** a document category:
 ```js
@@ -149,7 +149,7 @@ The header name of the column. This enable users to define an alternative title 
 **How:** assign a string value to the **title** key.
 
 #### The column width:  
-Specify the width of the column. Note that the sum of column widths for all the field entries should be 100%.  
+Specifies the column width. Note that the sum of column widths for all the field entries should be 100%.  
 **How:** assign a percentage value to the **column_width** key.
 
 #### Column values type:  
