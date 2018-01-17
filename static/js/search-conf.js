@@ -192,6 +192,7 @@ var search_conf = {
   ],
 
 
-"page_limit": [5,10,15,20,30,40,50]
+"page_limit": [5,10,15,20,30,40,50],
+"def_adv_category": "document"
 
 }

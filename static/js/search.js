@@ -2,6 +2,7 @@
 var search = (function () {
 
 		var search_conf_json = {};
+		var adv_cat_selected = null;
 		var table_conf ={
 				data: null,
 				category: "",
@@ -15,6 +16,16 @@ var search = (function () {
 				var re = new RegExp(search_conf_json["rules"][i]["regex"]);
 				if (query_text.match(re)) {
 					//console.log("Match with rule number"+String(i));
+					return search_conf_json["rules"][i];
+				}
+			}
+			return -1;
+		}
+
+		/*get rule entry with given name*/
+		function _get_rule_by_name(name){
+			for (i = 0; i < search_conf_json["rules"].length; i++) {
+				if (search_conf_json["rules"][i]['name'] == name) {
 					return search_conf_json["rules"][i];
 				}
 			}
@@ -42,55 +53,65 @@ var search = (function () {
 
 		/*THE MAIN FUNCTION CALL
 		call the sparql endpoint and do the query 'qtext'*/
-		function do_sparql_query(qtext){
+		function do_sparql_query(qtext, rule_name=null){
+
+			//initialize and get the search_config_json
+			//_get_search_conf();
+			search_conf_json = search_conf;
 
 			if (qtext != "") {
 
-				//initialize and get the search_config_json
-				//_get_search_conf();
-				search_conf_json = search_conf;
-
 				//get the rule of my input qtext
-				var rule =  _get_rule(qtext);
+				var rule = _get_rule_by_name(rule_name);
+				if (rule == -1) {
+					rule =  _get_rule(qtext);
+					console.log(qtext);
+					console.log(rule);
+				}
 				//console.log(rule);
 
-				//build the sparql query in turtle format
-				var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
-				var global_r = new RegExp("<VAR>", "g");
-				sparql_query = sparql_query.replace(global_r, "'"+qtext+"'");
-				//in case there is a url variable
-				global_r = new RegExp("<URL-VAR>", "g");
-				sparql_query = sparql_query.replace(global_r, qtext);
-				//console.log(sparql_query);
+				//if i have a corresponding rule
+				if (rule != -1) {
+					//build the sparql query in turtle format
+					var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
+					var global_r = new RegExp("<VAR>", "g");
+					sparql_query = sparql_query.replace(global_r, "'"+qtext+"'");
+					//in case there is a url variable
+					global_r = new RegExp("<URL-VAR>", "g");
+					sparql_query = sparql_query.replace(global_r, qtext);
+					//console.log(sparql_query);
 
-				//use this url to contact the sparql_endpoint triple store
-				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
+					//use this url to contact the sparql_endpoint triple store
+					var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
 
-				//put a loader div
-				htmldom.loader(true);
+					//put a loader div
+					htmldom.loader(true);
 
-				//call the sparql end point and retrieve results in json format
-				$.ajax({
-			        dataType: "json",
-			        url: query_contact_tp,
-							type: 'GET',
-	    				success: function( res_data ) {
-									htmldom.loader(false);
-									htmldom.remove_footer();
-									console.log(JSON.parse(JSON.stringify(res_data)));
-									_init_data(rule,res_data);
+					//call the sparql end point and retrieve results in json format
+					$.ajax({
+				        dataType: "json",
+				        url: query_contact_tp,
+								type: 'GET',
+		    				success: function( res_data ) {
+										htmldom.loader(false);
+										htmldom.remove_footer();
+										console.log(JSON.parse(JSON.stringify(res_data)));
+										_init_data(rule,res_data);
 
-									_build_filter_sec();
-									_limit_results();
-									_build_header_sec(rule);
-									_sort_results();
+										_build_filter_sec();
+										_limit_results();
+										_build_header_sec(rule);
+										_sort_results();
 
-									htmldom.update_page(table_conf,search_conf_json);
-	    				}
-			   });
+										htmldom.update_page(table_conf,search_conf_json);
+		    				}
+				   });
+				 }
 
 			 }else {
-	 				htmldom.main_entry();
+	 				//htmldom.main_entry();
+					adv_cat_selected = search_conf_json["def_adv_category"];
+					htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
 			 }
 		}
 
@@ -538,6 +559,19 @@ var search = (function () {
 			table_conf.view.fields_filter_index[myfield.value].i_to -= myfield.config.min;
 			htmldom.filter_checkboxes(table_conf);
 		}
+		function adv_query(){
+			var input_box = document.getElementById("advsearch_input_box");
+			var rules_selector = document.getElementById("rules_selector");
+			if (input_box.value != "") {
+				htmldom.remove_extras();
+				search.do_sparql_query(input_box.value,rules_selector.value);
+			}
+		}
+
+		function switch_adv_category(category_name){
+			adv_cat_selected = category_name;
+			htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
+		}
 
 		return {
 				next_page: next_page,
@@ -552,6 +586,8 @@ var search = (function () {
 				select_filter_field: select_filter_field,
 				next_filter_page: next_filter_page,
 				prev_filter_page: prev_filter_page,
+				switch_adv_category: switch_adv_category,
+				adv_query: adv_query,
 				do_sparql_query: do_sparql_query
 		 }
 })();
@@ -757,7 +793,7 @@ var htmldom = (function () {
 	var limitres_container = document.getElementById("limit_results");
 	var filter_btns_container = document.getElementById("filter_btns");
 	var filter_values_container = document.getElementById("filter_values_list");
-
+	var extra_container = document.getElementById("search_extra");
 
 	function table_res_header(cols,fields){
 
@@ -970,6 +1006,71 @@ var htmldom = (function () {
 
 		header_container.innerHTML = str_html;
 		return str_html;
+	}
+
+	function remove_extras(){
+		extra_container.innerHTML = "";
+	}
+
+	function build_advanced_search(conf_file, adv_cat_selected){
+
+		var str_lis = _build_lis(conf_file, adv_cat_selected);
+		var str_options = _build_options(conf_file, adv_cat_selected);
+
+		var str_html =
+						"<p><div class='adv-search'>"+
+								"<div class='adv-search-nav'>"+
+									"<ul class='nav pages-nav'>"+
+									str_lis+
+									"</ul>"+
+								"</div>"+
+								"<div class='adv-search-body'>"+
+									"<div class='adv-search-input'>"+
+										"<form class='input-group search-box' action='search' method='get'>"+
+											"<input id='advsearch_input_box' type='text' class='form-control oc-purple' placeholder='Search...' name='text'>"+
+										"</form>"+
+									"</div>"+
+									"<div class='adv-search-selector'>"+
+										"<select class='form-control input custom' onchange='' id='rules_selector'>"+
+										str_options+
+										"</select>"+
+									"</div>"+
+								"</div>"+
+								"<div class='adv-search-footer'>"+
+									"<div class='input-group-btn'>"+
+										"<button class='btn btn-default oc-purple' id='advsearch_btn'> <span class='search-btn-text'> Search inside OC </span><i class='glyphicon glyphicon-search large-icon'></i></button>"+
+									"</div>"+
+								"</div>"+
+						"</div></p>";
+		extra_container.innerHTML = str_html;
+		document.getElementById("advsearch_btn").onclick = search.adv_query;
+		return str_html;
+
+		function _build_options(conf_file, adv_cat_selected){
+			var str_allopt = "";
+			var str_selected = "selected";
+			for (var i = 0; i < conf_file["rules"].length; i++) {
+					var str_option = "";
+					if (conf_file["rules"][i].category == adv_cat_selected){
+						str_option = "<option "+str_selected+" value="+conf_file["rules"][i].name+">"+conf_file["rules"][i].name+"</option>";
+					}
+					str_allopt = str_allopt + str_option;
+					str_selected = "";
+			}
+			return str_allopt;
+		}
+		function _build_lis(conf_file, adv_cat_selected){
+			var str_lis = "";
+			for (var i = 0; i < conf_file["categories"].length; i++) {
+				var is_active = "";
+				if (conf_file["categories"][i].name == adv_cat_selected) {
+					is_active = "active";
+				}
+				var str_href = "javascript:search.switch_adv_category('"+conf_file["categories"][i].name+"')";
+				str_lis = str_lis + "<li class='"+is_active+"'><a href="+str_href+">"+conf_file["categories"][i].name+"</a></li>"
+			}
+			return str_lis;
+		}
 	}
 
 	function filter_btns(){
@@ -1262,6 +1363,8 @@ var htmldom = (function () {
 		page_limit: page_limit,
 		sort_box: sort_box,
 		main_entry: main_entry,
+		build_advanced_search: build_advanced_search,
+		remove_extras: remove_extras,
 		filter_btns: filter_btns,
 		limit_filter: limit_filter,
 		filter_checkboxes: filter_checkboxes,
