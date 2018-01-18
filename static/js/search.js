@@ -74,11 +74,11 @@ var search = (function () {
 				if (rule != -1) {
 					//build the sparql query in turtle format
 					var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
-					var global_r = new RegExp("<VAR>", "g");
-					sparql_query = sparql_query.replace(global_r, "'"+qtext+"'");
-					//in case there is a url variable
-					global_r = new RegExp("<URL-VAR>", "g");
-					sparql_query = sparql_query.replace(global_r, qtext);
+					//var global_r = new RegExp(, "g");
+					sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext);
+					//in case it is a url variable
+					//global_r = new RegExp("<URL-VAR>", "g");
+					//sparql_query = sparql_query.replace(global_r, qtext);
 					//console.log(sparql_query);
 
 					//use this url to contact the sparql_endpoint triple store
