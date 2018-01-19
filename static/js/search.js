@@ -15,6 +15,7 @@ var search = (function () {
 			for (i = 0; i < search_conf_json["rules"].length; i++) {
 				var re = new RegExp(search_conf_json["rules"][i]["regex"]);
 				if (query_text.match(re)) {
+				//if (re.test(query_text)){
 					//console.log("Match with rule number"+String(i));
 					return search_conf_json["rules"][i];
 				}
@@ -65,21 +66,24 @@ var search = (function () {
 				var rule = _get_rule_by_name(rule_name);
 				if (rule == -1) {
 					rule =  _get_rule(qtext);
-					console.log(qtext);
-					console.log(rule);
 				}
-				//console.log(rule);
+				console.log(rule);
 
 				//if i have a corresponding rule
 				if (rule != -1) {
 					//build the sparql query in turtle format
 					var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
 					//var global_r = new RegExp(, "g");
-					sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext);
+
+					var re = new RegExp(rule.regex,'i');
+					var qtext_groups = qtext.match(re);
+
+					console.log("Replace [[VAR]] with: "+qtext_groups[0]);
+					sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
 					//in case it is a url variable
 					//global_r = new RegExp("<URL-VAR>", "g");
 					//sparql_query = sparql_query.replace(global_r, qtext);
-					//console.log(sparql_query);
+					console.log(sparql_query);
 
 					//use this url to contact the sparql_endpoint triple store
 					var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
@@ -109,9 +113,11 @@ var search = (function () {
 				 }
 
 			 }else {
-	 				//htmldom.main_entry();
-					adv_cat_selected = search_conf_json["def_adv_category"];
-					htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
+	 				htmldom.main_entry();
+
+					//in case you want the advanced search interface
+					//adv_cat_selected = search_conf_json["def_adv_category"];
+					//htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
 			 }
 		}
 
@@ -1208,7 +1214,7 @@ var htmldom = (function () {
 	function loader(build_bool){
 		if (header_container != null) {
 			if (build_bool) {
-				var str_html = "<div id='search_loader' class='searchloader'> Searching in the corpus ...</div>";
+				var str_html = "<div id='search_loader' class='searchloader'> Searching the OpenCitations Corpus ...</div>";
 				parser = new DOMParser()
 	  		var dom = parser.parseFromString(str_html, "text/xml").firstChild;
 				header_container.appendChild(dom);
