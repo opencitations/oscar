@@ -89,7 +89,7 @@ var search = (function () {
 					var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
 
 					//put a loader div
-					htmldom.loader(true);
+					htmldom.loader(true,qtext);
 
 					//call the sparql end point and retrieve results in json format
 					$.ajax({
@@ -792,6 +792,7 @@ var util = (function () {
 
 var htmldom = (function () {
 
+	var input_box_container = document.getElementById("input_box");
 	var results_container = document.getElementById("search_results");
 	var header_container = document.getElementById("search_header");
 	var sort_container = document.getElementById("sort_results");
@@ -1211,14 +1212,16 @@ var htmldom = (function () {
 		return new_btn;
 	}
 
-	function loader(build_bool){
+	function loader(build_bool, queryt){
 		if (header_container != null) {
 			if (build_bool) {
+				retain_box_value(input_box_container,queryt);
 				var str_html = "<div id='search_loader' class='searchloader'> Searching the OpenCitations Corpus ...</div>";
 				parser = new DOMParser()
 	  		var dom = parser.parseFromString(str_html, "text/xml").firstChild;
 				header_container.appendChild(dom);
 			}else {
+				reset_box_value(input_box_container);
 				var element = document.getElementById("search_loader");
 				element.parentNode.removeChild(element);
 			}
@@ -1357,6 +1360,18 @@ var htmldom = (function () {
 		}
 		if (exclude_btn != null) {
 			exclude_btn.disabled = flag;
+		}
+	}
+
+	function retain_box_value(input_container, txtval){
+		for (var i = 0; i < input_container.length; i++) {
+			input_container[i].placeholder = txtval ;
+		}
+	}
+
+	function reset_box_value(input_container){
+		for (var i = 0; i < input_container.length; i++) {
+			input_container[i].placeholder = "Search..." ;
 		}
 	}
 
