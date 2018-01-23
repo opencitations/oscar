@@ -67,7 +67,7 @@ var search = (function () {
 				if (rule == -1) {
 					rule =  _get_rule(qtext);
 				}
-				console.log(rule);
+				//console.log(rule);
 
 				//if i have a corresponding rule
 				if (rule != -1) {
@@ -95,7 +95,7 @@ var search = (function () {
 		    				success: function( res_data ) {
 										htmldom.loader(false);
 										htmldom.remove_footer();
-										console.log(JSON.parse(JSON.stringify(res_data)));
+										//console.log(JSON.parse(JSON.stringify(res_data)));
 										_init_data(rule,res_data);
 
 										_build_filter_sec();
