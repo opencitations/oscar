@@ -156,6 +156,13 @@ spanfooter + spanfooter {
   font-size:medium;
 }
 
+.export-results {
+  float:left;
+  margin-left: 15px;
+  margin-top: 15px;
+  vertical-align: middle;
+}
+
 select {
   text-indent: 0%;
   margin: 5px;
@@ -174,7 +181,6 @@ select.custom {
 select.custom::-ms-expand {
   display: none;
 }
-
 /* ========================== (2) The search header */
 
 
@@ -261,7 +267,7 @@ td ar + ar {
 
 /* (4) The search entry (first page) */
 /* ================================= */
-.search_extra{font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;}
+.search-extra{font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;}
 
 .search-entry{
   font-size: 230%;
@@ -317,6 +323,29 @@ td ar + ar {
   margin-right:10px;
 }
 .large-icon{
+  font-size: 140%;
+}
+.abort-search{
+  margin-top: 50px;
+  color: #990000;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 100%;
+}
+
+.allert-a:active,
+.allert-a:hover,
+.allert-a:focus {
+  color: #990000;
+  border-bottom-color: #990000;
+}
+
+.allert-text{
+  color: #990000;
+}
+.platino-font{
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+.large-text{
   font-size: 140%;
 }
 /* ========================== (4) The search entry (first page) */

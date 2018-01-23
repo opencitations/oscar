@@ -28,9 +28,9 @@
         <div class="cover-container">
 
 
-            <input id="input_box" name="input_box" type="text" class="form-control oc-purple" placeholder="Search...">
+            <input id="input_box" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
             <div class="input-group-btn">
-              <button class="btn btn-default oc-purple" type="submit" onclick="on_click();"><i class="glyphicon glyphicon-search"></i></button>
+              <button id="search_btn" class="btn btn-default oc-purple" type="submit" ><i class="glyphicon glyphicon-search"></i></button>
             </div>
 
             <div class="cover">
@@ -71,28 +71,41 @@
         <script type="text/javascript" src="/Library/WebServer/Documents/search/static/js/search-conf.js"></script>
         <!--<script type="text/javascript" src="/Library/WebServer/Documents/search/static/js/search-conf-wikidata.js"></script>-->
         <script type="text/javascript" src="/Library/WebServer/Documents/search/static/js/search.js"></script>
+
         <script>
+        document.getElementById("search_btn").onclick = on_click;
+
           var search_doms = ["rows_per_page","sort_results","limit_results","filter_btns","filter_values_list","search_results"];
-          function reset_doms(mydom) {
-            if (search_doms.indexOf(mydom.id) != -1) {
-              mydom.innerHTML = "";
-            }else {
-              for(var i=0; i<mydom.children.length; i++) {
-                  reset_doms(mydom.children[i]);
-              }
+          function reset_doms() {
+            for(var i=0; i<search_doms.length; i++) {
+                var container = document.getElementById(search_doms[i]);
+                container.innerHTML = "";
             }
           }
+
+          function load_js()
+           {
+              var head= document.getElementsByTagName('head')[0];
+              var script= document.createElement('script');
+              script.type= 'text/javascript';
+              script.src= "/Library/WebServer/Documents/search/static/js/search.js";
+              head.appendChild(script);
+           }
+
           function on_click() {
+            //location.reload();
+            //build_search_skeleton();
+            load_js();
+            reset_doms();
             console.log(document.getElementById("search"));
-            reset_doms(document.getElementById("search"));
             var input_box = document.getElementById("input_box");
-            //console.log(input_box.value);
             if (input_box.value != "") {
                 search.do_sparql_query(input_box.value);
             }else {
               search.do_sparql_query("");
             }
           }
+
         </script>
 
     </body>

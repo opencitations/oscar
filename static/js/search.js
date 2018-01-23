@@ -67,29 +67,25 @@ var search = (function () {
 				if (rule == -1) {
 					rule =  _get_rule(qtext);
 				}
-				console.log(rule);
+				//console.log(rule);
 
 				//if i have a corresponding rule
 				if (rule != -1) {
 					//build the sparql query in turtle format
 					var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
-					//var global_r = new RegExp(, "g");
 
 					var re = new RegExp(rule.regex,'i');
 					var qtext_groups = qtext.match(re);
 
-					console.log("Replace [[VAR]] with: "+qtext_groups[0]);
+					//console.log("Replace [[VAR]] with: "+qtext_groups[0]);
 					sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
-					//in case it is a url variable
-					//global_r = new RegExp("<URL-VAR>", "g");
-					//sparql_query = sparql_query.replace(global_r, qtext);
-					console.log(sparql_query);
+					//console.log(sparql_query);
 
 					//use this url to contact the sparql_endpoint triple store
 					var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
 
 					//put a loader div
-					htmldom.loader(true,qtext);
+					htmldom.loader(true,qtext,search_conf_json["on_abort"]);
 
 					//call the sparql end point and retrieve results in json format
 					$.ajax({
@@ -99,7 +95,7 @@ var search = (function () {
 		    				success: function( res_data ) {
 										htmldom.loader(false);
 										htmldom.remove_footer();
-										console.log(JSON.parse(JSON.stringify(res_data)));
+										//console.log(JSON.parse(JSON.stringify(res_data)));
 										_init_data(rule,res_data);
 
 										_build_filter_sec();
@@ -295,6 +291,8 @@ var search = (function () {
 				arr_options = search_conf_json.page_limit;
 			}
 			htmldom.page_limit(arr_options);
+
+			htmldom.build_export_btn();
 		}
 		function _build_filter_sec(){
 			if (__build_limit_res() != -1) {
@@ -579,6 +577,33 @@ var search = (function () {
 			htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
 		}
 
+		function export_results(){
+			var matrix = [];
+			//console.log(table_conf.view.data.results.bindings);
+			var tab_results = table_conf.view.data.results.bindings;
+
+
+			var row_elem = [];
+			if (tab_results.length > 0) {
+
+				for (var key in tab_results[0]) {
+						row_elem.push(key);
+				}
+				matrix.push(row_elem);
+
+				for (var i = 0; i < tab_results.length; i++) {
+					var row_elem = [];
+					for (var key in tab_results[i]) {
+						row_elem.push(util.build_str(tab_results[i][key],"inline"));
+					}
+					matrix.push(row_elem);
+				}
+
+				var encodedUri = util.encode_matrix_to_csv(matrix);
+				htmldom.download_results(encodedUri);
+			}
+		}
+
 		return {
 				next_page: next_page,
 				prev_page: prev_page,
@@ -594,12 +619,26 @@ var search = (function () {
 				prev_filter_page: prev_filter_page,
 				switch_adv_category: switch_adv_category,
 				adv_query: adv_query,
-				do_sparql_query: do_sparql_query
+				do_sparql_query: do_sparql_query,
+				export_results: export_results
 		 }
 })();
 
 
 var util = (function () {
+
+	function encode_matrix_to_csv(matrix) {
+		let csvContent = "data:text/csv;charset=utf-8,";
+		matrix.forEach(function(rowArray){
+			 //var raw_vals = [];
+			 /*for (var key in rowArray) {
+				 raw_vals.push(rowArray[key]);
+			 }*/
+		   let row = rowArray.join("|");
+		   csvContent += row + "\r\n"; // add carriage return
+		});
+		return encodeURI(csvContent);
+	}
 
 		/**
 	 * Returns true if key is not a key in object or object[key] has
@@ -778,6 +817,46 @@ var util = (function () {
 		return a - b;
 	}
 
+	function build_str(obj,concat_style){
+		if (obj.hasOwnProperty("concat-list")) {
+			return __concat_vals(obj["concat-list"],concat_style);
+		}else {
+			return __get_val(obj);
+		}
+
+		function __get_val(obj){
+			if ((obj != null) && (obj != undefined)){
+				if (obj.value == "") {obj.value = "NONE";}
+				var str_html = obj.value;
+				return str_html;
+			}else {
+				return "NONE";
+			}
+		}
+		function __concat_vals(arr,concat_style){
+			var str_html = "";
+			var separator = ", ";
+
+			if ((concat_style != null) && (concat_style != undefined)) {
+				if (concat_style == "newline") {separator = "\n ";}
+				if (concat_style == "inline") {separator = ", ";}
+				if (concat_style == "first") {
+					if (arr.length > 0) {arr = [arr[0]];}
+				}
+				if (concat_style == "last") {
+					if (arr.length > 0) {arr = [arr[arr.length - 1]];}
+				}
+			}
+
+			for (var i = 0; i < arr.length; i++) {
+				var obj = arr[i];
+				if (i == arr.length - 1) {separator = " ";}
+				str_html = str_html + __get_val(obj) + separator;
+			}
+			return str_html;
+		}
+	}
+
 	return {
 		is_undefined_key: is_undefined_key,
 		group_by: group_by,
@@ -785,14 +864,16 @@ var util = (function () {
 		get_sub_arr: get_sub_arr,
 		sort_json_by_key: sort_json_by_key,
 		sort_int: sort_int,
-		index_in_arrjsons: index_in_arrjsons
+		index_in_arrjsons: index_in_arrjsons,
+		encode_matrix_to_csv: encode_matrix_to_csv,
+		build_str: build_str
 	 }
 })();
 
 
 var htmldom = (function () {
 
-	var input_box_container = document.getElementById("input_box");
+	var input_box_container = document.getElementsByClassName("form-control oc-purple");
 	var results_container = document.getElementById("search_results");
 	var header_container = document.getElementById("search_header");
 	var sort_container = document.getElementById("sort_results");
@@ -1212,18 +1293,22 @@ var htmldom = (function () {
 		return new_btn;
 	}
 
-	function loader(build_bool, queryt){
+	function loader(build_bool, queryt, abort_link){
 		if (header_container != null) {
 			if (build_bool) {
 				retain_box_value(input_box_container,queryt);
-				var str_html = "<div id='search_loader' class='searchloader'> Searching the OpenCitations Corpus ...</div>";
+				var str_html = "<p><div id='search_loader' class='searchloader'> Searching the OpenCitations Corpus ...</div></p>"+
+											"<p><div id='abort_search' class='abort-search'><a href="+abort_link+" class='allert-a'> Abort search </a></div></p>"+
+											"";
 				parser = new DOMParser()
-	  		var dom = parser.parseFromString(str_html, "text/xml").firstChild;
-				header_container.appendChild(dom);
+	  		//var dom = parser.parseFromString(str_html, "text/xml").firstChild;
+				//header_container.appendChild(dom);
+				extra_container.innerHTML = str_html;
 			}else {
-				reset_box_value(input_box_container);
-				var element = document.getElementById("search_loader");
-				element.parentNode.removeChild(element);
+				//reset_box_value(input_box_container);
+				//var element = document.getElementById("search_loader");
+				//element.parentNode.removeChild(element);
+				extra_container.innerHTML = "";
 			}
 		}
 	}
@@ -1365,14 +1450,39 @@ var htmldom = (function () {
 
 	function retain_box_value(input_container, txtval){
 		for (var i = 0; i < input_container.length; i++) {
-			input_container[i].placeholder = txtval ;
+			//input_container[i].placeholder = txtval ;
+			input_container[i].value = txtval ;
 		}
 	}
 
 	function reset_box_value(input_container){
 		for (var i = 0; i < input_container.length; i++) {
+			input_container[i].value = "" ;
 			input_container[i].placeholder = "Search..." ;
 		}
+	}
+
+	function build_export_btn(){
+ 		//var str_html = "<div id='abort_search' class='abort-search'><a href='javascript:search.export_results()' download='results.csv' > Export results </a></div>";
+		var link = document.createElement("a");
+		link.id = "export_a";
+		link.className = "export-results";
+		link.innerHTML = "Export results";
+		//link.setAttribute("onclick","search.export_results()");
+		//link.onclick = search.export_results;
+
+		link.setAttribute("href", "javascript:search.export_results();");
+		//link.setAttribute("download", "results.csv");
+
+		header_container.appendChild(link);
+		//return str_html;
+	}
+
+	function download_results(csv_data){
+		var export_a = document.getElementById("export_a");
+		export_a.setAttribute("href", csv_data);
+		export_a.setAttribute("download", "results.csv");
+		export_a.click();
 	}
 
 
@@ -1392,6 +1502,8 @@ var htmldom = (function () {
 		update_page: update_page,
 		disable_filter_btns:disable_filter_btns,
 		loader: loader,
-		remove_footer: remove_footer
+		remove_footer: remove_footer,
+		build_export_btn: build_export_btn,
+		download_results: download_results
 	}
 })();

@@ -47,11 +47,11 @@ var search_conf = {
     {
       "name":"br_resource",
       "category": "document",
-      "regex":"(^\/br\/\\d{1,})",
+      "regex":"(br\/\\d{1,})",
       "query": [
         "SELECT DISTINCT ?iri ?short_iri ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
             "BIND('[[VAR]]' as ?short_iri) .",
-            "BIND(<https://w3id.org/oc/corpus[[VAR]]> as ?iri) .",
+            "BIND(<https://w3id.org/oc/corpus/[[VAR]]> as ?iri) .",
             "OPTIONAL {?iri dcterms:title ?title .}",
             "OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}",
             "OPTIONAL {?iri fabio:hasPublicationYear ?year .}",
@@ -94,6 +94,32 @@ var search_conf = {
                     "?doc pro:isDocumentContextFor ?role.",
                "}",
           "}GROUP BY ?author_iri ?short_iri ?orcid ?author"
+      ]
+    },
+    {
+      "name":"ra_resource",
+      "category": "author",
+      "regex":"(ra\/\\d{1,})",
+      "query": [
+        "SELECT ?author_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
+            "BIND('[[VAR]]' as ?short_iri) .",
+            "BIND(<https://w3id.org/oc/corpus/[[VAR]]> as ?author_iri) .",
+            "OPTIONAL {?author_iri datacite:hasIdentifier[",
+                      "datacite:usesIdentifierScheme datacite:orcid ;",
+             			    "literal:hasLiteralValue ?orcid].}",
+            "?author_iri rdfs:label ?label .",
+            "OPTIONAL {",
+                    "?author_iri foaf:familyName ?fname .",
+                    "?author_iri foaf:givenName ?name .",
+                    "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+             "}",
+             "",
+             "OPTIONAL {",
+                  "?role pro:isHeldBy ?author_iri .",
+                  "?role pro:isHeldBy ?author_iri .",
+                  "?doc pro:isDocumentContextFor ?role.",
+             "}",
+        "}GROUP BY ?author_iri ?short_iri ?orcid ?author"
       ]
     },
     {
@@ -142,9 +168,9 @@ var search_conf = {
             "WHERE  {",
               "BIND('[[VAR]]' as ?free_txt) .",
               "?lit bds:search ?free_txt .",
-              //"?lit bds:matchAllTerms 'true' .",
+              "?lit bds:matchAllTerms 'true' .",
               "?lit bds:relevance ?score .",
-              "?lit bds:minRelevance '0.25' .",
+              "?lit bds:minRelevance '0.2' .",
               "?lit bds:maxRank '300' .",
             "",
               "{",
@@ -197,11 +223,12 @@ var search_conf = {
     {
       "name": "document",
       "fields": [
-        {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"doc","prefix":""}},
+        {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
         {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true, "default": {"order": "desc"}} },
-        {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"doc","prefix":""}},
+        {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
         {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "int", "min": 8, "sort": "sum", "order": "desc"}, "link":{"field":"author_iri","prefix":""}},
         {"value":"in_cits", "title": "Cited by", "column_width":"13%","type": "int", "sort":{"value": true}}
+        //{"value":"score", "title": "Score", "column_width":"8%","type": "int", "sort":{"value": true}}
       ],
       "group_by": {"keys":["iri"], "concats":["author"]}
     },
@@ -219,6 +246,7 @@ var search_conf = {
 
 
 "page_limit": [5,10,15,20,30,40,50],
+"on_abort": "/search",
 "def_adv_category": "document"
 
 }
