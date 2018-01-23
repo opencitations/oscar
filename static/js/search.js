@@ -67,7 +67,7 @@ var search = (function () {
 				if (rule == -1) {
 					rule =  _get_rule(qtext);
 				}
-				//console.log(rule);
+				console.log(rule);
 
 				//if i have a corresponding rule
 				if (rule != -1) {
@@ -95,7 +95,7 @@ var search = (function () {
 		    				success: function( res_data ) {
 										htmldom.loader(false);
 										htmldom.remove_footer();
-										//console.log(JSON.parse(JSON.stringify(res_data)));
+										console.log(JSON.parse(JSON.stringify(res_data)));
 										_init_data(rule,res_data);
 
 										_build_filter_sec();
@@ -629,12 +629,18 @@ var util = (function () {
 
 	function encode_matrix_to_csv(matrix) {
 		let csvContent = "data:text/csv;charset=utf-8,";
+
+		function withQuotes(elem){
+			return '"'+elem+'"';
+		}
+
 		matrix.forEach(function(rowArray){
 			 //var raw_vals = [];
 			 /*for (var key in rowArray) {
 				 raw_vals.push(rowArray[key]);
 			 }*/
-		   let row = rowArray.join("|");
+			 rowArray = rowArray.map(withQuotes);
+		   let row = rowArray.join(",");
 		   csvContent += row + "\r\n"; // add carriage return
 		});
 		return encodeURI(csvContent);
