@@ -11,26 +11,28 @@ var search = (function () {
 		}
 
 		/* get the rule which matches my query_text*/
-		function _get_rule(query_text) {
+		function _get_rules(query_text) {
+			var arr_rules = [];
 			for (i = 0; i < search_conf_json["rules"].length; i++) {
 				var re = new RegExp(search_conf_json["rules"][i]["regex"]);
 				if (query_text.match(re)) {
 				//if (re.test(query_text)){
 					//console.log("Match with rule number"+String(i));
-					return search_conf_json["rules"][i];
+					//return search_conf_json["rules"][i];
+					arr_rules.push(search_conf_json["rules"][i]);
 				}
 			}
-			return -1;
+			return arr_rules;
 		}
 
 		/*get rule entry with given name*/
 		function _get_rule_by_name(name){
 			for (i = 0; i < search_conf_json["rules"].length; i++) {
 				if (search_conf_json["rules"][i]['name'] == name) {
-					return search_conf_json["rules"][i];
+					return [search_conf_json["rules"][i]];
 				}
 			}
-			return -1;
+			return [];
 		}
 
 		/*build a string with all the prefixes in a turtle format*/
@@ -63,41 +65,69 @@ var search = (function () {
 			if (qtext != "") {
 
 				//get the rule of my input qtext
-				var rule = _get_rule_by_name(rule_name);
-				if (rule == -1) {
-					rule =  _get_rule(qtext);
-				}
-				console.log(rule);
+				// in case I am using an advanced search
+				//var rules = _get_rule_by_name(rule_name);
+
+				var rules = [];
+				//if (rules == []) {
+				rules =  _get_rules(qtext);
+				//}
+				console.log(rules);
 
 				//if i have a corresponding rule
-				if (rule != -1) {
-					//build the sparql query in turtle format
-					var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
+				//if (rules != -1) {
+				if(rules != []){
+					_exec_rule(rules, 0, qtext);
+				}else {
+					//empty: no rule suitable
+				}
 
-					var re = new RegExp(rule.regex,'i');
-					var qtext_groups = qtext.match(re);
+			 }else {
+	 				htmldom.main_entry();
 
-					//console.log("Replace [[VAR]] with: "+qtext_groups[0]);
-					sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
-					//console.log(sparql_query);
+					//in case you want the advanced search interface
+					//adv_cat_selected = search_conf_json["def_adv_category"];
+					//htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
+			 }
+		}
 
-					//use this url to contact the sparql_endpoint triple store
-					var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
+		function _exec_rule(rules, rule_index, qtext){
 
-					//put a loader div
-					htmldom.loader(true,qtext,search_conf_json["on_abort"]);
+			if (rule_index < rules.length) {
 
-					//call the sparql end point and retrieve results in json format
-					$.ajax({
-				        dataType: "json",
-				        url: query_contact_tp,
-								type: 'GET',
-		    				success: function( res_data ) {
-										htmldom.loader(false);
-										htmldom.remove_footer();
-										console.log(JSON.parse(JSON.stringify(res_data)));
+				console.log("Executing rule: "+rules[rule_index].name);
+				var rule = rules[rule_index];
+				//build the sparql query in turtle format
+				var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
+
+				var re = new RegExp(rule.regex,'i');
+				var qtext_groups = qtext.match(re);
+
+				//console.log("Replace [[VAR]] with: "+qtext_groups[0]);
+				sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
+				//console.log(sparql_query);
+
+				//use this url to contact the sparql_endpoint triple store
+				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
+
+				//put a loader div
+				htmldom.loader(true,qtext,search_conf_json["on_abort"]);
+
+				//call the sparql end point and retrieve results in json format
+				$.ajax({
+							dataType: "json",
+							url: query_contact_tp,
+							type: 'GET',
+							//async: false,
+							success: function( res_data ) {
+									htmldom.loader(false);
+									htmldom.remove_footer();
+									console.log(JSON.parse(JSON.stringify(res_data)));
+
+									if ((res_data.results.bindings.length == 0) && (rule_index != rules.length - 1)) {
+										_exec_rule(rules, rule_index + 1, qtext);
+									}else {
 										_init_data(rule,res_data);
-
 										_build_filter_sec();
 										_limit_results();
 										_gen_data_checkboxes();
@@ -106,16 +136,9 @@ var search = (function () {
 										_sort_results();
 
 										htmldom.update_page(table_conf,search_conf_json);
-		    				}
-				   });
-				 }
-
-			 }else {
-	 				htmldom.main_entry();
-
-					//in case you want the advanced search interface
-					//adv_cat_selected = search_conf_json["def_adv_category"];
-					//htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
+									}
+							}
+				 });
 			 }
 		}
 
