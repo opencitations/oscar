@@ -164,7 +164,7 @@ var search_conf = {
       "category": "document",
       "regex":"[-'a-zA-Z ]+$",
       "query": [
-        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
             "WHERE  {",
               "BIND('[[VAR]]' as ?free_txt) .",
               "?lit bds:search ?free_txt .",
@@ -214,7 +214,8 @@ var search_conf = {
                      "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
                "}",
               "}",
-            "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri"
+            "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri ",
+            "ORDER BY DESC(?score)"
       ]
     }
   ],
@@ -224,11 +225,11 @@ var search_conf = {
       "name": "document",
       "fields": [
         {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
-        {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true, "default": {"order": "desc"}} },
+        {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 4, "sort": "value", "order": "desc"}, "sort":{"value": true, "default": {"order": "desc"}} },
         {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
-        {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "int", "min": 8, "sort": "sum", "order": "desc"}, "link":{"field":"author_iri","prefix":""}},
+        {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "int", "min": 4, "sort": "sum", "order": "desc"}, "link":{"field":"author_iri","prefix":""}},
         {"value":"in_cits", "title": "Cited by", "column_width":"13%","type": "int", "sort":{"value": true}}
-        //{"value":"score", "title": "Score", "column_width":"8%","type": "int", "sort":{"value": true}}
+        //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
       ],
       "group_by": {"keys":["iri"], "concats":["author"]}
     },
