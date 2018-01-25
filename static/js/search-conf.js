@@ -156,7 +156,8 @@ var search_conf = {
                  "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
            "}",
           "}",
-        "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri"
+        "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri",
+        "LIMIT 2000"
       ]
     },
     {
@@ -203,7 +204,8 @@ var search_conf = {
                "}",
               "}",
             "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri ",
-            "ORDER BY DESC(?score)"
+            "ORDER BY DESC(?score)",
+            "LIMIT 2000"
       ]
     },
     {
@@ -256,7 +258,8 @@ var search_conf = {
                "}",
               "}",
             "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri ",
-            "ORDER BY DESC(?score)"
+            "ORDER BY DESC(?score)",
+            "LIMIT 2000"
       ]
     }
   ],

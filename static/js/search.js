@@ -72,7 +72,7 @@ var search = (function () {
 				//if (rules == []) {
 				rules =  _get_rules(qtext);
 				//}
-				console.log(rules);
+				//console.log(rules);
 
 				//if i have a corresponding rule
 				//if (rules != -1) {
@@ -95,7 +95,7 @@ var search = (function () {
 
 			if (rule_index < rules.length) {
 
-				console.log("Executing rule: "+rules[rule_index].name);
+				//console.log("Executing rule: "+rules[rule_index].name);
 				var rule = rules[rule_index];
 				//build the sparql query in turtle format
 				var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
@@ -122,7 +122,7 @@ var search = (function () {
 							success: function( res_data ) {
 									htmldom.loader(false);
 									htmldom.remove_footer();
-									console.log(JSON.parse(JSON.stringify(res_data)));
+									//console.log(JSON.parse(JSON.stringify(res_data)));
 
 									if ((res_data.results.bindings.length == 0) && (rule_index != rules.length - 1)) {
 										_exec_rule(rules, rule_index + 1, qtext);
