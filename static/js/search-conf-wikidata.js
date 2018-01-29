@@ -62,6 +62,42 @@ var search_conf = {
                       "bd:serviceParam wikibase:language 'en,da,no,sv,de,fr,es,ru,jp,ru,zh' . }",
         "}"
       ]
+    },
+    {
+      "name":"free_txt",
+      "category": "document",
+      "regex":"[-'a-zA-Z ]+$",
+      "query": [
+        "select ?work ?short_iri ?title ?venueLabel ?date ?volume ?author ?authorname ?issue ?pages ?license ?doi ?url ?type where {",
+            "",
+            "{",
+              "FILTER( regex(?lbl1, '[[VAR]]' ))",
+              "?work wdt:P1476 ?lbl1 .",
+            "}",
+            "UNION",
+            "{",
+              "FILTER( regex(?lbl2, '[[VAR]]' ))",
+              "?work wdt:P50/rdfs:label ?lbl2 .",
+            "}",
+            "",
+            "?work wdt:P31 wd:Q13442814.",
+            "optional { ?work wdt:P1476 ?title .}",
+            "optional {",
+              "?work wdt:P50 ?author .",
+              "?author rdfs:label ?authorname .",
+            "}",
+            "BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .",
+            "optional { ?work wdt:P1433 ?venue . }",
+            "optional { ?work wdt:P577 ?date . }",
+            "optional { ?work wdt:P478 ?volume . }",
+            "optional { ?work wdt:P433 ?issue . }",
+            "optional { ?work wdt:P304 ?pages . }",
+            "optional { ?work wdt:P275 ?license_ .}",
+            "optional { ?work wdt:P356 ?doi . }",
+            "optional { ?work wdt:P953 ?url . }",
+            "}",
+            "LIMIT 2000"
+      ]
     }
   ],
 
@@ -69,13 +105,12 @@ var search_conf = {
     {
       "name": "document",
       "fields": [
-        {"value":"work", "title": "URL","column_width":"15%","type": "text"},
+        {"value":"short_iri", "title": "Resource IRI","column_width":"15%","type": "text", "link":{"field":"work","prefix":""}},
         {"value":"title", "title": "Work title","column_width":"35%","type": "text", "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "desc"}},
-        {"value":"date", "title": "Date", "column_width":"20%","type": "text", "sort":{"value": true, "default": {"order": "desc"}} },
-        {"value":"volume", "title": "Volume","column_width":"10%","type": "int", "sort":{"value": true}},
-        {"value":"issue", "title": "Issue", "column_width":"10%","type": "int", "sort":{"value": true}},
-        {"value":"pages", "title": "Pages","column_width":"10%","type": "int"}
-      ]
+        {"value":"authorname", "title": "Authors", "column_width":"30%","type": "int", "link":{"field":"author","prefix":""}},
+        {"value":"date", "title": "Date", "column_width":"20%","type": "text", "sort":{"value": true, "default": {"order": "desc"}} }
+      ],
+      "group_by": {"keys":["work"], "concats":["authorname"]}
     },
     {
       "name": "author",
