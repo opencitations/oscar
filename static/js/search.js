@@ -122,7 +122,7 @@ var search = (function () {
 							success: function( res_data ) {
 									htmldom.loader(false);
 									//htmldom.footer_block();
-									//htmldom.remove_footer();
+									htmldom.remove_footer();
 									//console.log(JSON.parse(JSON.stringify(res_data)));
 
 									if ((res_data.results.bindings.length == 0) && (rule_index != rules.length - 1)) {
