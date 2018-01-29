@@ -122,13 +122,15 @@ var search = (function () {
 							success: function( res_data ) {
 									htmldom.loader(false);
 									//htmldom.footer_block();
-									htmldom.remove_footer();
+									//htmldom.remove_footer();
 									//console.log(JSON.parse(JSON.stringify(res_data)));
 
 									if ((res_data.results.bindings.length == 0) && (rule_index != rules.length - 1)) {
 										_exec_rule(rules, rule_index + 1, qtext);
 									}else {
+										//htmldom.remove_footer();
 										_init_data(rule,res_data);
+										console.log(JSON.parse(JSON.stringify(table_conf.data)));
 										_build_filter_sec();
 										_limit_results();
 										_gen_data_checkboxes();
@@ -155,6 +157,7 @@ var search = (function () {
 			//Adapt the resulting data
 			// init uri values
 			json_data.results.bindings = _init_uris(json_data.results.bindings);
+			json_data.results.bindings = _init_lbls(json_data.results.bindings);
 			// group by the rows
 			var group_by = category_conf_obj.group_by;
 			if (group_by != undefined) {
@@ -272,6 +275,48 @@ var search = (function () {
 						}
 					}
 				}
+				return new_elem_obj;
+			}
+		}
+
+		/*map the fields with their corresponding labels*/
+		function _init_lbls(data){
+			var new_data = data;
+			for (var i = 0; i < new_data.length; i++) {
+				var obj_elem = new_data[i];
+				for (var key_field in obj_elem) {
+					if (obj_elem.hasOwnProperty(key_field)) {
+						new_data[i] = _get_lbl(new_data[i], key_field);
+					}
+				}
+			}
+			return new_data;
+
+			function _get_lbl(elem_obj, field){
+				var new_elem_obj = elem_obj;
+
+				//lets look for the uri
+				var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
+				var index_field = util.index_in_arrjsons(search_conf_json.categories[index_category].fields, ["value"], [field]);
+				var lbl = null;
+				if (index_field != -1){
+					var field_obj = search_conf_json.categories[index_category].fields[index_field];
+					var lbl_obj = field_obj.label;
+
+					if (lbl_obj != undefined) {
+						if ((lbl_obj.field != null) && (lbl_obj.field != "")) {
+							// I have field to use as lbl
+
+							if (elem_obj.hasOwnProperty(lbl_obj.field)) {
+								lbl = elem_obj[lbl_obj.field].value;
+
+								new_elem_obj[field]["label"] = lbl;
+								return new_elem_obj;
+							}
+						}
+					}
+				}
+				new_elem_obj[field]["label"] = elem_obj[field].value;
 				return new_elem_obj;
 			}
 		}
@@ -483,9 +528,10 @@ var search = (function () {
 
 										for (var k = 0; k < arr.length; k++) {
 											var new_val = arr[k].value;
+											var new_lbl = arr[k].label;
 											var index_in_arr = util.index_in_arrjsons(arr_check_values,["value"],[new_val]);
 											if (index_in_arr == -1){
-												arr_check_values.push({"field": filter_field,"value":new_val,"sum":1,"checked":false});
+												arr_check_values.push({"field": filter_field,"value":new_val,"label":new_lbl ,"sum":1,"checked":false});
 											}else{
 												arr_check_values[index_in_arr]["sum"] = arr_check_values[index_in_arr]["sum"] + 1;
 											}
@@ -1063,7 +1109,7 @@ var htmldom = (function () {
 												//"checked='"+check_value.checked+"' "+
 												"id='"+String(myfield.value)+"-"+String(check_value.value)+"' "+
 												">"+
-												check_value.value+" ("+check_value.sum+
+												check_value.label+" ("+check_value.sum+
 												")</label></div></div>";
 		tr.appendChild(tabCell);
 		return tr;

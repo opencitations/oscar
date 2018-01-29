@@ -20,7 +20,7 @@ var search_conf = {
       "category": "document",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
-        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_lbl ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
             "BIND('[[VAR]]' as ?doi_txt) .",
             "?lit bds:search ?doi_txt . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
             "?iri datacite:hasIdentifier/literal:hasLiteralValue ?lit .",
@@ -40,8 +40,9 @@ var search_conf = {
                     "?author_iri foaf:familyName ?fname .",
                     "?author_iri foaf:givenName ?name .",
                     "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+                    "BIND(CONCAT(STR(?fname),', ', STR(?name)) as ?author_lbl) .",
              "}",
-          "} GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri"
+          "} GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_lbl ?author_iri"
       ]
     },
     {
@@ -49,7 +50,7 @@ var search_conf = {
       "category": "document",
       "regex":"(br\/\\d{1,})",
       "query": [
-        "SELECT DISTINCT ?iri ?short_iri ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
+        "SELECT DISTINCT ?iri ?short_iri ?title ?year ?author ?author_lbl ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
             "BIND('[[VAR]]' as ?short_iri) .",
             "BIND(<https://w3id.org/oc/corpus/[[VAR]]> as ?iri) .",
             "OPTIONAL {?iri dcterms:title ?title .}",
@@ -66,8 +67,9 @@ var search_conf = {
                     "?author_iri foaf:familyName ?fname .",
                     "?author_iri foaf:givenName ?name .",
                     "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+                    "BIND(CONCAT(STR(?fname),', ', STR(?name)) as ?author_lbl) .",
              "}",
-          "} GROUP BY ?iri ?short_iri ?title ?year ?author ?author_iri"
+          "} GROUP BY ?iri ?short_iri ?title ?year ?author ?author_lbl ?author_iri"
       ]
     },
     {
@@ -127,7 +129,7 @@ var search_conf = {
       "category": "document",
       "regex": "(https:\/\/w3id\\.org\/oc\/corpus\/ra\/\\d{1,})",
       "query": [
-        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_lbl ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
         "WHERE  {",
           "?a_role_iri pro:isHeldBy <[[VAR]]> .",
           "?iri pro:isDocumentContextFor ?a_role_iri .",
@@ -154,9 +156,10 @@ var search_conf = {
                  "?author_iri foaf:familyName ?fname .",
                  "?author_iri foaf:givenName ?name .",
                  "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+                 "BIND(CONCAT(STR(?fname),', ', STR(?name)) as ?author_lbl) .",
            "}",
           "}",
-        "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri",
+        "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_lbl ?author_iri",
         "LIMIT 2000"
       ]
     },
@@ -165,7 +168,7 @@ var search_conf = {
       "category": "document",
       "regex":"[-'a-zA-Z ]+$",
       "query": [
-        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_lbl ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
             "WHERE  {",
               "BIND('[[VAR]]' as ?free_txt) .",
               "?lit bds:search ?free_txt .",
@@ -201,9 +204,10 @@ var search_conf = {
                      "?author_iri foaf:familyName ?fname .",
                      "?author_iri foaf:givenName ?name .",
                      "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+                     "BIND(CONCAT(STR(?fname),', ', STR(?name)) as ?author_lbl) .",
                "}",
               "}",
-            "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri ",
+            "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_lbl ?author_iri ",
             "ORDER BY DESC(?score)",
             "LIMIT 2000"
       ]
@@ -213,7 +217,7 @@ var search_conf = {
       "category": "document",
       "regex":"[-'a-zA-Z ]+$",
       "query": [
-        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_lbl ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
             "WHERE  {",
               "BIND('[[VAR]]' as ?free_txt) .",
               "?lit bds:search ?free_txt .",
@@ -255,9 +259,10 @@ var search_conf = {
                      "?author_iri foaf:familyName ?fname .",
                      "?author_iri foaf:givenName ?name .",
                      "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+                     "BIND(CONCAT(STR(?fname),', ', STR(?name)) as ?author_lbl) .",
                "}",
               "}",
-            "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_iri ",
+            "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?score ?author ?author_lbl ?author_iri ",
             "ORDER BY DESC(?score)",
             "LIMIT 2000"
       ]
@@ -271,7 +276,7 @@ var search_conf = {
         {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
         {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true} },
         {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
-        {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "asc"}, "link":{"field":"author_iri","prefix":""}},
+        {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "label", "order": "asc"}, "link":{"field":"author_iri","prefix":""}},
         {"value":"in_cits", "title": "Cited by", "column_width":"13%","type": "int", "sort":{"value": true}}
         //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
       ],
