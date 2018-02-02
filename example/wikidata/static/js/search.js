@@ -106,6 +106,7 @@ var search = (function () {
 				//console.log("Replace [[VAR]] with: "+qtext_groups[0]);
 				sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
 				//console.log(sparql_query);
+				//console.log(qtext_groups);
 
 				//use this url to contact the sparql_endpoint triple store
 				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
@@ -130,7 +131,7 @@ var search = (function () {
 									}else {
 										//htmldom.remove_footer();
 										_init_data(rule,res_data);
-										console.log(JSON.parse(JSON.stringify(table_conf.data)));
+										//console.log(JSON.parse(JSON.stringify(table_conf.data)));
 										_build_filter_sec();
 										_limit_results();
 										_gen_data_checkboxes();
@@ -1210,7 +1211,7 @@ var htmldom = (function () {
 
 	function main_entry(){
 		var str_html = "<div class='search-entry'>"+
-											"Search inside the <a href='/'><span class='oc-purple'>Open</span><span class='oc-blue'>Citations</span></a> corpus"+
+											"Search inside the Wikidata corpus"+
 											"<form class='input-group search-box' action='search' method='get'>"+
 											"<input type='text' class='form-control oc-purple' placeholder='Search...' name='text'>"+
 												"<div class='input-group-btn'>"+
@@ -1424,7 +1425,7 @@ var htmldom = (function () {
 		if (header_container != null) {
 			if (build_bool) {
 				retain_box_value(input_box_container,queryt);
-				var str_html = "<p><div id='search_loader' class='searchloader'> Searching the OpenCitations Corpus ...</div></p>"+
+				var str_html = "<p><div id='search_loader' class='searchloader'> Searching the Wikidata Corpus ...</div></p>"+
 											"<p><div id='abort_search' class='abort-search'><a href="+abort_link+" class='allert-a'> Abort search </a></div></p>"+
 											"";
 				parser = new DOMParser()

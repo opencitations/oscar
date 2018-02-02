@@ -558,6 +558,7 @@ var search = (function () {
 		function update_page_limit(new_page_limit){
 			table_conf.view.page_limit = parseInt(new_page_limit);
 			table_conf.view.page = 0;
+			console.log(table_conf);
 			htmldom.update_page(table_conf,search_conf_json);
 		}
 		function update_res_limit(new_res_limit){
@@ -1210,7 +1211,7 @@ var htmldom = (function () {
 
 	function main_entry(){
 		var str_html = "<div class='search-entry'>"+
-											"Search inside the <a href='/'><span class='oc-purple'>Open</span><span class='oc-blue'>Citations</span></a> corpus"+
+											"Search inside the ScholarlyData corpus"+
 											"<form class='input-group search-box' action='search' method='get'>"+
 											"<input type='text' class='form-control oc-purple' placeholder='Search...' name='text'>"+
 												"<div class='input-group-btn'>"+
@@ -1424,7 +1425,7 @@ var htmldom = (function () {
 		if (header_container != null) {
 			if (build_bool) {
 				retain_box_value(input_box_container,queryt);
-				var str_html = "<p><div id='search_loader' class='searchloader'> Searching the OpenCitations Corpus ...</div></p>"+
+				var str_html = "<p><div id='search_loader' class='searchloader'> Searching the ScholarlyData Corpus ...</div></p>"+
 											"<p><div id='abort_search' class='abort-search'><a href="+abort_link+" class='allert-a'> Abort search </a></div></p>"+
 											"";
 				parser = new DOMParser()
