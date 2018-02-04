@@ -36,7 +36,7 @@ var search_conf = {
             "optional { ?work wdt:P356 ?doi . }",
             "optional { ?work wdt:P953 ?url . }",
             "}",
-            "LIMIT 2000"
+            "LIMIT 500"
       ]
     },
     {
@@ -51,7 +51,7 @@ var search_conf = {
           "OPTIONAL { ?author wdt:P106 ?occupation.}",
           "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. }",
         "}",
-        "LIMIT 2000"
+        "LIMIT 500"
       ]
     },
     {
@@ -67,9 +67,9 @@ var search_conf = {
           "?work wdt:P31 wd:Q13442814.",
           "optional { ?work wdt:P1476 ?title .}",
           "optional {",
-          "?work wdt:P50 ?author .",
-          "?author rdfs:label ?authorname .",
-          "FILTER (langMatches( lang(?authorname), 'EN' ) )",
+              "?work wdt:P50 ?author .",
+              "?author rdfs:label ?authorname .",
+              "FILTER (langMatches( lang(?authorname), 'EN' ) )",
           "}",
           "BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .",
           "optional { ?work wdt:P1433 ?venue . }",
@@ -81,7 +81,7 @@ var search_conf = {
           "optional { ?work wdt:P356 ?doi . }",
           "optional { ?work wdt:P953 ?url . }",
             "}",
-            "LIMIT 1000"
+            "LIMIT 200"
       ]
     }
   ],

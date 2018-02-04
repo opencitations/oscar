@@ -72,9 +72,9 @@
         <script type="text/javascript" src="static/js/search.js"></script>
         <script>
 
-        var escape_spaces = decodeURIComponent(window.location.search+'').replace(/\+/g, '%20');
+        var escape_spaces = decodeURIComponent(window.location.search.replace(/\+/g, '%20')+'');
         var queryt= escape_spaces.replace('?query=','');
-        //console.log(queryt);
+        console.log(queryt);
         search.do_sparql_query(queryt);
         </script>
     </body>

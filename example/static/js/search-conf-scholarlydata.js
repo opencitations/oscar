@@ -28,7 +28,7 @@ var search_conf = {
               "optional {?paper conf:keyword ?kw .}",
               "optional {?paper conf:hasTopic ?topic .}",
         "}",
-        "LIMIT 2000"
+        "LIMIT 200"
       ]
     },
     {
@@ -52,7 +52,7 @@ var search_conf = {
               "optional {?paper conf:keyword ?kw .}",
               "optional {?paper conf:hasTopic ?topic .}",
         "}",
-        "LIMIT 2000"
+        "LIMIT 200"
       ]
     }
   ],
