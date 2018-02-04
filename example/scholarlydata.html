@@ -26,9 +26,18 @@
 
 
         <div class="cover-container">
-
           <form action="scholarlydata.html" method="GET" accept-charset="ASCII">
-              <input id="input_box" name="query" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
+              <br>
+              <p style="text-align:left;">This interface let you perform queries on the <span style="font-size: 175%; color:#669900;">ScholarlyData triplestore</span>.
+              It represent an alternative configuration and usage of <b>OSCAR</b>: an RDF search application. Scholarly Data provides an RDF dataset of the papers, people, organisations and events related to Web and Semantic Web academic conferences.
+              Here we list some examples: </p>
+              <ul style="text-align:left; font-size: 125%;">
+                <li>DOI: <a href="scholarlydata.html?query=10.1007/978-3-319-11955-7_31">10.1007/978-3-319-11955-7_31</a> </li>
+                <li>Free-text: <a href="scholarlydata.html?query=semantic">"semantic"</a></li>
+              </ul>
+              <p style="text-align:left;"> <u>Searches might take several seconds, please be patient. </u></p>
+              <br>
+              <input style="width:80%; display:inline;" id="input_box" name="query" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
               <span>
                 <button id="search_btn" class="btn btn-default oc-purple" type="submit"><i class="glyphicon glyphicon-search"></i></button>
               </span>

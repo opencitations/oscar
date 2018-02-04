@@ -25,6 +25,7 @@ var search_conf = {
             "optional {",
               "?work wdt:P50 ?author .",
               "?author rdfs:label ?authorname .",
+              "FILTER (langMatches( lang(?authorname), 'EN' ) )",
             "}",
             "BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .",
             "optional { ?work wdt:P1433 ?venue . }",
