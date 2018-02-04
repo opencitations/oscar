@@ -6,5 +6,5 @@ This idea came out with regard to the [OpenCitations](http://opencitations.net/)
 
 One of the main characteristics of OSCAR is its adaptability to work with any other RDF triplestore. It is possible to configure OSCAR to work with a particular endpoint by configuring a particular JSON document, which specifies how the SPARQL queries are sent to that endpoint, and how the returned query results should be visualized, according to the predefined tabular view that OSCAR provides. In this repository we have a brief [documentation/guidelines](OSCAR/doc/README.md) explaining the configure operations. Currently we have tested OSCAR with three different projects: [OpenCitations](http://opencitations.net/), [ScholarlyData](http://www.scholarlydata.org/), [Wikidata](http://wikidata.org/). For each one of these projects we have its corresponding example directory and .html main entry:
 * OpenCitations: [search.html](search.html)
-* Wikidata: [wikidata.html](example/wikidata/wikidata.html)
-* ScholarlyData: [scholarlydata.html](example/scholarlydata/scholarlydata.html)
+* Wikidata: [wikidata.html](example/wikidata.html)
+* ScholarlyData: [scholarlydata.html](example/scholarlydata.html)
