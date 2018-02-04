@@ -18,7 +18,7 @@ var search_conf = {
       "category": "document",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
-        "select ?work ?short_iri ?title ?venueLabel ?date ?volume ?author ?authorname ?issue ?pages ?license ?doi ?url ?type where {",
+        "select ?work ?short_iri ?title ?venueLabel (STR(YEAR (?alldate)) as ?date) ?volume ?author ?authorname ?issue ?pages ?license ?doi ?url ?type where {",
             "?work wdt:P356 '[[VAR]]' .",
             "?work wdt:P31 wd:Q13442814.",
             "optional { ?work wdt:P1476 ?title .}",
@@ -28,7 +28,7 @@ var search_conf = {
             "}",
             "BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .",
             "optional { ?work wdt:P1433 ?venue . }",
-            "optional { ?work wdt:P577 ?date . }",
+            "optional { ?work wdt:P577 ?alldate . }",
             "optional { ?work wdt:P478 ?volume . }",
             "optional { ?work wdt:P433 ?issue . }",
             "optional { ?work wdt:P304 ?pages . }",
