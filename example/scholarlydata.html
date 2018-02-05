@@ -28,14 +28,16 @@
         <div class="cover-container">
           <form action="scholarlydata.html" method="GET" accept-charset="ASCII">
               <br>
-              <p style="text-align:left;">This interface let you perform queries on the <span style="font-size: 175%; color:#669900;">ScholarlyData triplestore</span>.
-              It represent an alternative configuration and usage of <b>OSCAR</b>: an RDF search application. Scholarly Data provides an RDF dataset of the papers, people, organisations and events related to Web and Semantic Web academic conferences.
+              <h1 style="color:#669900;">OSCAR with ScholarlyData</h1>
+              <h4>NOTE:</b> This page should be loaded via "http://" protocol.</h4>
+              <p style="text-align:left;">This interface let you perform queries on the <b><a href="http://www.scholarlydata.org/">ScholarlyData</a></b> triplestore.
+              It represent an alternative configuration and usage of <b><a href="https://github.com/ivanhb/OSCAR">OSCAR</a></b>: an RDF search application. Scholarly Data provides an RDF dataset of the papers, people, organisations and events related to Web and Semantic Web academic conferences.
               Here we list some examples: </p>
               <ul style="text-align:left; font-size: 125%;">
                 <li>DOI: <a href="scholarlydata.html?query=10.1007/978-3-319-11955-7_31">10.1007/978-3-319-11955-7_31</a> </li>
-                <li>Free-text: <a href="scholarlydata.html?query=semantic">"semantic"</a></li>
+                <li>Document titles with keyword: <a href="scholarlydata.html?query=semantic">"semantic"</a></li>
               </ul>
-              <p style="text-align:left;"> <u> <b>NOTE:</b> This page must be called with "http://". Searches might take several seconds, please be patient. </u></p>
+              <p style="text-align:left;"> <u> <b>NOTE:</b> Searches might take several seconds, please be patient. </u></p>
               <br>
               <input style="width:80%; display:inline;" id="input_box" name="query" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
               <span>

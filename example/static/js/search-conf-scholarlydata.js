@@ -1,5 +1,5 @@
 var search_conf = {
-  "sparql_endpoint": "https://www.scholarlydata.org/sparql/",
+  "sparql_endpoint": "http://www.scholarlydata.org/sparql/",
   "prefixes": [
       {"prefix":"person","iri":"https://w3id.org/scholarlydata/person/"},
       {"prefix":"conf","iri":"https://w3id.org/scholarlydata/ontology/conference-ontology.owl#"},

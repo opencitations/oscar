@@ -29,15 +29,16 @@
 
           <form action="wikidata.html" method="GET" accept-charset="ASCII">
               <br>
-              <p style="text-align:left;">This interface let you perform queries on the <span style="font-size: 175%; color:#669900;">Wikidata triplestore</span>.
-              It represent an alternative configuration and usage of <b>OSCAR</b>: an RDF search application. We have decided to limit the range of data to be searched to bibliographic entities within the scholarly domain.
+              <h1 style="color:#669900;">OSCAR with Wikidata</h1>
+              <p style="text-align:left;">This interface let you perform queries on the <b><a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">Wikidata</a></b> triplestore.
+              It represent an alternative configuration and usage of <b><a href="https://github.com/ivanhb/OSCAR">OSCAR</a></b>: an RDF search application. We have decided to limit the range of data to be searched to bibliographic entities within the scholarly domain.
               You can try to type: <b>DOIs, ORCIDs and free textual inputs</b>. Here we list some examples:</p>
               <ul style="text-align:left; font-size: 125%;">
                 <li>DOI: <a href="wikidata.html?query=10.1186/1471-2105-10-S6-S19">10.1186/1471-2105-10-S6-S19</a> </li>
                 <li>ORCID: <a href="wikidata.html?query=0000-0003-0530-4305">0000-0003-0530-4305</a> </li>
-                <li>Free-text: <a href="wikidata.html?query=semantic">"semantic"</a></li>
+                <li>Document titles with keyword: <a href="wikidata.html?query=semantic">"semantic"</a></li>
               </ul>
-              <p style="text-align:left;"> <u> <b>NOTE:</b> This page must be called with "http://". Searches might take several seconds, please be patient. </u></p>
+              <p style="text-align:left;"> <u> <b>NOTE:</b> Searches might take several seconds, please be patient. Slowness is also due to the fact that Wikidata sparql endpoint does not support bigdata searches (like blazegraph).</u></p>
               <br>
               <input style="width:80%; display:inline;" id="input_box" name="query" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
               <span>
