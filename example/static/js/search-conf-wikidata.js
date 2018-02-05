@@ -92,9 +92,9 @@ var search_conf = {
       "name": "document",
       "fields": [
         {"value":"short_iri", "title": "Resource IRI","column_width":"15%","type": "text", "link":{"field":"work","prefix":""}},
-        {"value":"title", "title": "Work title","column_width":"35%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "desc"}},
-        {"value":"authorname", "title": "Authors", "column_width":"30%","type": "int", "link":{"field":"author","prefix":""}},
-        {"value":"date", "title": "Date", "column_width":"20%","type": "text", "sort":{"value": true, "default": {"order": "desc"}} }
+        {"value":"title", "title": "Work title","column_width":"35%","type": "text", "sort":{"value": true}},
+        {"value":"authorname", "title": "Authors", "column_width":"30%","type": "int", "link":{"field":"author","prefix":""}, "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "asc"}},
+        {"value":"date", "title": "Date", "column_width":"20%","type": "text", "sort":{"value": true, "default": {"order": "desc"}}, "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"} }
       ],
       "group_by": {"keys":["work"], "concats":["authorname"]}
     },

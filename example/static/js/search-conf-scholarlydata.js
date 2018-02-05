@@ -61,8 +61,8 @@ var search_conf = {
       "name": "document",
       "fields": [
         {"value":"short_iri", "title": "Resource IRI","column_width":"20%","type": "text", "link":{"field":"paper","prefix":""}},
-        {"value":"title", "title": "Work title","column_width":"35%","type": "text", "sort":{"value":true}, "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "desc"}},
-        {"value":"author_name", "title": "Authors", "column_width":"30%","type": "int", "link":{"field":"author","prefix":""}},
+        {"value":"title", "title": "Work title","column_width":"35%","type": "text", "sort":{"value":true}},
+        {"value":"author_name", "title": "Authors", "column_width":"30%","type": "int", "link":{"field":"author","prefix":""}, "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "asc"}},
         {"value":"doi", "title": "DOI","column_width":"15%","type": "text"}
       ],
       "group_by": {"keys":["short_iri"], "concats":["author_name"]}
