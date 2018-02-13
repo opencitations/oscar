@@ -71,10 +71,12 @@
         <script type="text/javascript" src="static/js/search-conf.js"></script>
         <script type="text/javascript" src="static/js/search.js"></script>
         <script>
-
+        search_conf["search_base_path"] = "search.html";
         var escape_spaces = decodeURIComponent(window.location.search+'').replace(/\+/g, '%20');
-        var queryt= escape_spaces.replace('?query=','');
-        //console.log(queryt);
+        var queryt= escape_spaces.replace('?query=','?text=');
+        //queryt = escape_spaces;
+
+        console.log(queryt);
         search.do_sparql_query(queryt);
         </script>
     </body>
