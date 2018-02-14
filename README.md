@@ -2,7 +2,7 @@
 ### a general [S]earch [A]pplication for [R]df data specially designed for [O]pen [C]itations  
 #### - [OSCAR paper for SAVE-SD2018](https://essepuntato.github.io/papers/oscar-savesd2018.html)  
 
-A user friendly search platform applicable for any triplestore endpoint.  
+A  user friendly search platform applicable for any triplestore endpoint.  
 This idea came out with regard to the [OpenCitations](http://opencitations.net/) project, which contains an open repository of scholarly citation data in RDF format, we would like to make accesible for any user to search and explore. The current version of the tool is integrated inside the OpenCitations web interface.  
 [opencitations.net/search](http://opencitations.net/search)
 
