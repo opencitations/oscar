@@ -1,20 +1,21 @@
 # The Configuration file: 
 
-## The Rules:
-The search execution is based on the fact that the input should belong to a specific rule which will handle it. So the system need to find this specific rule from a list and apply its policies. In order to do this you need to define a **rules** key inside the configuration file, which will have an array of several rule entries as value. Here we show an example:
+## 3) The Rules:
+The search execution is based on the fact that the input should belong to a specific rule which handles it. So the system need to find this specific rule from a list and apply its policies. In order to do this you need to define a **rules** key inside the configuration file, which will contain an array of several rule entries.
 ```js
-"rules":  [
+"rules":  
+[
     {<RULE-ENTRY>},
     {<RULE-ENTRY>},
     ...
 ]
 ```
-Each rule entry have several internal keys which defines it (attributes), here we list all the possible keys. 
+Each entry is an object containing several attributes/keys (optional and primary). 
 
 ### Name:
-A representative name for the rule. This value does not have any effect on the execution.  
+A representative name for the rule. This value is also the identifier of the rule.
 **How:** assign a string value to the **name** key.  
-**Example:** a rule for the DOI detection:
+**Example:** 
 ```js
 "rules":  [
     {
@@ -26,9 +27,9 @@ A representative name for the rule. This value does not have any effect on the e
 ```
 
 ### Results category:
-Each rule will retrieve results that should be classified in categories. This will enable the system to view the information needed according to the category the current rule belongs to. Next on this documentation we will describe how a category should be defined.  
-**How:** assign a string value to the **category** key.  
-**Example:** a rule which retrieves results as a document category:
+Each rule will retrieve results classified in categories. This will enable the system to view the information needed according to the category the rule belongs to.
+**How:** assign a string value to the **category** key, which matches the exact name of the category.  
+**Example:** 
 ```js
 "rules":  [
     {
@@ -41,9 +42,9 @@ Each rule will retrieve results that should be classified in categories. This wi
 ```
 
 ### Rule-entry detection:
-In order to retrieve the correct information for a specific textual searching input you need to know the search intent: what kind of information I am looking for. A search operation refers to a category C if its textual format matches a specific regular expression.  
-**How:** each different rule entry can specify this by assigning a regular expression value to the **regex** key  
-**Example:** a rule definition for the rule 'doi':
+In order to find the corrisponding rule for textual-query, the textual-query input need to match a particular regular expression.  
+**How:** assign a string value representing a regular expression to the **regex** key  
+**Example:** 
 ```js
 "rules":  [
     {
