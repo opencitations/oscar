@@ -81,10 +81,6 @@
 }
 
 /* (1.1) the tab footer ---------------*/
-.table.tab-footer tr{
-  text-align:center;
-}
-
 .tab-footer {
   margin-bottom: 70px;
   table-layout:fixed;
@@ -105,6 +101,7 @@
 }
 .tab-nav-btn.next{ margin-right: 50px;}
 .tab-nav-btn.prev{ margin-left: 50px;}
+.tab-footer a {color: var(--main-bg-color);}
 
 .pages-nav {
   display:inline-block;

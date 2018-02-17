@@ -43,6 +43,28 @@ var search_conf = {
       ]
     },
     {
+      "name":"doc_cites_list",
+      "label": "List of documents cited by Bibiographic resource IRI",
+      "category": "document",
+      "regex": "(https:\/\/w3id\\.org\/oc\/corpus\/br\/\\d{1,})",
+      "query": [
+            "{",
+            "<[[VAR]]> cito:cites ?iri .",
+            "}"
+      ]
+    },
+    {
+      "name":"doc_cites_me_list",
+      "label": "List of documents who have cited the Bibiographic resource IRI",
+      "category": "document",
+      "regex": "(https:\/\/w3id\\.org\/oc\/corpus\/br\/\\d{1,})",
+      "query": [
+            "{",
+            "?iri cito:cites <[[VAR]]> .",
+            "}"
+      ]
+    },
+    {
       "name":"orcid",
       "label": "ORCID",
       "advanced": true,
@@ -239,11 +261,16 @@ var search_conf = {
 
 "page_limit": [5,10,15,20,30,40,50],
 "def_results_limit": 1,
-"on_abort": "/search",
 "search_base_path": "search",
 "advanced_search": true,
-"progress_loader": true,
-"def_adv_category": "document"
+"def_adv_category": "document",
+
+"progress_loader":{
+          "visible": true,
+          "title":"Searching the OpenCitations Corpus ...",
+          "subtitle":"Be patient - this search might take several seconds!",
+          "abort":{"title":"Abort Search","href_link":"/search"}
+        }
 }
 
 //heuristic functions
