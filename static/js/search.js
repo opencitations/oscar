@@ -155,7 +155,7 @@ var search = (function () {
 
 				var sparql_query = composed_query.replace(/\[\[RULE\]\]/g, query_allrules);
 				//console.log(sparql_query);
-				console.log(sparql_query);
+				//console.log(sparql_query);
 				return sparql_query;
 			}
 		}
@@ -318,7 +318,7 @@ var search = (function () {
 								if (util.get_obj_key_val(search_conf_json,"progress_loader.visible") == true) {
 									htmldom.loader(false);
 								}
-								console.log(JSON.parse(JSON.stringify(res_data)));
+								//console.log(JSON.parse(JSON.stringify(res_data)));
 
 								if ((rule_index >= rules.length -1) || (res_data.results.bindings.length > 0)) {
 									//I have only 1 rule
@@ -371,7 +371,7 @@ var search = (function () {
 
 			//initialize and get the search_config_json
 			search_conf_json = search_conf;
-			console.log(search_conf_json);
+			//console.log(search_conf_json);
 
 			//sync or async
 			async_call = async_bool;
@@ -384,7 +384,7 @@ var search = (function () {
 
 			if (query_comp.values.length != 0) {
 				if (query_comp.rules.length == 0) {
-					console.log("It's a freetext search!");
+					//console.log("It's a freetext search!");
 					//one text box
 					var qtext = query_comp.values[0];
 					var rules = _get_rules(qtext);
@@ -394,7 +394,7 @@ var search = (function () {
 						_call_ts(r_cat, rules, 0, sparql_query, qtext, qtext, callbk_fun);
 					}else {}
 				}else{
-					console.log("It's an advanced search!");
+					//console.log("It's an advanced search!");
 					//it's an advanced query
 					var sparql_query = build_adv_sparql_query(
 											query_comp.values,
