@@ -187,7 +187,7 @@ var search_conf = {
               "[[RULE]]",
               "OPTIONAL {",
                 "?iri rdf:type ?type .",
-                "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
+                "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
                 "OPTIONAL {?iri dcterms:title  ?title .}",
                 "OPTIONAL {?iri fabio:hasSubtitle  ?subtitle .}",
                 "OPTIONAL {?iri fabio:hasPublicationYear ?year .}",
@@ -232,7 +232,7 @@ var search_conf = {
       "macro_query": [
         "SELECT ?author_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
             "[[RULE]]",
-            "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
+            "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
             "OPTIONAL {?author_iri datacite:hasIdentifier[",
                       "datacite:usesIdentifierScheme datacite:orcid ;",
              			    "literal:hasLiteralValue ?orcid].}",
