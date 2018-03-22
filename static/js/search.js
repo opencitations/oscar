@@ -275,18 +275,21 @@ var search = (function () {
 							var heuristic_fun = heuristic_arr_elem[j];
 							heuristic_val_text = Reflect.apply(heuristic_fun,undefined,[heuristic_val_text]);
 						}
-						heuristic_vals_arr.push(heuristic_val_text);
+						//in case the value originated from the heuristic is different than the original one
+						if (heuristic_val_text != val_qtext) {
+							heuristic_vals_arr.push(heuristic_val_text);
+						}
 					}
 
 					//i have heuristics to apply
 					var heuristic_rule_arr = [];
 					var heuristic_bcs_arr = [];
 					//populate arr of rules
-					for (var i = 0; i < rule.heuristics.length; i++) {
+					for (var i = 0; i < heuristic_vals_arr.length; i++) {
 						heuristic_rule_arr.push(rule);
 					}
 					//populate arr of bcs
-					for (var i = 0; i < rule.heuristics.length; i++) {
+					for (var i = 0; i < heuristic_vals_arr.length; i++) {
 						heuristic_bcs_arr.push("or");
 					}
 					return {"values":heuristic_vals_arr, "rules":heuristic_rule_arr, "connectors":heuristic_bcs_arr};
@@ -299,6 +302,7 @@ var search = (function () {
 		function _call_ts(rule_category, rules, rule_index, sparql_query, query_text=null, query_label=null, callbk_fun=null){
 			//use this url to contact the sparql_endpoint triple store
 			var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
+			console.log(sparql_query)
 
 			//reset all doms
 			htmldom.reset_html_structure();
