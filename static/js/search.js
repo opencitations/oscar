@@ -87,7 +87,7 @@ var search = (function () {
 				}
 
 				//decode all boolean connectors
-				reg = /bc_\d{1,}=(.+?)(?=&text)/g;
+				reg = /bc=(.+?)(?=&text)/g;
 				while (match = reg.exec(qtext)) {
 					res.bcs.push(match[1]);
 				}
@@ -1810,13 +1810,13 @@ var htmldom = (function () {
 			'<fieldset>'+
 			'<div class="adv btn-group" data-toggle="buttons">'+
 				'<label class="btn btn-secondary active">'+
-				'<input name="bc_'+id_rows+'" value="and" type="radio" entryid="'+id_rows+'" class="btn btn-default" checked>And'+
+				'<input name="bc" value="and" type="radio" entryid="'+id_rows+'" class="btn btn-default" checked>And'+
 				'</label>'+
 				'<label class="btn btn-secondary" value="or">'+
-				'<input name="bc_'+id_rows+'" value="or" type="radio" entryid="'+id_rows+'" class="btn btn-default">Or'+
+				'<input name="bc" value="or" type="radio" entryid="'+id_rows+'" class="btn btn-default">Or'+
 				'</label>'+
 				'<label class="btn btn-secondary" value="and_not">'+
-				'<input name="bc_'+id_rows+'" value="and_not" type="radio" entryid="'+id_rows+'" class="btn btn-default">And Not'+
+				'<input name="bc" value="and_not" type="radio" entryid="'+id_rows+'" class="btn btn-default">And Not'+
 				'</label>'+
 			'</div>'+
 			'<div class="adv btn remove">'+
