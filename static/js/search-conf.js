@@ -222,10 +222,14 @@ var search_conf = {
         {"value":"year", "title": "Year", "column_width":"13%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true} },
         {"value":"title", "title": "Title","column_width":"30%","type": "text", "sort":{"value": true}, "link":{"field":"browser_iri","prefix":""}},
         {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}},
-        {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": true}}
+        {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": true}},
         //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
+        {"value": "ext_data.crossref4doi.message.publisher", "title": "Publisher", "column_width":"8%","type": "text"}
       ],
-      "group_by": {"keys":["iri"], "concats":["author"]}
+      "group_by": {"keys":["iri"], "concats":["author"]},
+      "ext_data": {
+        "crossref4doi": {"func_name": call_crossref, "param": {"fields":["doi","FREE-TEXT"],"values":[null,1]}}
+      },
     },
 
     {
@@ -283,4 +287,28 @@ function lower_case(str){
 }
 function capitalize_1st_letter(str){
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+//"FUNC" {"name": call_crossref, "param":{"fields":[],"vlaues":[]}}
+function call_crossref(str_doi, field){
+  var call_crossref_api = "https://api.crossref.org/works/";
+  var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
+
+  var result_data = "";
+  $.ajax({
+        dataType: "json",
+        url: call_url,
+        type: 'GET',
+        async: false,
+        success: function( res_obj ) {
+            if (field == 1) {
+              result_data = res_obj;
+            }else {
+              if (!util.is_undefined_key(res_obj,field)) {
+                result_data = b_util.get_obj_key_val(res_obj,field);
+              }
+            }
+        }
+   });
+   return result_data;
 }

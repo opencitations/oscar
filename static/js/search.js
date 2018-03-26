@@ -14,6 +14,7 @@ var search = (function () {
 				view: {"data": null, "page": 0, "page_limit": null, "fields_filter_index":{}, "sort": {"field":null, "order":null, "type":null}}
 		}
 
+
 		/* get the rules that matches my query_text*/
 		function _get_rules(query_text) {
 			var arr_rules = [];
@@ -448,6 +449,28 @@ var search = (function () {
 			table_conf.data = JSON.parse(JSON.stringify(json_data));
 			// keep only the fields I want
 			var fields = category_conf_obj.fields;
+			// check if there is ext_data columns also
+			var ext_data_fields = [];
+			for (var i = 0; i < fields.length; i++) {
+				if (fields[i].value.startsWith("ext_data")) {
+					var all_parts = fields[i].value.split(".");
+					var data_field = "";
+					var sep = ".";
+					for (var j = 2; j < all_parts.length; j++) {
+						if (j == all_parts.length-1) {
+							sep = "";
+						}
+						data_field = data_field + all_parts[j] + sep;
+					}
+					ext_data_fields.push({
+						"full_name": fields[i].value,
+						"func_name": window[all_parts[1]],
+						"data_field": data_field
+					});
+				}
+			}
+			console.log(ext_data_fields);
+
 			// the header first
 			var new_header = [];
 			for (var i = 0; i < table_conf.data.head.vars.length; i++) {
@@ -456,7 +479,13 @@ var search = (function () {
 					new_header.push(table_conf.data.head.vars[i]);
 				}
 			}
+			for (var i = 0; i < ext_data_fields.length; i++) {
+				new_header.push(ext_data_fields[i]["full_name"]);
+			}
 			table_conf.data.head.vars = new_header;
+
+			console.log(table_conf.data.head.vars);
+
 			// now the results
 			for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
 				for (var key in table_conf.data.results.bindings[i]) {
@@ -464,7 +493,24 @@ var search = (function () {
 							delete table_conf.data.results.bindings[i][key];
 						}
 				}
+
+				for (var j = 0; j < ext_data_fields.length; j++) {
+					var key_full_name = ext_data_fields[i]["full_name"];
+					table_conf.data.results.bindings[i][key_full_name] = {"value":"", "label":""};
+				}
+				//calculate the external fields
+				/*
+				for (var j = 0; j < ext_data_fields.length; j++) {
+					var key_full_name = ext_data_fields[i]["full_name"];
+					table_conf.data.results.bindings[i][key_full_name] = _exec_ext_data(
+																																	ext_data_fields[i]["func_name"],
+																																	table_conf.data.results.bindings[i],
+																																	ext_data_fields[i]["data_field"]
+																																);
+				}
+				*/
 			}
+			console.log(table_conf.data.results.bindings);
 
 			//set all the other table_conf fields
 			//init all the filtered fields
@@ -591,7 +637,47 @@ var search = (function () {
  				return new_elem_obj;
  			}
  		}
+		/*retrieve the externa data*/
+		function _exec_ext_data(func_name, data, data_field){
+			var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
+			var ext_data_obj = search_conf_json.categories[index_category]['ext_data'];
+			//console.log(ext_data_obj,obj_vals);
+			if (ext_data_obj != undefined) {
+				if (func_name in ext_data_obj) {
 
+					var func_obj = ext_data_obj[func_name];
+
+					//my func params
+					var func_param = []
+					var func_param_fields = func_obj['param']['fields'];
+					var func_param_values = func_obj['param']['values'];
+					for (var j = 0; j < func_param_fields.length; j++) {
+						var p_field = func_param_fields[j];
+						if ( p_field == "FREE-TEXT"){
+							func_param.push(func_param_values[j]);
+						}else {
+							if (data.hasOwnProperty(p_field)) {
+								if (! util.is_undefined_key(func_obj,"concat_style."+String(p_field))) {
+										func_param.push(b_util.build_str(p_field, data[p_field],func_obj.concat_style[p_field], include_link= false));
+								}else {
+										func_param.push(b_util.build_str(p_field, data[p_field],null, include_link= false));
+								}
+							}
+						}
+					}
+
+					var res = Reflect.apply(func_name,undefined,func_param);
+					if (data_field == "") {
+						return res;
+					}else if (!util.is_undefined_key(res,data_field)) {
+						 return util.get_obj_key_val(res,data_field);
+					}else {
+						return -1;
+					}
+
+				}
+			}
+		}
 
 		function _build_header_sec(){
 
@@ -964,7 +1050,7 @@ var search = (function () {
 				for (var i = 0; i < tab_results.length; i++) {
 					var row_elem = [];
 					for (var j = 0; j < set_keys.length; j++) {
-						row_elem.push(util.build_str_html(tab_results[i][set_keys[j]],"inline"));
+						row_elem.push(util.build_str(tab_results[i][set_keys[j]],"inline"));
 					}
 					matrix.push(row_elem);
 				}
@@ -1374,27 +1460,32 @@ var util = (function () {
 	/*create and return an html string representing the value of obj
 	in case it is a concatanation of values then the string styles
 	follows the 'concat_style' pattern for its construction  */
-	function build_str_html(obj,concat_style=null){
+	function build_str(obj,concat_style=null, include_link = true){
 		if (obj != undefined) {
 			if (obj.hasOwnProperty("concat-list")) {
-				return __concat_vals(obj["concat-list"],concat_style);
+				return __concat_vals(obj["concat-list"],concat_style,include_link);
 			}else {
-				return __get_val(obj);
+				return __get_val(obj,include_link);
 			}
 		}else {
 			return "";
 		}
 
-		function __get_val(obj){
+		function __get_val(obj,include_link){
 			if ((obj != null) && (obj != undefined)){
-				if (obj.value == "") {obj.value = "NONE";}
+				//if (obj.value == "") {obj.value = "NONE";}
 				var str_html = obj.value;
+				if (include_link) {
+					if (obj.hasOwnProperty("uri")) {
+						str_html = "<a href='"+String(obj.uri)+"'>"+obj.value+"</a>";
+					}
+				}
 				return str_html;
 			}else {
 				return "NONE";
 			}
 		}
-		function __concat_vals(arr,concat_style){
+		function __concat_vals(arr,concat_style,include_link){
 			var str_html = "";
 			var separator = ", ";
 
@@ -1412,7 +1503,7 @@ var util = (function () {
 			for (var i = 0; i < arr.length; i++) {
 				var obj = arr[i];
 				if (i == arr.length - 1) {separator = " ";}
-				str_html = str_html + __get_val(obj) + separator;
+				str_html = str_html + __get_val(obj,include_link) + separator;
 			}
 			return str_html;
 		}
@@ -1431,7 +1522,7 @@ var util = (function () {
 		sort_int: sort_int,
 		index_in_arrjsons: index_in_arrjsons,
 		encode_matrix_to_csv: encode_matrix_to_csv,
-		build_str_html: build_str_html
+		build_str: build_str
 	 }
 })();
 
