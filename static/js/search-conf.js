@@ -218,7 +218,7 @@ var search_conf = {
             "LIMIT 2000"
       ],
       "fields": [
-        {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"browser_iri","prefix":""}},
+        {"iskey": true, "value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"browser_iri","prefix":""}},
         {"value":"year", "title": "Year", "column_width":"13%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true} },
         {"value":"title", "title": "Title","column_width":"30%","type": "text", "sort":{"value": true}, "link":{"field":"browser_iri","prefix":""}},
         {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}},
@@ -294,18 +294,16 @@ function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, d
   var call_crossref_api = "https://api.crossref.org/works/";
   var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
 
-  var result_data = "";
+  //var result_data = "...";
   $.ajax({
         dataType: "json",
         url: call_url,
         type: 'GET',
         async: async_bool,
         success: function( res_obj ) {
-            result_data = res_obj;
             var func_param = [];
-            func_param.push(index, key_full_name, result_data, data_field);
+            func_param.push(index, key_full_name, res_obj, data_field);
             Reflect.apply(callbk_func,undefined,func_param);
         }
    });
-   return result_data;
 }
