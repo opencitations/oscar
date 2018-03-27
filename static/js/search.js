@@ -667,7 +667,6 @@ var search = (function () {
 
 		function callbk_update_data_entry_val(index_entry, key_full_name, res_obj, data_field){
 			var new_val = util.get_obj_key_val(res_obj,data_field);
-			console.log(new_val);
 			table_conf.data.results.bindings[index_entry][key_full_name] = {"value":new_val, "label":new_val};
 		}
 

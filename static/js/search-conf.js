@@ -228,7 +228,7 @@ var search_conf = {
       ],
       "group_by": {"keys":["iri"], "concats":["author"]},
       "ext_data": {
-        "crossref4doi": {"name": call_crossref, "param": {"fields":["doi"]}, "async": false}
+        "crossref4doi": {"name": call_crossref, "param": {"fields":["doi"]}, "async": true}
       },
     },
 
@@ -291,11 +291,6 @@ function capitalize_1st_letter(str){
 
 //"FUNC" {"name": call_crossref, "param":{"fields":[],"vlaues":[]}}
 function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
-  console.log(str_doi);
-  console.log(index);
-  console.log(async_bool);
-  console.log(callbk_func);
-  console.log(key_full_name);
   var call_crossref_api = "https://api.crossref.org/works/";
   var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
 
@@ -307,10 +302,10 @@ function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, d
         async: async_bool,
         success: function( res_obj ) {
             result_data = res_obj;
+            var func_param = [];
+            func_param.push(index, key_full_name, result_data, data_field);
+            Reflect.apply(callbk_func,undefined,func_param);
         }
    });
-
-   var func_param = [];
-   func_param.push(index, key_full_name, result_data, data_field);
-   Reflect.apply(callbk_func,undefined,func_param);
+   return result_data;
 }
