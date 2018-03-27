@@ -519,7 +519,7 @@ var search = (function () {
 									key_full_name,
 									func_obj.name,
 									table_conf.data.results.bindings[i],
-									ext_data_fields[i]["data_field"]
+									ext_data_fields[j]["data_field"]
 						);
 
 					}
@@ -665,32 +665,58 @@ var search = (function () {
 					var func_param = []
 					var func_param_fields = func_obj['param']['fields'];
 					var func_param_values = func_obj['param']['values'];
+
+					var conf_params = [];
+					for (var j = 0; j < func_param_fields.length; j++) {
+						conf_params.push(undefined);
+					}
 					for (var j = 0; j < func_param_fields.length; j++) {
 						var p_field = func_param_fields[j];
 						if ( p_field == "FREE-TEXT"){
-							func_param.push(func_param_values[j]);
+							conf_params.push(func_param_values[j]);
 						}else {
 							if (data.hasOwnProperty(p_field)) {
-								func_param.push(data[p_field].value);
+								conf_params.push(data[p_field].value);
 							}
 						}
 					}
 
+					func_param.push(conf_params);
 					func_param.push(index, async_bool, callbk_func, key_full_name, data_field);
 					var res = Reflect.apply(func_name,undefined,func_param);
 		}
 
 		function callbk_update_data_entry_val(index_entry, key_full_name, res_obj, data_field){
 			var new_val = util.get_obj_key_val(res_obj,data_field);
+			if (new_val == -1) {
+				new_val = "";
+			}
 
-			_update_table_entry_field(new_val, key_full_name, index_entry);
-			//table_conf.data.results.bindings[index_entry][key_full_name] = {"value":new_val, "label":new_val};
-			console.log(table_conf.data.results.bindings);
+			_update_all_data_entry_field(index_entry, key_full_name, new_val);
+			_update_current_table_entry_field(new_val, key_full_name, index_entry);
+			//console.log(table_conf.data.results.bindings);
 
-			function _update_table_entry_field(new_val, field, index_entry) {
+			function _update_all_data_entry_field(data_key_val, field, new_val) {
+
+				__update_data_type(table_conf.data.results.bindings,data_key_val, field, new_val);
+				__update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, new_val);
+				__update_data_type(table_conf.view.data.results.bindings,data_key_val, field, new_val);
+				function __update_data_type(dataset, data_key_val, field, new_val) {
+					for (var i = 0; i < dataset.length; i++) {
+						if (! util.is_undefined_key(dataset[i],table_conf.data_key)) {
+							if(dataset[i][table_conf.data_key].value == data_key_val){
+								dataset[i][field].value = new_val;
+							}
+						}
+					}
+				}
+			}
+			function _update_current_table_entry_field(new_val, field, index_entry) {
 				for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
 					if (table_conf.data.results.bindings[i][table_conf.data_key].value == index_entry) {
-						table_conf.data.results.bindings[i][field] = {"value":new_val, "label":new_val};
+						var obj_newval = {};
+						obj_newval[field] = {"value":new_val, "label":new_val};
+						htmldom.update_tab_entry_field(table_conf.data_key, index_entry, field, obj_newval);
 					}
 				}
 			}
@@ -1593,38 +1619,51 @@ var htmldom = (function () {
 				if (index != -1) {
 
 					var tabCell = tr.insertCell(-1);
-					if (results_obj.hasOwnProperty(f_obj["value"])) {
-						var str_html = "";
+					tabCell.setAttribute("field", f_obj["value"]);
+					var cell_inner = _cell_inner_str(results_obj, f_obj["value"]);
 
-						//check if field is concatenated through group_by
-						if (results_obj[f_obj["value"]].hasOwnProperty("concat-list")) {
-							var arr = results_obj[f_obj["value"]]["concat-list"];
-							var str_sep = ", ";
-							for (var k = 0; k < arr.length; k++) {
-								if (k == arr.length -1) {str_sep = " ";}
-								if(arr[k].hasOwnProperty("uri")){
-									str_html = str_html + "<a class='res-val-link' href='"+String(arr[k].uri)+"' target='_blank'>"+arr[k].value+"</a>";
-								}else {
-									str_html = str_html + String(arr[k].value);
-								}
-								str_html = String(str_html) + String(str_sep);
-							}
-						}
-						else {
-							if(results_obj[f_obj["value"]].hasOwnProperty("uri")){
-								str_html = "<a class='res-val-link' href='"+String(results_obj[f_obj["value"]].uri)+"' target='_blank'>"+results_obj[f_obj["value"]].value+"</a>";
-							}else {
-								str_html = results_obj[f_obj["value"]].value;
-							}
-						}
-					}else{
-						str_html = "";
-					}
-					tabCell.innerHTML = str_html;
+					tabCell.setAttribute("value", cell_inner.str_value);
+					tabCell.innerHTML = cell_inner.str_html;
 				}
 		}
 		return tr;
 	}
+
+	function _cell_inner_str(results_obj,cell_field) {
+		if (results_obj.hasOwnProperty(cell_field)) {
+			var str_html = "";
+
+			//check if field is concatenated through group_by
+			var str_value = "";
+			if (results_obj[cell_field].hasOwnProperty("concat-list")) {
+				var arr = results_obj[cell_field]["concat-list"];
+				var str_sep = ", ";
+				for (var k = 0; k < arr.length; k++) {
+					if (k == arr.length -1) {str_sep = " ";}
+					str_value = str_value + arr[k].value + str_sep;
+					if(arr[k].hasOwnProperty("uri")){
+						str_html = str_html + "<a class='res-val-link' href='"+String(arr[k].uri)+"' target='_blank'>"+arr[k].value+"</a>";
+					}else {
+						str_html = str_html + String(arr[k].value);
+					}
+					str_html = String(str_html) + String(str_sep);
+				}
+			}
+			else {
+				str_value = results_obj[cell_field].value;
+				if(results_obj[cell_field].hasOwnProperty("uri")){
+					str_html = "<a class='res-val-link' href='"+String(results_obj[cell_field].uri)+"' target='_blank'>"+results_obj[cell_field].value+"</a>";
+				}else {
+					str_html = results_obj[cell_field].value;
+				}
+			}
+		}else{
+			str_html = "";
+		}
+		return {"str_html": str_html, "str_value": str_value};
+	}
+
+
 	/*create the footer of the results table*/
 	function _table_footer(no_results_flag, my_tr){
 		var new_footer_tab = document.createElement("table");
@@ -2258,6 +2297,38 @@ var htmldom = (function () {
 			}
 	}
 
+	function update_tab_entry_field(table_field_key, entry_data_key, entry_data_field, new_val){
+
+		var tab_res = document.getElementById("tab_res");
+		var tr_index = _get_index_of_tr(tab_res, table_field_key, entry_data_key);
+
+		if(tr_index != -1){
+			for (var j = 0; j < tab_res.rows[tr_index].cells.length; j++) {
+				var mycell = tab_res.rows[tr_index].cells[j];
+				if (mycell.getAttribute("field") == entry_data_field) {
+					var cell_inner = _cell_inner_str(new_val, entry_data_field);
+					mycell.setAttribute("value", cell_inner.str_value);
+					mycell.innerHTML = cell_inner.str_html;
+				}
+			}
+		}
+
+		function _get_index_of_tr(tab_res, table_field_key, entry_data_key){
+			for (var i = 0; i < tab_res.rows.length; i++) {
+				for (var j = 0; j < tab_res.rows[i].cells.length; j++) {
+					var mycell = tab_res.rows[i].cells[j];
+					if (mycell.getAttribute("field") == table_field_key) {
+						if (mycell.getAttribute("value") == entry_data_key) {
+							return i;
+						}
+					}
+				}
+			}
+			return -1;
+		}
+
+	}
+
 	/*disable/enable the filter buttons: Show-only, Exclude */
 	function disable_filter_btns(flag) {
 		var show_only_btn = document.getElementById("show-only");
@@ -2342,6 +2413,7 @@ var htmldom = (function () {
 		filter_history_tab: filter_history_tab,
 		reset_filter_history_tab: reset_filter_history_tab,
 		update_res_table: update_res_table,
+		update_tab_entry_field: update_tab_entry_field,
 		disable_filter_btns:disable_filter_btns,
 		loader: loader,
 		build_export_btn: build_export_btn,

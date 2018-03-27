@@ -292,18 +292,20 @@ function capitalize_1st_letter(str){
 //"FUNC" {"name": call_crossref, "param":{"fields":[],"vlaues":[]}}
 function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
   var call_crossref_api = "https://api.crossref.org/works/";
-  var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
 
-  //var result_data = "...";
-  $.ajax({
-        dataType: "json",
-        url: call_url,
-        type: 'GET',
-        async: async_bool,
-        success: function( res_obj ) {
-            var func_param = [];
-            func_param.push(index, key_full_name, res_obj, data_field);
-            Reflect.apply(callbk_func,undefined,func_param);
-        }
-   });
+  if (str_doi != undefined) {
+    var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
+    //var result_data = "...";
+    $.ajax({
+          dataType: "json",
+          url: call_url,
+          type: 'GET',
+          async: async_bool,
+          success: function( res_obj ) {
+              var func_param = [];
+              func_param.push(index, key_full_name, res_obj, data_field);
+              Reflect.apply(callbk_func,undefined,func_param);
+          }
+     });
+  }
 }
