@@ -513,7 +513,7 @@ var search = (function () {
 						table_conf.data.results.bindings[i][key_full_name] = {"value":"", "label":""};
 						var ext_res = _exec_ext_data(
 									func_obj,
-									j,
+									table_conf.data.results.bindings[i][table_conf.data_key].value,
 									async_val,
 									search.callbk_update_data_entry_val,
 									key_full_name,
@@ -682,9 +682,18 @@ var search = (function () {
 
 		function callbk_update_data_entry_val(index_entry, key_full_name, res_obj, data_field){
 			var new_val = util.get_obj_key_val(res_obj,data_field);
-			table_conf.data.results.bindings[index_entry][key_full_name] = {"value":new_val, "label":new_val};
+
+			_update_table_entry_field(new_val, key_full_name, index_entry);
+			//table_conf.data.results.bindings[index_entry][key_full_name] = {"value":new_val, "label":new_val};
 			console.log(table_conf.data.results.bindings);
-			//show_all();
+
+			function _update_table_entry_field(new_val, field, index_entry) {
+				for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
+					if (table_conf.data.results.bindings[i][table_conf.data_key].value == index_entry) {
+						table_conf.data.results.bindings[i][field] = {"value":new_val, "label":new_val};
+					}
+				}
+			}
 		}
 
 		function _build_header_sec(){
