@@ -464,7 +464,7 @@ var search = (function () {
 					}
 					ext_data_fields.push({
 						"full_name": fields[i].value,
-						"func_name": window[all_parts[1]],
+						"func_name": all_parts[1],
 						"data_field": data_field
 					});
 				}
@@ -488,27 +488,33 @@ var search = (function () {
 
 			// now the results
 			for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
+
+				for (var j = 0; j < ext_data_fields.length; j++) {
+					var key_full_name = ext_data_fields[j]["full_name"];
+					var key_func_name = ext_data_fields[j]["func_name"];
+					var func_obj = category_conf_obj["ext_data"][key_func_name];
+					if (func_obj != undefined) {
+						if (func_obj["async"] != undefined) {
+								table_conf.data.results.bindings[i][key_full_name] = {"value":"", "label":""};
+								var ext_res = _exec_ext_data(
+									func_obj,
+									j,
+									func_obj["async"],
+									search.callbk_update_data_entry_val,
+									key_full_name,
+									func_obj.name,
+									table_conf.data.results.bindings[i],
+									ext_data_fields[i]["data_field"]
+								);
+						}
+					}
+				}
+
 				for (var key in table_conf.data.results.bindings[i]) {
 						if(util.index_in_arrjsons(fields,["value"],[key]) == -1){
 							delete table_conf.data.results.bindings[i][key];
 						}
 				}
-
-				for (var j = 0; j < ext_data_fields.length; j++) {
-					var key_full_name = ext_data_fields[i]["full_name"];
-					table_conf.data.results.bindings[i][key_full_name] = {"value":"", "label":""};
-				}
-				//calculate the external fields
-				/*
-				for (var j = 0; j < ext_data_fields.length; j++) {
-					var key_full_name = ext_data_fields[i]["full_name"];
-					table_conf.data.results.bindings[i][key_full_name] = _exec_ext_data(
-																																	ext_data_fields[i]["func_name"],
-																																	table_conf.data.results.bindings[i],
-																																	ext_data_fields[i]["data_field"]
-																																);
-				}
-				*/
 			}
 			console.log(table_conf.data.results.bindings);
 
@@ -638,14 +644,7 @@ var search = (function () {
  			}
  		}
 		/*retrieve the externa data*/
-		function _exec_ext_data(func_name, data, data_field){
-			var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
-			var ext_data_obj = search_conf_json.categories[index_category]['ext_data'];
-			//console.log(ext_data_obj,obj_vals);
-			if (ext_data_obj != undefined) {
-				if (func_name in ext_data_obj) {
-
-					var func_obj = ext_data_obj[func_name];
+		function _exec_ext_data(func_obj, index, async_bool, callbk_func, key_full_name, func_name, data, data_field){
 
 					//my func params
 					var func_param = []
@@ -657,26 +656,19 @@ var search = (function () {
 							func_param.push(func_param_values[j]);
 						}else {
 							if (data.hasOwnProperty(p_field)) {
-								if (! util.is_undefined_key(func_obj,"concat_style."+String(p_field))) {
-										func_param.push(b_util.build_str(p_field, data[p_field],func_obj.concat_style[p_field], include_link= false));
-								}else {
-										func_param.push(b_util.build_str(p_field, data[p_field],null, include_link= false));
-								}
+								func_param.push(data[p_field].value);
 							}
 						}
 					}
 
+					func_param.push(index, async_bool, callbk_func, key_full_name, data_field);
 					var res = Reflect.apply(func_name,undefined,func_param);
-					if (data_field == "") {
-						return res;
-					}else if (!util.is_undefined_key(res,data_field)) {
-						 return util.get_obj_key_val(res,data_field);
-					}else {
-						return -1;
-					}
+		}
 
-				}
-			}
+		function callbk_update_data_entry_val(index_entry, key_full_name, res_obj, data_field){
+			var new_val = util.get_obj_key_val(res_obj,data_field);
+			console.log(new_val);
+			table_conf.data.results.bindings[index_entry][key_full_name] = {"value":new_val, "label":new_val};
 		}
 
 		function _build_header_sec(){
@@ -1178,7 +1170,10 @@ var search = (function () {
 				//main operations
 				build_table: build_table,
 				do_sparql_query: do_sparql_query,
-				build_adv_sparql_query: build_adv_sparql_query
+				build_adv_sparql_query: build_adv_sparql_query,
+
+				//others
+				callbk_update_data_entry_val: callbk_update_data_entry_val
 		 }
 })();
 
