@@ -832,7 +832,7 @@ var search = (function () {
 							var checked_filters_arr = null;
 							if (operation == "showonly_exclude") {
 								checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
-								htmldom.add_filentry_history(checked_filters_arr , params.showonly);
+								htmldom.add_filentry_history(checked_filters_arr , params.showonly, table_conf.filters.fields);
 							}
 							if (operation == "show_all") {
 								htmldom.reset_filter_history_tab();
@@ -2062,7 +2062,7 @@ var htmldom = (function () {
 	}
 
 	/*creates and adds an entry filter history to the table*/
-	function add_filentry_history(arr_options=[], filter_type = ""){
+	function add_filentry_history(arr_options=[], filter_type = "", filter_fields_arr = []){
 		if (arr_options.length > 0) {
 			var filter_history_tab = document.getElementById("filter_history_tab");
 
@@ -2076,7 +2076,13 @@ var htmldom = (function () {
 				if (i == arr_options.length-1) {
 					str_span = " ";
 				}
-				str_html = str_html +"<span class='theme-color'>"+arr_options[i].label+" ("+arr_options[i].field+")" +"</span>"+str_span;
+				var str_field = arr_options[i].field;
+				var filter_field_index = util.index_in_arrjsons(filter_fields_arr,["value"],[arr_options[i].field]);
+				if (filter_field_index != -1) {
+					str_field = filter_fields_arr[filter_field_index].title;
+				}
+
+				str_html = str_html +"<span class='theme-color'>"+arr_options[i].label+" ("+str_field+")" +"</span>"+str_span;
 			}
 
 			var tabCell = document.createElement("td");
