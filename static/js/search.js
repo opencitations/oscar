@@ -304,7 +304,7 @@ var search = (function () {
 		function _call_ts(rule_category, rules, rule_index, sparql_query, query_text=null, query_label=null, callbk_fun=null){
 			//use this url to contact the sparql_endpoint triple store
 			var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
-			console.log(sparql_query)
+			//console.log(sparql_query)
 
 			//reset all doms
 			htmldom.reset_html_structure();
@@ -480,7 +480,7 @@ var search = (function () {
 					});
 				}
 			}
-			console.log(ext_data_fields);
+			//console.log(ext_data_fields);
 
 			// the header first
 			var new_header = [];
@@ -494,8 +494,7 @@ var search = (function () {
 				new_header.push(ext_data_fields[i]["full_name"]);
 			}
 			table_conf.data.head.vars = new_header;
-
-			console.log(table_conf.data.head.vars);
+			//console.log(table_conf.data.head.vars);
 
 			// now the results
 			for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
@@ -531,13 +530,12 @@ var search = (function () {
 						}
 				}
 			}
-			console.log(table_conf.data.results.bindings);
+			//console.log(table_conf.data.results.bindings);
 
 			//set all the other table_conf fields
 			//init all the filtered fields
 			//-- filtered data
 			table_conf.filters.data = JSON.parse(JSON.stringify(table_conf.data));
-
 
 			//-- the filtered checked fields
 			table_conf.filters.arr_entries = [];
@@ -686,27 +684,32 @@ var search = (function () {
 					var res = Reflect.apply(func_name,undefined,func_param);
 		}
 
-		function callbk_update_data_entry_val(index_entry, key_full_name, res_obj, data_field){
+		function callbk_update_data_entry_val(index_entry, key_full_name, res_obj, data_field, async_bool){
 			var new_val = util.get_obj_key_val(res_obj,data_field);
 			if (new_val == -1) {
 				new_val = "";
 			}
 
-			_update_all_data_entry_field(index_entry, key_full_name, new_val);
-			_update_current_table_entry_field(new_val, key_full_name, index_entry);
+			if (async_bool) {
+				_update_all_data_entry_field(index_entry, key_full_name, new_val);
+				_update_current_table_entry_field(new_val, key_full_name, index_entry);
+			}else {
+				_update_data_type(table_conf.data.results.bindings,index_entry, key_full_name, new_val);
+			}
+
 			//console.log(table_conf.data.results.bindings);
 
 			function _update_all_data_entry_field(data_key_val, field, new_val) {
-
-				__update_data_type(table_conf.data.results.bindings,data_key_val, field, new_val);
-				__update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, new_val);
-				__update_data_type(table_conf.view.data.results.bindings,data_key_val, field, new_val);
-				function __update_data_type(dataset, data_key_val, field, new_val) {
-					for (var i = 0; i < dataset.length; i++) {
-						if (! util.is_undefined_key(dataset[i],table_conf.data_key)) {
-							if(dataset[i][table_conf.data_key].value == data_key_val){
-								dataset[i][field].value = new_val;
-							}
+				_update_data_type(table_conf.data.results.bindings,data_key_val, field, new_val);
+				_update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, new_val);
+				_update_data_type(table_conf.view.data.results.bindings,data_key_val, field, new_val);
+			}
+			function _update_data_type(dataset, data_key_val, field, new_val) {
+				for (var i = 0; i < dataset.length; i++) {
+					if (! util.is_undefined_key(dataset[i],table_conf.data_key)) {
+						if(dataset[i][table_conf.data_key].value == data_key_val){
+							dataset[i][field].value = new_val;
+							dataset[i][field].label = new_val;
 						}
 					}
 				}
@@ -933,8 +936,6 @@ var search = (function () {
 			//table_conf.view.data.results.bindings = JSON.parse(JSON.stringify(table_conf.view.data.results.bindings));
 			//_limit_results();
 			if (field != 'none') {
-					//console.log(JSON.parse(JSON.stringify(table_conf.filters.data.results.bindings[0])));
-					//console.log(JSON.parse(JSON.stringify(table_conf.view.data.results.bindings[0])));
 					table_conf.view.data.results.bindings = _sort_tabdata(table_conf.view.data.results.bindings,field,order,val_type);
 			}else {
 				/*no sort operation is applied*/
@@ -953,12 +954,15 @@ var search = (function () {
 							field_val = ".concat-list";
 						}
 				}
+				util.printobj(arr_obj);
+				console.log(field+field_val);
 				var new_arr_obj = util.sort_objarr_by_key(
 							JSON.parse(JSON.stringify(arr_obj)),
 							order,
 							field+field_val,
 							val_type
 				);
+				util.printobj(new_arr_obj);
 				return new_arr_obj;
 			}
 		}
@@ -1418,6 +1422,8 @@ var util = (function () {
 
 		var sorted_arr = [];
 		var array_key = key.split('.');
+		//in case the field name have dots
+		array_key = _handle_dots(array_key);
 
 		for (var i = 0; i < objarr.length; i++) {
 			var objval = _init_val(objarr[i], array_key, val_type);
@@ -1496,6 +1502,21 @@ var util = (function () {
 
 			return val;
 		}
+		/*handle dots in field name*/
+		function _handle_dots(array_key) {
+			var new_arr = [];
+			var field_name = ""; var sep= ".";
+			for (var i = 0; i < array_key.length-1; i++) {
+				if (i == array_key.length-2) {
+					sep= "";
+				}
+				field_name= field_name + array_key[i]+sep;
+			}
+			new_arr.push(field_name);
+			new_arr.push(array_key[array_key.length-1]);
+			return new_arr;
+		}
+
 	}
 
 	/*sort int function*/
