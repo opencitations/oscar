@@ -693,6 +693,9 @@ var search = (function () {
 			if (async_bool) {
 				_update_all_data_entry_field(index_entry, key_full_name, new_val);
 				_update_current_table_entry_field(new_val, key_full_name, index_entry);
+				if (util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]) != -1) {
+					_exec_operation(null, null, "filter");
+				}
 			}else {
 				_update_data_type(table_conf.data.results.bindings,index_entry, key_full_name, new_val);
 			}
@@ -954,15 +957,13 @@ var search = (function () {
 							field_val = ".concat-list";
 						}
 				}
-				util.printobj(arr_obj);
-				console.log(field+field_val);
+
 				var new_arr_obj = util.sort_objarr_by_key(
 							JSON.parse(JSON.stringify(arr_obj)),
 							order,
 							field+field_val,
 							val_type
 				);
-				util.printobj(new_arr_obj);
 				return new_arr_obj;
 			}
 		}
@@ -1423,7 +1424,7 @@ var util = (function () {
 		var sorted_arr = [];
 		var array_key = key.split('.');
 		//in case the field name have dots
-		array_key = _handle_dots(array_key);
+		array_key = handle_dots(array_key);
 
 		for (var i = 0; i < objarr.length; i++) {
 			var objval = _init_val(objarr[i], array_key, val_type);
@@ -1502,21 +1503,24 @@ var util = (function () {
 
 			return val;
 		}
-		/*handle dots in field name*/
-		function _handle_dots(array_key) {
-			var new_arr = [];
-			var field_name = ""; var sep= ".";
-			for (var i = 0; i < array_key.length-1; i++) {
-				if (i == array_key.length-2) {
-					sep= "";
-				}
-				field_name= field_name + array_key[i]+sep;
-			}
-			new_arr.push(field_name);
-			new_arr.push(array_key[array_key.length-1]);
-			return new_arr;
-		}
 
+	}
+
+	/*handle dots in field name*/
+	function handle_dots(array_key) {
+		var new_arr = [];
+		var field_name = ""; var sep= ".";
+		for (var i = 0; i < array_key.length-1; i++) {
+			if (i == array_key.length-2) {
+				sep= "";
+			}
+			field_name= field_name + array_key[i]+sep;
+		}
+		if (field_name != "") {
+			new_arr.push(field_name);
+		}
+		new_arr.push(array_key[array_key.length-1]);
+		return new_arr;
 	}
 
 	/*sort int function*/
@@ -1586,6 +1590,7 @@ var util = (function () {
 		collect_values: collect_values,
 		get_sub_arr: get_sub_arr,
 		sort_objarr_by_key: sort_objarr_by_key,
+		handle_dots: handle_dots,
 		sort_int: sort_int,
 		index_in_arrjsons: index_in_arrjsons,
 		encode_matrix_to_csv: encode_matrix_to_csv,
