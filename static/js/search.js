@@ -584,7 +584,10 @@ var search = (function () {
 						var index_field = util.index_in_arrjsons(cat_conf.fields,["value"],[key_field]);
 						if (index_field != -1) {
 							var field_obj = cat_conf.fields[index_field];
-							new_data[i][key_field]["uri"] = _get_uri(new_data[i], key_field, field_obj);
+							var my_uri = _get_uri(new_data[i], key_field, field_obj);
+							if (my_uri != null) {
+								new_data[i][key_field]["uri"] = my_uri;
+							}
 						}
 					}
 				}
@@ -686,8 +689,8 @@ var search = (function () {
 			}
 
 			if (async_bool) {
-				_update_all_data_entry_field(index_entry, key_full_name, new_val);
-				_update_current_table_entry_field(new_val, key_full_name, index_entry);
+				var obj_data = _update_all_data_entry_field(index_entry, key_full_name, new_val);
+				_update_current_table_entry_field(obj_data, key_full_name, index_entry);
 				var myfilter_index = util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]);
 				if (myfilter_index != -1) {
 					//_exec_operation(null, null, "filter");
@@ -706,9 +709,10 @@ var search = (function () {
 			function _update_all_data_entry_field(data_key_val, field, new_val) {
 				var init_obj = {"value": new_val, "label": new_val};
 				init_obj["uri"] = _update_uri(data_key_val,field);
-				_update_data_type(table_conf.data.results.bindings,data_key_val, field, init_obj);
+				var obj_data = _update_data_type(table_conf.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.view.data.results.bindings,data_key_val, field, init_obj);
+				return obj_data;
 				function _update_uri(data_key_val,field) {
 					var field_index = util.index_in_arrjsons(cat_conf.fields,["value"],[field]);
 					if( field_index != -1){
@@ -725,16 +729,17 @@ var search = (function () {
 					if (! util.is_undefined_key(dataset[i],table_conf.data_key)) {
 						if(dataset[i][table_conf.data_key].value == data_key_val){
 							dataset[i][field] = JSON.parse(JSON.stringify(new_obj));
+							return dataset[i];
 						}
 					}
 				}
 			}
-			function _update_current_table_entry_field(new_val, field, index_entry) {
+			function _update_current_table_entry_field(obj_data, field, index_entry) {
 				for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
 					if (table_conf.data.results.bindings[i][table_conf.data_key].value == index_entry) {
-						var obj_newval = {};
-						obj_newval[field] = {"value":new_val, "label":new_val};
-						htmldom.update_tab_entry_field(table_conf.data_key, index_entry, field, obj_newval);
+						//var obj_newval = {};
+						//obj_newval[field] = {"value":new_val, "label":new_val};
+						htmldom.update_tab_entry_field(table_conf.data_key, index_entry, field, obj_data);
 					}
 				}
 			}
