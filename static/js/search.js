@@ -691,10 +691,11 @@ var search = (function () {
 				var myfilter_index = util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]);
 				if (myfilter_index != -1) {
 					//_exec_operation(null, null, "filter");
-					_gen_data_checkboxes([table_conf.filters.fields[myfilter_index]]);
-					htmldom.filter_checkboxes(table_conf);
-					checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
-					htmldom.disable_filter_btns(checked_filters_arr.length == 0);
+					//_gen_data_checkboxes([table_conf.filters.fields[myfilter_index]]);
+					_gen_data_checkboxes();
+					//htmldom.filter_checkboxes(table_conf);
+					//checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
+					//htmldom.disable_filter_btns(checked_filters_arr.length == 0);
 				}
 			}else {
 				_update_data_type(table_conf.data.results.bindings,index_entry, key_full_name, new_val);
@@ -1046,8 +1047,9 @@ var search = (function () {
 		}
 		function _gen_data_checkboxes(myfields = table_conf.filters.fields){
 
-			table_conf.filters.arr_entries = [];
+			//table_conf.filters.arr_entries = [];
 
+			var new_arr_entries = [];
 			// create the list of values I can filter
 			for (var i = 0; i < myfields.length; i++) {
 
@@ -1073,7 +1075,16 @@ var search = (function () {
 											var new_label = arr[k].label;
 											var index_in_arr = util.index_in_arrjsons(arr_check_values,["value"],[new_val]);
 											if (index_in_arr == -1){
-												arr_check_values.push({"field": filter_field,"value":new_val,"label":new_label ,"sum":1,"checked":false});
+												//check it according to prev status
+												var checked_bool = false;
+												var index_in_arr_entries = util.index_in_arrjsons(table_conf.filters.arr_entries,["value"],[new_val]);
+												if (index_in_arr_entries != -1) {
+													if (table_conf.filters.arr_entries[index_in_arr_entries]['checked'] == true) {
+													}
+													checked_bool = table_conf.filters.arr_entries[index_in_arr_entries]['checked'];
+												}
+
+												arr_check_values.push({"field": filter_field,"value":new_val,"label":new_label ,"sum":1,"checked":checked_bool});
 											}else{
 												arr_check_values[index_in_arr]["sum"] = arr_check_values[index_in_arr]["sum"] + 1;
 											}
@@ -1083,9 +1094,12 @@ var search = (function () {
 
 							//insert them all
 							for (var j = 0; j < arr_check_values.length; j++) {
-								table_conf.filters.arr_entries.push(arr_check_values[j]);
+								new_arr_entries.push(arr_check_values[j]);
 							}
 			}
+
+			//insert them all
+			table_conf.filters.arr_entries = new_arr_entries;
 		}
 		function _export_csv(){
 			var matrix = [];
