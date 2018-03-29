@@ -688,8 +688,13 @@ var search = (function () {
 			if (async_bool) {
 				_update_all_data_entry_field(index_entry, key_full_name, new_val);
 				_update_current_table_entry_field(new_val, key_full_name, index_entry);
-				if (util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]) != -1) {
-					_exec_operation(null, null, "filter");
+				var myfilter_index = util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]);
+				if (myfilter_index != -1) {
+					//_exec_operation(null, null, "filter");
+					_gen_data_checkboxes([table_conf.filters.fields[myfilter_index]]);
+					htmldom.filter_checkboxes(table_conf);
+					checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
+					htmldom.disable_filter_btns(checked_filters_arr.length == 0);
 				}
 			}else {
 				_update_data_type(table_conf.data.results.bindings,index_entry, key_full_name, new_val);
@@ -703,14 +708,14 @@ var search = (function () {
 				_update_data_type(table_conf.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.view.data.results.bindings,data_key_val, field, init_obj);
-			}
-			function _update_uri(data_key_val,field) {
-				var field_index = util.index_in_arrjsons(cat_conf.fields,["value"],[field]);
-				if( field_index != -1){
-					var link_obj = cat_conf.fields[field_index].link;
-					if (link_obj != undefined) {
-						var original_data_index = util.index_in_arrjsons(sparql_results.results.bindings,[table_conf.data_key],[data_key_val]);
-						return  _get_uri(sparql_results.results.bindings[original_data_index], field, cat_conf.fields[field_index]);
+				function _update_uri(data_key_val,field) {
+					var field_index = util.index_in_arrjsons(cat_conf.fields,["value"],[field]);
+					if( field_index != -1){
+						var link_obj = cat_conf.fields[field_index].link;
+						if (link_obj != undefined) {
+							var original_data_index = util.index_in_arrjsons(sparql_results.results.bindings,[table_conf.data_key],[data_key_val]);
+							return  _get_uri(sparql_results.results.bindings[original_data_index], field, cat_conf.fields[field_index]);
+						}
 					}
 				}
 			}
@@ -1039,12 +1044,11 @@ var search = (function () {
 				return filters_flag;
 			}
 		}
-		function _gen_data_checkboxes(){
+		function _gen_data_checkboxes(myfields = table_conf.filters.fields){
 
 			table_conf.filters.arr_entries = [];
 
 			// create the list of values I can filter
-			var myfields = table_conf.filters.fields;
 			for (var i = 0; i < myfields.length; i++) {
 
 							var filter_field = myfields[i].value;
