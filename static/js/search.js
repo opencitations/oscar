@@ -2140,12 +2140,8 @@ var htmldom = (function () {
 			var myfields = table_conf.filters.fields;
 			for (var i = 0; i < myfields.length; i++) {
 
-						// create dynamic table
-						var table = document.createElement("table");
-						table.className = "table filter-values-tab";
-
-						var div_header_tab = document.createElement("div");
-						div_header_tab.appendChild(table);
+						var divtab = __create_inner_tab_container(myfields[i].value)
+						var table = divtab.firstChild;
 
 						//insert the header
 						var tr = table.insertRow(-1);
@@ -2156,9 +2152,12 @@ var htmldom = (function () {
 						//in case i don't have checkbox values i remove header
 						if (arr_check_values.length == 0) {
 							table.deleteRow(table.rows.length -1);
-						}else {
+						}else
+						{
 							if (myfields[i].dropdown_active == true)
 							{
+									var inner_divtab = __create_inner_tab_container(myfields[i].value+".innervalues");
+
 									arr_check_values = util.sort_objarr_by_key(arr_check_values, myfields[i].config.order, myfields[i].config.sort, myfields[i].config.type_sort);
 									var j_from = table_conf.view.fields_filter_index[myfields[i].value].i_from;
 									var j_to = table_conf.view.fields_filter_index[myfields[i].value].i_to;
@@ -2166,19 +2165,22 @@ var htmldom = (function () {
 
 									for (var j = j_from; j < j_to; j++) {
 										//insert a checkbox entry
-										tr = table.insertRow(-1);
+										tr = inner_divtab.firstChild.insertRow(-1);
 										tr.innerHTML = _checkbox_value(myfields[i],arr_check_values[j]).outerHTML;
 									}
-									tr = table.insertRow(-1);
+									tr = inner_divtab.firstChild.insertRow(-1);
 									tr.innerHTML = _filter_vals_pages_nav(j_from,j_to,arr_check_values.length,myfields[i]).outerHTML;
+
+									tab_arr.push(divtab);
+									tab_arr.push(inner_divtab);
 							}else {
 								//dropdown is closed
 								var tr = table.rows[table.rows.length -1];
 								tr.innerHTML = _field_filter_dropdown(myfields[i], href_string, true).outerHTML;
-							}
-						}
 
-						tab_arr.push(div_header_tab);
+								tab_arr.push(divtab);
+							}
+					}
 				}
 
 				filter_values_container.innerHTML = "";
@@ -2205,6 +2207,16 @@ var htmldom = (function () {
 							}
 						}
 					}
+				}
+				function __create_inner_tab_container(val){
+					// create dynamic table
+					var table = document.createElement("table");
+					table.className = "table filter-values-tab";
+
+					var divtab = document.createElement("div");
+					divtab.setAttribute("value",val);
+					divtab.appendChild(table);
+					return divtab;
 				}
 		}
 	}
