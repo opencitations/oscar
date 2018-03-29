@@ -224,7 +224,7 @@ var search_conf = {
         {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}},
         {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": true}},
         //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
-        {"value": "ext_data.crossref4doi.message.publisher", "title": "Publisher", "column_width":"13%", "type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "label", "order": "asc"}}
+        {"value": "ext_data.crossref4doi.message.publisher", "title": "Publisher", "column_width":"13%", "type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "label", "order": "asc"}, "link":{"field":"browser_iri","prefix":""}}
       ],
       "group_by": {"keys":["iri"], "concats":["author"]},
       "ext_data": {

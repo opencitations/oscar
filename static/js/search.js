@@ -581,40 +581,35 @@ var search = (function () {
 				var obj_elem = new_data[i];
 				for (var key_field in obj_elem) {
 					if (obj_elem.hasOwnProperty(key_field)) {
-						new_data[i] = _get_uri(new_data[i], key_field);
+						var index_field = util.index_in_arrjsons(cat_conf.fields,["value"],[key_field]);
+						if (index_field != -1) {
+							var field_obj = cat_conf.fields[index_field];
+							new_data[i][key_field]["uri"] = _get_uri(new_data[i], key_field, field_obj);
+						}
 					}
 				}
 			}
 			return new_data;
-
-			function _get_uri(elem_obj, field){
+		}
+		function _get_uri(elem_obj, field, field_obj){
 				var new_elem_obj = elem_obj;
-
-				//lets look for the uri
-				var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
-				var index_field = util.index_in_arrjsons(search_conf_json.categories[index_category].fields, ["value"], [field]);
 				var uri = null;
-				if (index_field != -1){
-					var field_obj = search_conf_json.categories[index_category].fields[index_field];
-					var link_obj = field_obj.link;
-
-					if (link_obj != undefined) {
-						if ((link_obj.field != null) && (link_obj.field != "")) {
-							// I have field to link to
-
-							if (elem_obj.hasOwnProperty(link_obj.field)) {
-								uri = elem_obj[link_obj.field].value;
-								if (link_obj.hasOwnProperty("prefix")) {
-									uri = String(link_obj.prefix) + uri;
-								}
-								new_elem_obj[field]["uri"] = uri;
+				var link_obj = field_obj.link;
+				if (link_obj != undefined) {
+					if ((link_obj.field != null) && (link_obj.field != "")) {
+						// I have field to link to
+						if (elem_obj.hasOwnProperty(link_obj.field)) {
+							uri = elem_obj[link_obj.field].value;
+							if (link_obj.hasOwnProperty("prefix")) {
+								uri = String(link_obj.prefix) + uri;
 							}
+							//new_elem_obj[field]["uri"] = uri;
 						}
 					}
 				}
-				return new_elem_obj;
-			}
+				return uri;
 		}
+
 		/*map the fields with their corresponding labels*/
  		function _init_lbls(data){
  			var new_data = data;
@@ -703,16 +698,27 @@ var search = (function () {
 			//console.log(table_conf.data.results.bindings);
 
 			function _update_all_data_entry_field(data_key_val, field, new_val) {
-				_update_data_type(table_conf.data.results.bindings,data_key_val, field, new_val);
-				_update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, new_val);
-				_update_data_type(table_conf.view.data.results.bindings,data_key_val, field, new_val);
+				var init_obj = {"value": new_val, "label": new_val};
+				init_obj["uri"] = _update_uri(data_key_val,field);
+				_update_data_type(table_conf.data.results.bindings,data_key_val, field, init_obj);
+				_update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, init_obj);
+				_update_data_type(table_conf.view.data.results.bindings,data_key_val, field, init_obj);
 			}
-			function _update_data_type(dataset, data_key_val, field, new_val) {
+			function _update_uri(data_key_val,field) {
+				var field_index = util.index_in_arrjsons(cat_conf.fields,["value"],[field]);
+				if( field_index != -1){
+					var link_obj = cat_conf.fields[field_index].link;
+					if (link_obj != undefined) {
+						var original_data_index = util.index_in_arrjsons(sparql_results.results.bindings,[table_conf.data_key],[data_key_val]);
+						return  _get_uri(sparql_results.results.bindings[original_data_index], field, cat_conf.fields[field_index]);
+					}
+				}
+			}
+			function _update_data_type(dataset, data_key_val, field, new_obj) {
 				for (var i = 0; i < dataset.length; i++) {
 					if (! util.is_undefined_key(dataset[i],table_conf.data_key)) {
 						if(dataset[i][table_conf.data_key].value == data_key_val){
-							dataset[i][field].value = new_val;
-							dataset[i][field].label = new_val;
+							dataset[i][field] = JSON.parse(JSON.stringify(new_obj));
 						}
 					}
 				}
