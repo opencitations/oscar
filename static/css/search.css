@@ -277,6 +277,11 @@ td ar + ar {
   margin-left: 30px;
 }
 
+.filter_innervalues{
+  overflow-y: scroll;
+  max-height: 300px;
+}
+
 /* ========================== (3) The search filter section */
 
 

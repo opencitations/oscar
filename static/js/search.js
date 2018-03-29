@@ -2156,7 +2156,7 @@ var htmldom = (function () {
 						{
 							if (myfields[i].dropdown_active == true)
 							{
-									var inner_divtab = __create_inner_tab_container(myfields[i].value+".innervalues");
+									var inner_divtab = __create_inner_tab_container("filter_innervalues");
 
 									arr_check_values = util.sort_objarr_by_key(arr_check_values, myfields[i].config.order, myfields[i].config.sort, myfields[i].config.type_sort);
 									var j_from = table_conf.view.fields_filter_index[myfields[i].value].i_from;
@@ -2208,13 +2208,13 @@ var htmldom = (function () {
 						}
 					}
 				}
-				function __create_inner_tab_container(val){
+				function __create_inner_tab_container(class_val){
 					// create dynamic table
 					var table = document.createElement("table");
 					table.className = "table filter-values-tab";
 
 					var divtab = document.createElement("div");
-					divtab.setAttribute("value",val);
+					divtab.className = class_val;
 					divtab.appendChild(table);
 					return divtab;
 				}
