@@ -584,7 +584,10 @@ var search = (function () {
 						var index_field = util.index_in_arrjsons(cat_conf.fields,["value"],[key_field]);
 						if (index_field != -1) {
 							var field_obj = cat_conf.fields[index_field];
-							new_data[i][key_field]["uri"] = _get_uri(new_data[i], key_field, field_obj);
+							var my_uri = _get_uri(new_data[i], key_field, field_obj);
+							if (my_uri != null) {
+								new_data[i][key_field]["uri"] = my_uri;
+							}
 						}
 					}
 				}
@@ -704,11 +707,12 @@ var search = (function () {
 				var init_obj = {"value": new_val, "label": new_val};
 				init_obj["uri"] = _update_uri(data_key_val,field);
 
+
 				var obj = _update_data_type(table_conf.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.view.data.results.bindings,data_key_val, field, init_obj);
-
 				return obj;
+
 				function _update_uri(data_key_val,field) {
 					var field_index = util.index_in_arrjsons(cat_conf.fields,["value"],[field]);
 					if( field_index != -1){
