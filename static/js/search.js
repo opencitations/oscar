@@ -689,30 +689,30 @@ var search = (function () {
 			}
 
 			if (async_bool) {
-				var obj_data = _update_all_data_entry_field(index_entry, key_full_name, new_val);
-				_update_current_table_entry_field(obj_data, key_full_name, index_entry);
-				var myfilter_index = util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]);
-				if (myfilter_index != -1) {
-					//_exec_operation(null, null, "filter");
-					//_gen_data_checkboxes([table_conf.filters.fields[myfilter_index]]);
+				//init the data
+				var obj = _update_all_data_entry_field(index_entry, key_full_name, new_val);
+				//visualize it in current table page
+				htmldom.update_tab_entry_field(table_conf.data_key, index_entry, key_full_name, obj);
+
+				//check if it should be a filter field
+				if (util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]) != -1) {
 					_gen_data_checkboxes();
-					//htmldom.filter_checkboxes(table_conf);
-					//checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
-					//htmldom.disable_filter_btns(checked_filters_arr.length == 0);
 				}
+
 			}else {
 				_update_data_type(table_conf.data.results.bindings,index_entry, key_full_name, new_val);
 			}
-
 			//console.log(table_conf.data.results.bindings);
-
 			function _update_all_data_entry_field(data_key_val, field, new_val) {
 				var init_obj = {"value": new_val, "label": new_val};
 				init_obj["uri"] = _update_uri(data_key_val,field);
-				var obj_data = _update_data_type(table_conf.data.results.bindings,data_key_val, field, init_obj);
+
+
+				var obj = _update_data_type(table_conf.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.filters.data.results.bindings,data_key_val, field, init_obj);
 				_update_data_type(table_conf.view.data.results.bindings,data_key_val, field, init_obj);
-				return obj_data;
+				return obj;
+
 				function _update_uri(data_key_val,field) {
 					var field_index = util.index_in_arrjsons(cat_conf.fields,["value"],[field]);
 					if( field_index != -1){
@@ -731,15 +731,6 @@ var search = (function () {
 							dataset[i][field] = JSON.parse(JSON.stringify(new_obj));
 							return dataset[i];
 						}
-					}
-				}
-			}
-			function _update_current_table_entry_field(obj_data, field, index_entry) {
-				for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
-					if (table_conf.data.results.bindings[i][table_conf.data_key].value == index_entry) {
-						//var obj_newval = {};
-						//obj_newval[field] = {"value":new_val, "label":new_val};
-						htmldom.update_tab_entry_field(table_conf.data_key, index_entry, field, obj_data);
 					}
 				}
 			}
@@ -2146,13 +2137,16 @@ var htmldom = (function () {
 	function filter_checkboxes(table_conf) {
 		if (filter_values_container != null) {
 
-			// create dynamic table
-			var table = document.createElement("table");
-			table.className = "table filter-values-tab";
+			//array of tables
+			var tab_arr = [];
 
 			// build cells of fields to filter
 			var myfields = table_conf.filters.fields;
 			for (var i = 0; i < myfields.length; i++) {
+
+						var divtab = __create_inner_tab_container(myfields[i].value)
+						var table = divtab.firstChild;
+
 						//insert the header
 						var tr = table.insertRow(-1);
 						var href_string = "javascript:search.select_filter_field('"+String(myfields[i].value)+"');";
@@ -2162,9 +2156,12 @@ var htmldom = (function () {
 						//in case i don't have checkbox values i remove header
 						if (arr_check_values.length == 0) {
 							table.deleteRow(table.rows.length -1);
-						}else {
+						}else
+						{
 							if (myfields[i].dropdown_active == true)
 							{
+									var inner_divtab = __create_inner_tab_container("filter_innervalues");
+
 									arr_check_values = util.sort_objarr_by_key(arr_check_values, myfields[i].config.order, myfields[i].config.sort, myfields[i].config.type_sort);
 									var j_from = table_conf.view.fields_filter_index[myfields[i].value].i_from;
 									var j_to = table_conf.view.fields_filter_index[myfields[i].value].i_to;
@@ -2172,21 +2169,29 @@ var htmldom = (function () {
 
 									for (var j = j_from; j < j_to; j++) {
 										//insert a checkbox entry
-										tr = table.insertRow(-1);
+										tr = inner_divtab.firstChild.insertRow(-1);
 										tr.innerHTML = _checkbox_value(myfields[i],arr_check_values[j]).outerHTML;
 									}
-									tr = table.insertRow(-1);
+									tr = inner_divtab.firstChild.insertRow(-1);
 									tr.innerHTML = _filter_vals_pages_nav(j_from,j_to,arr_check_values.length,myfields[i]).outerHTML;
+
+									tab_arr.push(divtab);
+									tab_arr.push(inner_divtab);
 							}else {
 								//dropdown is closed
 								var tr = table.rows[table.rows.length -1];
 								tr.innerHTML = _field_filter_dropdown(myfields[i], href_string, true).outerHTML;
+
+								tab_arr.push(divtab);
 							}
-						}
+					}
 				}
 
 				filter_values_container.innerHTML = "";
-				filter_values_container.appendChild(table);
+				for (var i = 0; i < tab_arr.length; i++) {
+					filter_values_container.appendChild(tab_arr[i]);
+				}
+				//filter_values_container.appendChild(table);
 
 				__update_checkboxes();
 
@@ -2206,6 +2211,16 @@ var htmldom = (function () {
 							}
 						}
 					}
+				}
+				function __create_inner_tab_container(class_val){
+					// create dynamic table
+					var table = document.createElement("table");
+					table.className = "table filter-values-tab";
+
+					var divtab = document.createElement("div");
+					divtab.className = class_val;
+					divtab.appendChild(table);
+					return divtab;
 				}
 		}
 	}
@@ -2358,7 +2373,7 @@ var htmldom = (function () {
 			}
 	}
 
-	function update_tab_entry_field(table_field_key, entry_data_key, entry_data_field, new_val){
+	function update_tab_entry_field(table_field_key, entry_data_key, entry_data_field, obj_val){
 
 		var tab_res = document.getElementById("tab_res");
 		var tr_index = _get_index_of_tr(tab_res, table_field_key, entry_data_key);
@@ -2367,7 +2382,7 @@ var htmldom = (function () {
 			for (var j = 0; j < tab_res.rows[tr_index].cells.length; j++) {
 				var mycell = tab_res.rows[tr_index].cells[j];
 				if (mycell.getAttribute("field") == entry_data_field) {
-					var cell_inner = _cell_inner_str(new_val, entry_data_field);
+					var cell_inner = _cell_inner_str(obj_val, entry_data_field);
 					mycell.setAttribute("value", cell_inner.str_value);
 					mycell.innerHTML = cell_inner.str_html;
 				}
