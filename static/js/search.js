@@ -304,7 +304,6 @@ var search = (function () {
 		function _call_ts(rule_category, rules, rule_index, sparql_query, query_text=null, query_label=null, callbk_fun=null){
 			//use this url to contact the sparql_endpoint triple store
 			var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
-			//console.log(sparql_query)
 
 			//reset all doms
 			htmldom.reset_html_structure();
@@ -327,15 +326,17 @@ var search = (function () {
 								//console.log(JSON.parse(JSON.stringify(res_data)));
 
 								if ((rule_index >= rules.length -1) || (res_data.results.bindings.length > 0)) {
+									sparql_results = res_data;
 									//I have only 1 rule
 									cat_conf = rule_category;
-									//util.printobj(cat_conf);
+
+									//in this case don't build the table directly 
 									if (callbk_fun != null) {
-					 				 Reflect.apply(callbk_fun,undefined,[sparql_query_add,JSON.parse(JSON.stringify(res_data))]);
+									 //look at the rule name
+					 				 Reflect.apply(callbk_fun,undefined,[query_text, JSON.parse(JSON.stringify(res_data))]);
+									 return JSON.parse(JSON.stringify(res_data));
 					 			 	}
 									build_table(res_data);
-									sparql_results = res_data;
-
 
 								}else {
 										var sparql_query = _build_sparql_query(rules[rule_index+1], query_text);
@@ -408,7 +409,7 @@ var search = (function () {
 											query_comp.bcs
 										);
 					var r_cat = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[_get_rule_by_name(query_comp.rules[0]).category])];
-					_call_ts(r_cat, [], 0, sparql_query, null, null, callbk_fun);
+					_call_ts(r_cat, [], 0, sparql_query, qtext, null, callbk_fun);
 				}
 			 }else {
 					var val_adv = util.get_obj_key_val(search_conf_json,"advanced_search");
