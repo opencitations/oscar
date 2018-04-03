@@ -330,7 +330,7 @@ var search = (function () {
 									//I have only 1 rule
 									cat_conf = rule_category;
 
-									//in this case don't build the table directly 
+									//in this case don't build the table directly
 									if (callbk_fun != null) {
 									 //look at the rule name
 					 				 Reflect.apply(callbk_fun,undefined,[query_text, JSON.parse(JSON.stringify(res_data))]);
@@ -388,6 +388,7 @@ var search = (function () {
 
 			//modify config file
 			search_conf_json = util.update_obj(search_conf_json, config_mod);
+			util.printobj(search_conf_json);
 
 			if (query_comp.values.length != 0) {
 				if (query_comp.rules.length == 0) {
@@ -1269,10 +1270,19 @@ var util = (function () {
 		function _update_key(obj,arrkeys, value){
 			var key = arrkeys[0];
 			if (obj[key] == undefined){
-				obj[key] = value;
+				if (value != "REMOVE_ENTRY") {
+					obj[key] = value;
+				}
 			}else {
 				if (arrkeys.length == 1) {
-					obj[key] = value;
+					console.log(value);
+					switch (value) {
+						case "REMOVE_ENTRY":
+							delete obj[key];
+							break;
+						default:
+							obj[key] = value;
+					}
 				}else {
 					_update_key(obj[key],arrkeys.splice(1, arrkeys.length),value);
 				}
