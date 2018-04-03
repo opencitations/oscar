@@ -1269,16 +1269,36 @@ var util = (function () {
 
 		function _update_key(obj,arrkeys, value){
 			var key = arrkeys[0];
+
+			var reg = /\[\[(.+?)\]\]/g;
+			if (match = reg.exec(key)) {
+				//search for it
+				 var inner_regex = match[1];
+				 var innerreg = /(.+?),(.+)/g;
+				 if (innermatch = innerreg.exec(inner_regex)) {
+					 var innerfield = innermatch[1];
+					 var innervalue = innermatch[2];
+					 var innerindex = util.index_in_arrjsons(obj,[innerfield],[innervalue]);
+					 util.printobj(obj);
+					 if (innerindex != -1) {
+						 key = innerindex;
+					 }
+				 }
+			}
+
 			if (obj[key] == undefined){
 				if (value != "REMOVE_ENTRY") {
 					obj[key] = value;
 				}
 			}else {
 				if (arrkeys.length == 1) {
-					console.log(value);
 					switch (value) {
 						case "REMOVE_ENTRY":
-							delete obj[key];
+							if(Array.isArray(obj)){
+								obj.splice(key, 1);
+							}else {
+								delete obj[key];
+							}
 							break;
 						default:
 							obj[key] = value;
