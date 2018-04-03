@@ -222,9 +222,9 @@ var search_conf = {
         {"value":"year", "title": "Year", "column_width":"8%","type": "int", "filter":{"type_sort": "int", "min": 150, "sort": "value", "order": "desc"}, "sort":{"value": true} },
         {"value":"title", "title": "Title","column_width":"30%","type": "text", "sort":{"value": true}, "link":{"field":"browser_iri","prefix":""}},
         {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 150, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}},
-        {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": true}},
+        {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": true}}
         //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
-        {"value": "ext_data.crossref4doi.message.publisher", "title": "Publisher", "column_width":"13%", "type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 150, "sort": "label", "order": "asc"}, "link":{"field":"browser_iri","prefix":""}}
+        //,{"value": "ext_data.crossref4doi.message.publisher", "title": "Publisher", "column_width":"13%", "type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 150, "sort": "label", "order": "asc"}, "link":{"field":"browser_iri","prefix":""}}
       ],
       "group_by": {"keys":["iri"], "concats":["author"]},
       "ext_data": {
