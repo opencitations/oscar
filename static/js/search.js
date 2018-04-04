@@ -569,16 +569,13 @@ var search = (function () {
 			//-- init my default sort
 			for (var i = 0; i < fields.length; i++) {
 
-				if (! util.is_undefined_key(fields[i], "sort.default")) {
-						var sort_def = fields[i].sort.default;
+				if (! util.is_undefined_key(fields[i], "sort.default.order")) {
 						table_conf.view.sort.field = fields[i].value;
-						table_conf.view.sort.order = "desc";
-						if (sort_def.order != undefined) {
-							table_conf.view.sort.order = sort_def.order;
-						}
+						table_conf.view.sort.order = fields[i].sort.default.order;
 						table_conf.view.sort.type = fields[i].type;
 				}
 			}
+			console.log(table_conf.view.sort.field,table_conf.view.sort.order,table_conf.view.sort.type)
 
 		}
 		/*map the fields with their corresponding links*/
@@ -1950,7 +1947,7 @@ var htmldom = (function () {
 				if ((arr_options[i].value == def_value)
 					&& (arr_options[i].order == def_order)
 					&& (arr_options[i].type == def_type)) {
-						str_selected = "selected";
+						str_selected = "selected='selected'";
 						default_field = true;
 				}
 				var str_option = "<option "+str_selected+" value="+arr_options[i].value+" type="+arr_options[i].type+" order="+arr_options[i].order+">"+arr_options[i].text+"</option>";
@@ -1958,7 +1955,8 @@ var htmldom = (function () {
 				options_html= options_html + str_option;
 			}
 
-			if (!default_field) {str_selected = "selected";}
+			str_selected = "";
+			if (!default_field) {str_selected = "selected='selected'";}
 			var str_option = "<option "+str_selected+" value='none' type='none' order='none'>"+"None"+"</option>";
 			options_html= options_html + str_option;
 
