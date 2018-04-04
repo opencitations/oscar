@@ -388,7 +388,7 @@ var search = (function () {
 
 			//modify config file
 			search_conf_json = util.update_obj(search_conf_json, config_mod);
-			util.printobj(search_conf_json);
+			//util.printobj(search_conf_json);
 
 			if (query_comp.values.length != 0) {
 				if (query_comp.rules.length == 0) {
@@ -1279,7 +1279,7 @@ var util = (function () {
 					 var innerfield = innermatch[1];
 					 var innervalue = innermatch[2];
 					 var innerindex = util.index_in_arrjsons(obj,[innerfield],[innervalue]);
-					 util.printobj(obj);
+					 //util.printobj(obj);
 					 if (innerindex != -1) {
 						 key = innerindex;
 					 }
