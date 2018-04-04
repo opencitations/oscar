@@ -575,8 +575,6 @@ var search = (function () {
 						table_conf.view.sort.type = fields[i].type;
 				}
 			}
-			console.log(table_conf.view.sort.field,table_conf.view.sort.order,table_conf.view.sort.type)
-
 		}
 		/*map the fields with their corresponding links*/
 		function _init_uris(data){
