@@ -267,6 +267,7 @@ var search_conf = {
   ],
 
 "page_limit": [5,10,15,20,30,40,50],
+"page_limit_def": 15,
 "def_results_limit": 1,
 "search_base_path": "search",
 "advanced_search": true,
