@@ -182,12 +182,13 @@ var search_conf = {
       "name": "document",
       "label": "Document",
       "macro_query": [
-        "SELECT DISTINCT ?iri ?short_iri ?browser_iri ?doi ?title ?year ?author ?author_lbl ?author_iri ?author_browser_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "SELECT DISTINCT ?iri ?short_iri ?short_iri_id ?browser_iri ?doi ?title ?year ?author ?author_lbl ?author_iri ?author_browser_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
             "WHERE  {",
               "[[RULE]]",
               "OPTIONAL {",
                 "?iri rdf:type ?type .",
                 "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
+                "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/br/', '', 'i') as ?short_iri_id) .",
                 "BIND(REPLACE(STR(?iri), '/corpus/', '/browser/', 'i') as ?browser_iri) .",
                 "OPTIONAL {?iri dcterms:title  ?title .}",
                 "OPTIONAL {?iri fabio:hasSubtitle  ?subtitle .}",
@@ -213,16 +214,16 @@ var search_conf = {
                      "BIND(CONCAT(STR(?fname),', ', STR(?name)) as ?author_lbl) .",
                "}",
               "}",
-            "}GROUP BY ?iri ?short_iri ?browser_iri ?doi ?title ?year ?score ?author ?author_lbl ?author_iri ?author_browser_iri ",
+            "}GROUP BY ?iri ?short_iri ?short_iri_id ?browser_iri ?doi ?title ?year ?score ?author ?author_lbl ?author_iri ?author_browser_iri ",
             //"ORDER BY DESC(?score) ",
             "LIMIT 2000"
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"browser_iri","prefix":""}},
-        {"value":"year", "title": "Year", "column_width":"8%","type": "int", "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}, "sort":{"value": true} },
-        {"value":"title", "title": "Title","column_width":"30%","type": "text", "sort":{"value": true}, "link":{"field":"browser_iri","prefix":""}},
-        {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 10000, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}},
-        {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": true}}
+        {"iskey": true, "value":"short_iri", "label":{"field":"short_iri_id"}, "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": "short_iri.label", "type":"int"}, "link":{"field":"browser_iri","prefix":""}},
+        {"value":"year", "title": "Year", "column_width":"8%","type": "int", "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}, "sort":{"value": "year", "type":"int"} },
+        {"value":"title", "title": "Title","column_width":"30%","type": "text", "sort":{"value": "title", "type":"text"}, "link":{"field":"browser_iri","prefix":""}},
+        {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": "author", "type":"text"}, "filter":{"type_sort": "text", "min": 10000, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}},
+        {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": "in_cits", "type":"int"}}
         //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
         //,{"value": "ext_data.crossref4doi.message.publisher", "title": "Publisher", "column_width":"13%", "type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 150, "sort": "label", "order": "asc"}, "link":{"field":"browser_iri","prefix":""}}
       ],

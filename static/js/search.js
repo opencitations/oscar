@@ -570,9 +570,9 @@ var search = (function () {
 			for (var i = 0; i < fields.length; i++) {
 
 				if (! util.is_undefined_key(fields[i], "sort.default.order")) {
-						table_conf.view.sort.field = fields[i].value;
+						table_conf.view.sort.field = fields[i].sort.value;
 						table_conf.view.sort.order = fields[i].sort.default.order;
-						table_conf.view.sort.type = fields[i].type;
+						table_conf.view.sort.type = fields[i].sort.type;
 				}
 			}
 		}
@@ -750,20 +750,23 @@ var search = (function () {
 				var index = util.index_in_arrjsons(myfields,["value"],[table_conf.data.head.vars[i]]);
 				if (index != -1) {
 					if(! util.is_undefined_key(myfields[index],"sort.value")){
-						if(myfields[index].sort.value == true){
+
+							var inner_field = myfields[index].sort.value;
+							var inner_field_type = myfields[index].sort.type;
+
 							var str_html = myfields[index].value;
 							if(myfields[index].title != undefined){str_html = myfields[index].title; }
-							arr_options.push({"value": myfields[index].value, "type": myfields[index].type, "order": "asc", "text":str_html+" &#8593;" });
-							arr_options.push({"value": myfields[index].value, "type": myfields[index].type, "order": "desc", "text":str_html+" &#8595;"});
+
+							arr_options.push({"value": inner_field, "type": inner_field_type, "order": "asc", "text":str_html+" &#8593;" });
+							arr_options.push({"value": inner_field, "type": inner_field_type, "order": "desc", "text":str_html+" &#8595;"});
 
 							if(! util.is_undefined_key(myfields[index],"sort.default.order")){
 							//if (myfields[index].sort.default.order != undefined) {
-								table_conf.view.sort.field = myfields[index].value;
+								table_conf.view.sort.field = myfields[index].sort.value;
 								table_conf.view.sort.order = myfields[index].sort.default.order;
-								table_conf.view.sort.type = myfields[index].type;
+								table_conf.view.sort.type = myfields[index].sort.type;
 							}
 						}
-					}
 				}
 			}
 
@@ -960,6 +963,14 @@ var search = (function () {
 
 			function _sort_tabdata(arr_obj,field,order,val_type){
 				var field_val = ".value";
+
+				if (field != null) {
+					var field_parts = field.split(".")
+					if (field_parts.length > 1) {
+						field_val = "";
+					}
+				}
+
 				var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
 
 				if (! util.is_undefined_key(search_conf_json.categories[index_category],"group_by.concats")) {
@@ -1155,6 +1166,7 @@ var search = (function () {
 			);
 		}
 		function check_sort_opt(option){
+			//console.log(option.getAttribute("value"),option.getAttribute("order"),option.getAttribute("type"));
 			_exec_operation(
 				"sort_results",
 				{
