@@ -237,9 +237,10 @@ var search_conf = {
       "name": "author",
       "label": "Author",
       "macro_query": [
-        "SELECT ?author_iri ?author_browser_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
+        "SELECT ?author_iri ?author_browser_iri ?short_iri ?short_iri_id ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
             "[[RULE]]",
             "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
+            "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus/ra/', '', 'i') as ?short_iri_id) .",
             "BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .",
             "OPTIONAL {?author_iri datacite:hasIdentifier[",
                       "datacite:usesIdentifierScheme datacite:orcid ;",
@@ -256,11 +257,11 @@ var search_conf = {
                   "?role pro:isHeldBy ?author_iri .",
                   "?doc pro:isDocumentContextFor ?role.",
              "}",
-        "}GROUP BY ?author_iri ?author_browser_iri ?short_iri ?orcid ?author"
+        "}GROUP BY ?author_iri ?author_browser_iri ?short_iri ?short_iri_id ?orcid ?author"
       ],
       "fields": [
-        {"value":"short_iri", "title": "Corpus ID","column_width":"25%", "type": "text", "link":{"field":"author_browser_iri","prefix":""}},
-        {"value":"author", "title": "Author","column_width":"35%", "type": "text","filter":{"type_sort": "text", "min": 10000, "sort": "value", "order": "desc"}, "sort": {"value": true, "default": {"order": "desc"}}},
+        {"value":"short_iri", "title": "Corpus ID", "label":{"field":"short_iri_id"}, "column_width":"25%", "type": "text", "sort":{"value": "short_iri.label", "type":"int"}, "link":{"field":"author_browser_iri","prefix":""}},
+        {"value":"author", "title": "Author","column_width":"35%", "type": "text","filter":{"type_sort": "text", "min": 10000, "sort": "value", "order": "desc"}, "sort": {"value": "author", "type":"text", "default": {"order": "desc"}}},
         {"value":"orcid", "title": "ORCID","column_width":"25%", "type": "text", "link":{"field":"orcid","prefix":"https://orcid.org/"}},
         {"value":"num_docs", "title": "Works","column_width":"15%", "type": "int"}
       ]
