@@ -364,11 +364,45 @@ var search = (function () {
 			_build_header_sec();
 			_sort_results();
 			htmldom.update_res_table(table_conf,search_conf_json);
+			return {
+				"table_conf": JSON.parse(JSON.stringify(table_conf)),
+				"cat_conf": JSON.parse(JSON.stringify(cat_conf)),
+				"search_conf_json": JSON.parse(JSON.stringify(search_conf_json))
+			};
+		}
+
+		function change_search_data(all_data){
+			table_conf = JSON.parse(JSON.stringify(all_data.table_conf));
+			cat_conf = JSON.parse(JSON.stringify(all_data.cat_conf));
+			search_conf_json = JSON.parse(JSON.stringify(all_data.search_conf_json));
+			//htmldom.update_res_table(table_conf,search_conf_json);
+			//__update_interface();
+			if (table_conf.data != null) {
+				_exec_operation();
+			}
+		}
+
+		function get_search_data(native = false, config_mod = null) {
+			var my_search_conf_json = JSON.parse(JSON.stringify(search_conf_json));
+
+			if (native) {
+				my_search_conf_json = search_conf;
+				if (config_mod != null) {
+					my_search_conf_json = util.update_obj(my_search_conf_json, config_mod);
+				}
+			}
+
+
+			return {
+				"table_conf": JSON.parse(JSON.stringify(table_conf)),
+				"cat_conf": JSON.parse(JSON.stringify(cat_conf)),
+				"search_conf_json": my_search_conf_json
+			};
 		}
 
 		/*THE MAIN FUNCTION CALL
 		call the sparql endpoint and do the query 'qtext'*/
-		function do_sparql_query(qtext, config_mod = null, async_bool= true, callbk_fun= null){
+		function do_sparql_query(qtext, alternative_conf = null , config_mod = null, async_bool= true, callbk_fun= null){
 
 			var query_comp =  _decode_uri_query_components(qtext);
 			console.log("This query is composed by:");
@@ -378,7 +412,10 @@ var search = (function () {
 
 			//initialize and get the search_config_json
 			search_conf_json = search_conf;
-			//console.log(search_conf_json);
+			if (alternative_conf != null) {
+				search_conf_json = alternative_conf;
+			}
+			//util.printobj(search_conf_json);
 
 			//sync or async
 			async_call = async_bool;
@@ -760,12 +797,14 @@ var search = (function () {
 							arr_options.push({"value": inner_field, "type": inner_field_type, "order": "asc", "text":str_html+" &#8593;" });
 							arr_options.push({"value": inner_field, "type": inner_field_type, "order": "desc", "text":str_html+" &#8595;"});
 
+							/*
 							if(! util.is_undefined_key(myfields[index],"sort.default.order")){
 							//if (myfields[index].sort.default.order != undefined) {
 								table_conf.view.sort.field = myfields[index].sort.value;
 								table_conf.view.sort.order = myfields[index].sort.default.order;
 								table_conf.view.sort.type = myfields[index].sort.type;
 							}
+							*/
 						}
 				}
 			}
@@ -840,7 +879,8 @@ var search = (function () {
 							htmldom.filter_checkboxes(table_conf);
 							table_conf.view.page = 0;
 							_reset_filters_page();
-							break;
+							_build_header_sec();
+							//break;
 						case "filter":
 							var checked_filters_arr = null;
 							if (operation == "showonly_exclude") {
@@ -1261,6 +1301,8 @@ var search = (function () {
 				build_table: build_table,
 				do_sparql_query: do_sparql_query,
 				build_adv_sparql_query: build_adv_sparql_query,
+				change_search_data: change_search_data,
+				get_search_data: get_search_data,
 
 				//others
 				callbk_update_data_entry_val: callbk_update_data_entry_val
@@ -2476,6 +2518,9 @@ var htmldom = (function () {
 	/*creates the export button*/
 	function build_export_btn(){
 		if (export_container != null) {
+			if (export_container.firstChild != null) {
+				return 1;
+			}
 			var link = document.createElement("a");
 			link.id = "export_a";
 			link.className = "search-a export-results";
@@ -2483,6 +2528,7 @@ var htmldom = (function () {
 			link.setAttribute("href", "javascript:search.export_results();");
 
 			export_container.appendChild(link);
+			return 1;
 			//header_container.appendChild(link);
 		}
 	}
