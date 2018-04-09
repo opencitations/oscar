@@ -2071,8 +2071,11 @@ var htmldom = (function () {
 		document.getElementById("add_rule_btn").onclick = function(){htmldom.add_adv_rule(arr_rules, adv_cat_selected)};
 		return str_html;
 
-		function __build_cat_menu(arr_categories, arr_rules, adv_cat_selected){
+		function __build_cat_menu(arr_categories, arr_rules, adv_cat_selected, build_for_one_cat = false){
 			var str_lis = "";
+			if ((!build_for_one_cat) && (arr_categories.length <= 1)) {
+				return str_lis;
+			}
 			for (var i = 0; i < arr_categories.length; i++) {
 				var is_active = "";
 				if (arr_categories[i].name == adv_cat_selected) {

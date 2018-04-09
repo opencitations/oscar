@@ -1,5 +1,6 @@
 var search_conf = {
-"sparql_endpoint": "http://localhost:8080/sparql",
+//"sparql_endpoint": "http://localhost:8080/sparql",
+"sparql_endpoint": "http://localhost:9999/blazegraph/sparql",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},
     {"prefix":"dcterms","iri":"http://purl.org/dc/terms/"},
@@ -52,7 +53,7 @@ var search_conf = {
       "regex":"",
       "query": [
             "{",
-            "?iri cito:Citation '[[VAR]]' .",
+            "BIND(<https://w3id.org/oc/index/coci/ci/[[VAR]]> as ?iri) .",
             "}"
       ]
     },
@@ -63,7 +64,7 @@ var search_conf = {
       "name": "citation",
       "label": "Citation",
       "macro_query": [
-        "SELECT DISTINCT ?iri ?oci ?citing_doi ?cited_doi ?creationdate ?timespan",
+        "SELECT DISTINCT ?iri ?citing_doi ?cited_doi ?creationdate ?timespan",
             "WHERE  {",
               "[[RULE]]",
               "OPTIONAL {",
@@ -77,21 +78,22 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
+        {"iskey": true, "value":"iri", "title": "COCI IRI","column_width":"15%", "type": "text", "sort":{"value": "iri", "type":"text"}, "link":{"field":"iri","prefix":""}}
       ]
     },
   ],
 
 "page_limit": [5,10,15,20,30,40,50],
 "def_results_limit": 1,
-"search_base_path": "search",
+"search_base_path": "coci.html",
 "advanced_search": true,
-"def_adv_category": "document",
+"def_adv_category": "citation",
 
 "progress_loader":{
           "visible": true,
-          "title":"Searching the OpenCitations Corpus ...",
+          "title":"Searching the COCI Corpus ...",
           "subtitle":"Be patient - this search might take several seconds!",
-          "abort":{"title":"Abort Search","href_link":"/search"}
+          "abort":{"title":"Abort Search","href_link":"coci.html"}
         }
 }
 
