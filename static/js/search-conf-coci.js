@@ -19,6 +19,7 @@ var search_conf = {
     {
       "name":"citingdoi",
       "label": "Citing DOI",
+      "placeholder": "IN DOI",
       "advanced": true,
       "freetext": false,
       "heuristics": [[lower_case]],
@@ -33,6 +34,7 @@ var search_conf = {
     {
       "name":"citeddoi",
       "label": "Cited DOI",
+      "placeholder": "Out DOI",
       "advanced": true,
       "freetext": false,
       "heuristics": [[lower_case]],

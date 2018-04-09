@@ -1904,19 +1904,42 @@ var htmldom = (function () {
 	/*creates an advanced rule-entry, without the boolean connector box*/
 	function _build_rule_entry(entryid, arr_rules, adv_cat_selected){
 		var str_options = _build_rules_options(arr_rules, adv_cat_selected);
+
+		var first_placeholder = "";
+		if (arr_rules.length > 0) {
+			first_placeholder = arr_rules[0].placeholder;
+			if (first_placeholder == undefined) {
+				first_placeholder = "";
+			}
+		}
+
+		var param0 = "adv_input_box_"+entryid;
+		var param1 = "rules_selector_"+entryid;
+		var onchange_rule = "javascript:htmldom.adv_placeholder('"+param0+"','"+param1+"')";
+
 		var str_html= ""+
 			"<div class='adv-search-entry'>"+
 				"<div class='adv-search-input search-box'>"+
-						"<input entryid="+entryid+" id='adv_input_box_"+entryid+"' class='form-control theme-color' placeholder='' type='text' name='text'>"+
+						"<input entryid="+entryid+" id='adv_input_box_"+entryid+"' class='form-control theme-color' placeholder='"+first_placeholder+"' type='text' name='text'>"+
 				"</div>"+
 				"<div class='adv-search-selector'>"+
-					"<select type='text' name='rule' entryid="+entryid+" class='form-control input custom' onchange='' id='rules_selector_"+entryid+"'>"+
+					"<select type='text' name='rule' entryid="+entryid+" class='form-control input custom' onchange="+onchange_rule+" id='rules_selector_"+entryid+"'>"+
 					str_options+
 					"</select>"+
 				"</div>"+
 			"</div>"+
 		"";
 		return str_html;
+	}
+	function adv_placeholder(inputbox_id, select_id) {
+		console.log(inputbox_id);
+		console.log(select_id);
+
+		var e = document.getElementById(select_id);
+		var selected_opt_placeholder = e.options[e.selectedIndex].getAttribute("my_placeholder");
+		console.log(selected_opt_placeholder);
+
+		document.getElementById(inputbox_id).setAttribute('placeholder',selected_opt_placeholder);
 	}
 	/*creates an options selector dom for the rule names*/
 	function _build_rules_options(arr_rules, adv_cat_selected){
@@ -1927,7 +1950,9 @@ var htmldom = (function () {
 				if (arr_rules[i].category == adv_cat_selected){
 					if (!util.is_undefined_key(arr_rules[i], "advanced")) {
 						if (arr_rules[i].advanced == true) {
-								str_option = "<option "+str_selected+" value="+arr_rules[i].name+">"+arr_rules[i].label+"</option>";
+								var my_placeholder = arr_rules[i].placeholder;
+								if (my_placeholder == undefined) { my_placeholder = "";}
+								str_option = "<option "+str_selected+" value="+arr_rules[i].name+" my_placeholder='"+my_placeholder+"'>"+arr_rules[i].label+"</option>";
 						}
 					}
 				}
@@ -2592,6 +2617,7 @@ var htmldom = (function () {
 		add_adv_rule: add_adv_rule,
 		remove_adv_rule: remove_adv_rule,
 		reset_html_structure:reset_html_structure,
-		download_results: download_results
+		download_results: download_results,
+		adv_placeholder: adv_placeholder
 	}
 })();
