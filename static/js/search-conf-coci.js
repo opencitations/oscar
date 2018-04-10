@@ -1,6 +1,6 @@
 var search_conf = {
 //"sparql_endpoint": "http://localhost:8080/sparql",
-"sparql_endpoint": "http://localhost:9999/blazegraph/sparql",
+"sparql_endpoint": "http://localhost:8080/sparql/coci",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},
     {"prefix":"dcterms","iri":"http://purl.org/dc/terms/"},
@@ -18,8 +18,8 @@ var search_conf = {
 "rules":  [
     {
       "name":"citingdoi",
-      "label": "Citing DOI",
-      "placeholder": "IN DOI",
+      "label": "References",
+      "placeholder": "DOI",
       "advanced": true,
       "freetext": false,
       "heuristics": [[lower_case]],
@@ -33,8 +33,8 @@ var search_conf = {
     },
     {
       "name":"citeddoi",
-      "label": "Cited DOI",
-      "placeholder": "Out DOI",
+      "label": "Citations",
+      "placeholder": "DOI",
       "advanced": true,
       "freetext": false,
       "heuristics": [[lower_case]],
@@ -48,11 +48,12 @@ var search_conf = {
     },
     {
       "name":"oci",
-      "label": "OCI Identifier",
+      "label": "Citation resource",
+      "placeholder": "OCI Identifier",
       "advanced": true,
       "freetext": false,
       "category": "citation",
-      "regex":"",
+      "regex":"(\\d{1,}-\\d{1,})",
       "query": [
             "{",
             "BIND(<https://w3id.org/oc/index/coci/ci/[[VAR]]> as ?iri) .",
@@ -66,12 +67,15 @@ var search_conf = {
       "name": "citation",
       "label": "Citation",
       "macro_query": [
-        "SELECT DISTINCT ?iri ?citing_doi ?cited_doi ?creationdate ?timespan",
+        "SELECT DISTINCT ?iri ?short_iri ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan",
             "WHERE  {",
               "[[RULE]]",
               "OPTIONAL {",
-                "?iri cito:hasCitingEntity ?citing_doi .",
-                "?iri cito:hasCitedEntity ?cited_doi .",
+                "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/index/coci/ci/', '', 'i') as ?short_iri) .",
+                "?iri cito:hasCitingEntity ?citing_doi_iri .",
+                "BIND(REPLACE(STR(?citing_doi_iri), 'http://dx.doi.org/', '', 'i') as ?citing_doi) .",
+                "?iri cito:hasCitedEntity ?cited_doi_iri .",
+                "BIND(REPLACE(STR(?cited_doi_iri), 'http://dx.doi.org/', '', 'i') as ?cited_doi) .",
                 "?iri cito:hasCitationCreationDate ?creationdate .",
                 "?iri cito:hasCitationTimeSpan ?timespan .",
               "}",
@@ -80,7 +84,11 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
-        {"iskey": true, "value":"iri", "title": "COCI IRI","column_width":"15%", "type": "text", "sort":{"value": "iri", "type":"text"}, "link":{"field":"iri","prefix":""}}
+        {"iskey": true, "value":"short_iri", "title": "COCI IRI","column_width":"25%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"value":"citing_doi", "title": "Citing DOI", "column_width":"15%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
+        {"value":"cited_doi", "title": "Cited DOI", "column_width":"15%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
+        {"value":"creationdate", "title": "Creation", "column_width":"10%", "type": "text", "sort":{"value": "creationdate", "type":"text"}},
+        {"value":"timespan", "title": "Timespan", "column_width":"8%", "type": "text", "sort":{"value": "timespan", "type":"text"}}
       ]
     },
   ],
