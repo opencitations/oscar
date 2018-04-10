@@ -67,11 +67,12 @@ var search_conf = {
       "name": "citation",
       "label": "Citation",
       "macro_query": [
-        "SELECT DISTINCT ?iri ?short_iri ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan",
+        "SELECT DISTINCT ?iri ?short_iri ?shorter_coci ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan",
             "WHERE  {",
               "[[RULE]]",
               "OPTIONAL {",
                 "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/index/coci/ci/', '', 'i') as ?short_iri) .",
+                //"BIND(CONCAT(SUBSTR(STR(?short_iri), 0, 20), '...') as ?shorter_coci) .",
                 "?iri cito:hasCitingEntity ?citing_doi_iri .",
                 "BIND(REPLACE(STR(?citing_doi_iri), 'http://dx.doi.org/', '', 'i') as ?citing_doi) .",
                 "?iri cito:hasCitedEntity ?cited_doi_iri .",
@@ -84,13 +85,13 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "value_map": [], "title": "COCI IRI","column_width":"12%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
         {"value":"citing_doi", "value_map": [decodeURIStr],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
         {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
         {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
         {"value": "ext_data.cited_doi_citation.reference", "title": "Cited reference", "column_width":"19%", "type": "text"},
         {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"}},
-        {"value":"timespan", "value_map":[timespan_translate], "title": "Timespan", "column_width":"10%", "type": "text", "sort":{"value": "timespan", "type":"text"}}
+        {"value":"timespan", "value_map":[timespan_in_days], "title": "Timespan (days)", "column_width":"13%", "type": "text", "sort":{"value": "timespan", "type":"int"}}
       ],
       "ext_data": {
         //"citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
@@ -161,6 +162,36 @@ function timespan_translate(str) {
 
   return new_str;
 }
+function timespan_in_days(str) {
+  var new_str = "";
+  var years = 0;
+  var months = 0;
+  var days = 0;
+
+  let reg = /(\d{1,})Y/g;
+  let match;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      years = parseInt(match[1]) ;
+    }
+  }
+
+  reg = /(\d{1,})M/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      months = parseInt(match[1]) ;
+    }
+  }
+
+  reg = /(\d{1,})D/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      days = parseInt(match[1]) ;
+    }
+  }
+
+  return String(years * 365 + months * 30 + days);
+}
 function short_version(str, max_chars = 20) {
   var new_str = "";
   for (var i = 0; i < max_chars; i++) {
@@ -228,7 +259,6 @@ function call_crossref_4citation(str_doi, index, async_bool, callbk_func, key_fu
           async: async_bool,
           success: function( res ) {
               var res_obj = {"reference": res};
-              console.log(res_obj);
               var func_param = [];
               func_param.push(index, key_full_name, res_obj, data_field, async_bool);
               Reflect.apply(callbk_func,undefined,func_param);
