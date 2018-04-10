@@ -659,16 +659,18 @@ var search = (function () {
 
 		function _init_val_map(data) {
 			var new_data = data;
-			console.log(new_data);
 
 			for (var i = 0; i < cat_conf.fields.length; i++) {
 				var field_conf_obj = cat_conf.fields[i];
 				if (!util.is_undefined_key(field_conf_obj,"value_map")) {
 					//for all the data apply the mapping
 					for (var j = 0; j < new_data.length; j++) {
-						console.log(field_conf_obj["value_map"],new_data[j][field_conf_obj.value].value);
-						console.log(Reflect.apply(field_conf_obj["value_map"],undefined,[new_data[j][field_conf_obj.value].value]));
-						new_data[j][field_conf_obj.value].value = Reflect.apply(field_conf_obj["value_map"],undefined,[new_data[j][field_conf_obj.value].value]);
+						var result = new_data[j][field_conf_obj.value].value;
+						for (var k = 0; k < field_conf_obj["value_map"].length; k++) {
+							var fname = field_conf_obj["value_map"][k];
+							result = Reflect.apply(fname,undefined,[result]);
+						}
+						new_data[j][field_conf_obj.value].value = result;
 					}
 				}
 			}

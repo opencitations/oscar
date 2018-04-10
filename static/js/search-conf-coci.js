@@ -84,13 +84,13 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "value_map": short_version, "title": "COCI IRI","column_width":"12%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
-        {"value":"citing_doi", "value_map": decodeURIStr,"title": "Citing DOI", "column_width":"15%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
+        {"iskey": true, "value":"short_iri", "value_map": [short_version], "title": "COCI IRI","column_width":"12%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"value":"citing_doi", "value_map": [decodeURIStr],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
         {"value": "ext_data.citing_doi_citation.message.title", "title": "Citing title", "column_width":"19%", "type": "text"},
-        {"value":"cited_doi", "value_map": decodeURIStr, "title": "Cited DOI", "column_width":"15%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
+        {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
         {"value": "ext_data.cited_doi_citation", "title": "Cited reference", "column_width":"19%", "type": "text"},
         {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"}},
-        {"value":"timespan", "value_map":timespan_translate, "title": "Timespan", "column_width":"10%", "type": "text", "sort":{"value": "timespan", "type":"text"}}
+        {"value":"timespan", "value_map":[timespan_translate], "title": "Timespan", "column_width":"10%", "type": "text", "sort":{"value": "timespan", "type":"text"}}
       ],
       "ext_data": {
         "citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
