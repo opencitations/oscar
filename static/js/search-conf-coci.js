@@ -86,14 +86,15 @@ var search_conf = {
       "fields": [
         {"iskey": true, "value":"short_iri", "value_map": [short_version], "title": "COCI IRI","column_width":"12%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
         {"value":"citing_doi", "value_map": [decodeURIStr],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
-        {"value": "ext_data.citing_doi_citation.message.title", "title": "Citing title", "column_width":"19%", "type": "text"},
+        {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
         {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
-        {"value": "ext_data.cited_doi_citation", "title": "Cited reference", "column_width":"19%", "type": "text"},
+        {"value": "ext_data.cited_doi_citation.reference", "title": "Cited reference", "column_width":"19%", "type": "text"},
         {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"}},
         {"value":"timespan", "value_map":[timespan_translate], "title": "Timespan", "column_width":"10%", "type": "text", "sort":{"value": "timespan", "type":"text"}}
       ],
       "ext_data": {
-        "citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
+        //"citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
+        "citing_doi_citation": {"name": call_crossref_4citation, "param": {"fields":["citing_doi"]}, "async": true},
         "cited_doi_citation": {"name": call_crossref_4citation, "param": {"fields":["cited_doi"]}, "async": true}
       },
     },
@@ -213,17 +214,18 @@ function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, d
 //https://citation.crosscite.org/format?doi=10.1145%2F2783446.2783605&style=apa&lang=en-US
 function call_crossref_4citation(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
   var call_crossref_api = "https://citation.crosscite.org/format?doi=";
+  var suffix = "&style=apa&lang=en-US";
 
-  console.log(str_doi);
   if (str_doi != undefined) {
-    var call_url =  call_crossref_api+str_doi;
+    var call_url =  call_crossref_api+str_doi+suffix;
     //var result_data = "...";
     $.ajax({
-          dataType: "json",
           url: call_url,
           type: 'GET',
           async: async_bool,
-          success: function( res_obj ) {
+          success: function( res ) {
+              var res_obj = {"reference": res};
+              console.log(res_obj);
               var func_param = [];
               func_param.push(index, key_full_name, res_obj, data_field, async_bool);
               Reflect.apply(callbk_func,undefined,func_param);
