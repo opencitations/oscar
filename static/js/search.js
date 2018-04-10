@@ -728,9 +728,9 @@ var search = (function () {
 					var func_param_values = func_obj['param']['values'];
 
 					var conf_params = [];
-					for (var j = 0; j < func_param_fields.length; j++) {
+					/*for (var j = 0; j < func_param_fields.length; j++) {
 						conf_params.push(undefined);
-					}
+					}*/
 					for (var j = 0; j < func_param_fields.length; j++) {
 						var p_field = func_param_fields[j];
 						if ( p_field == "FREE-TEXT"){

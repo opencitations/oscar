@@ -94,7 +94,7 @@ var search_conf = {
       ],
       "ext_data": {
         "citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
-        "cited_doi_citation": {"name": get_citation_format, "param": {"fields":["cited_doi"]}, "async": true}
+        "cited_doi_citation": {"name": call_crossref_4citation, "param": {"fields":["cited_doi"]}, "async": true}
       },
     },
   ],
@@ -193,8 +193,30 @@ function get_citation_format(str, index, async_bool, callbk_func, key_full_name,
 function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
   var call_crossref_api = "https://api.crossref.org/works/";
 
+  console.log(str_doi);
   if (str_doi != undefined) {
     var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
+    //var result_data = "...";
+    $.ajax({
+          dataType: "json",
+          url: call_url,
+          type: 'GET',
+          async: async_bool,
+          success: function( res_obj ) {
+              var func_param = [];
+              func_param.push(index, key_full_name, res_obj, data_field, async_bool);
+              Reflect.apply(callbk_func,undefined,func_param);
+          }
+     });
+  }
+}
+//https://citation.crosscite.org/format?doi=10.1145%2F2783446.2783605&style=apa&lang=en-US
+function call_crossref_4citation(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
+  var call_crossref_api = "https://citation.crosscite.org/format?doi=";
+
+  console.log(str_doi);
+  if (str_doi != undefined) {
+    var call_url =  call_crossref_api+str_doi;
     //var result_data = "...";
     $.ajax({
           dataType: "json",
