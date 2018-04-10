@@ -22,12 +22,12 @@ var search_conf = {
       "placeholder": "DOI",
       "advanced": true,
       "freetext": false,
-      "heuristics": [[lower_case]],
+      "heuristics": [[encodeURIStr]],
       "category": "citation",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
             "{",
-            "?iri cito:hasCitingEntity '[[VAR]]' .",
+            "?iri cito:hasCitingEntity <http://dx.doi.org/[[VAR]]> .",
             "}"
       ]
     },
@@ -37,12 +37,12 @@ var search_conf = {
       "placeholder": "DOI",
       "advanced": true,
       "freetext": false,
-      "heuristics": [[lower_case]],
+      "heuristics": [[encodeURIStr]],
       "category": "citation",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
             "{",
-            "?iri cito:hasCitedEntity '[[VAR]]' .",
+            "?iri cito:hasCitedEntity <http://dx.doi.org/[[VAR]]> .",
             "}"
       ]
     },
@@ -84,7 +84,7 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "value_map": [short_version], "title": "COCI IRI","column_width":"12%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"iskey": true, "value":"short_iri", "value_map": [], "title": "COCI IRI","column_width":"12%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
         {"value":"citing_doi", "value_map": [decodeURIStr],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
         {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
         {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
@@ -124,6 +124,9 @@ function capitalize_1st_letter(str){
 }
 function decodeURIStr(str) {
   return decodeURIComponent(str);
+}
+function encodeURIStr(str) {
+  return encodeURIComponent(str);
 }
 function timespan_translate(str) {
   var new_str = "";
