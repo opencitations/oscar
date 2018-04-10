@@ -470,6 +470,11 @@ var search = (function () {
 
 			//Adapt the resulting data
 			// init uri values
+
+			//TODOO function for oscar
+			json_data.results.bindings = _init_val_map(json_data.results.bindings);
+			console.log(json_data.results.bindings);
+
 			json_data.results.bindings = _init_uris(json_data.results.bindings);
 			json_data.results.bindings = _init_lbls(json_data.results.bindings);
 			// group by the rows
@@ -650,6 +655,25 @@ var search = (function () {
 					}
 				}
 				return uri;
+		}
+
+		function _init_val_map(data) {
+			var new_data = data;
+			console.log(new_data);
+
+			for (var i = 0; i < cat_conf.fields.length; i++) {
+				var field_conf_obj = cat_conf.fields[i];
+				if (!util.is_undefined_key(field_conf_obj,"value_map")) {
+					//for all the data apply the mapping
+					for (var j = 0; j < new_data.length; j++) {
+						console.log(field_conf_obj["value_map"],new_data[j][field_conf_obj.value].value);
+						console.log(Reflect.apply(field_conf_obj["value_map"],undefined,[new_data[j][field_conf_obj.value].value]));
+						new_data[j][field_conf_obj.value].value = Reflect.apply(field_conf_obj["value_map"],undefined,[new_data[j][field_conf_obj.value].value]);
+					}
+				}
+			}
+
+ 			return new_data;
 		}
 
 		/*map the fields with their corresponding labels*/
