@@ -84,12 +84,18 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "title": "COCI IRI","column_width":"25%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"iskey": true, "value":"short_iri", "value_map": short_version, "title": "COCI IRI","column_width":"12%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
         {"value":"citing_doi", "value_map": decodeURIStr,"title": "Citing DOI", "column_width":"15%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
+        {"value": "ext_data.citing_doi_citation.message.title", "title": "Citing title", "column_width":"19%", "type": "text"},
         {"value":"cited_doi", "value_map": decodeURIStr, "title": "Cited DOI", "column_width":"15%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
-        {"value":"creationdate", "title": "Creation", "column_width":"10%", "type": "text", "sort":{"value": "creationdate", "type":"text"}},
-        {"value":"timespan", "title": "Timespan", "column_width":"8%", "type": "text", "sort":{"value": "timespan", "type":"text"}}
-      ]
+        {"value": "ext_data.cited_doi_citation", "title": "Cited reference", "column_width":"19%", "type": "text"},
+        {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"}},
+        {"value":"timespan", "value_map":timespan_translate, "title": "Timespan", "column_width":"10%", "type": "text", "sort":{"value": "timespan", "type":"text"}}
+      ],
+      "ext_data": {
+        "citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
+        "cited_doi_citation": {"name": get_citation_format, "param": {"fields":["cited_doi"]}, "async": true}
+      },
     },
   ],
 
@@ -117,4 +123,89 @@ function capitalize_1st_letter(str){
 }
 function decodeURIStr(str) {
   return decodeURIComponent(str);
+}
+function timespan_translate(str) {
+  var new_str = "";
+  var years = 0;
+  var months = 0;
+  var days = 0;
+
+  let reg = /(\d{1,})Y/g;
+  let match;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      years = match[1] ;
+      new_str = new_str + years +" Years "
+    }
+  }
+
+  reg = /(\d{1,})M/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      months = match[1] ;
+      new_str = new_str + months +" Months "
+    }
+  }
+
+  reg = /(\d{1,})D/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      days = match[1] ;
+      new_str = new_str + days +" Days "
+    }
+  }
+
+  return new_str;
+}
+function short_version(str, max_chars = 20) {
+  var new_str = "";
+  for (var i = 0; i < max_chars; i++) {
+    if (str[i] != undefined) {
+      new_str = new_str + str[i];
+    }else {
+      break;
+    }
+  }
+  return new_str+"...";
+}
+function get_citation_format(str, index, async_bool, callbk_func, key_full_name, data_field ){
+  var call_api = "https://doi.org/";
+
+  // Accept: text/x-bibliography; style=apa
+  if (str != undefined) {
+    var call_url =  call_api+ encodeURIComponent(str);
+    //var result_data = "...";
+    $.ajax({
+          dataType: "json",
+          url: call_url,
+          type: 'GET',
+          async: async_bool,
+          headers: {"Accept": "text/x-bibliography", "style":"apa"},
+          success: function( res_obj ) {
+              console.log(res_obj);
+              var func_param = [];
+              func_param.push(index, key_full_name, res_obj, data_field, async_bool);
+              Reflect.apply(callbk_func,undefined,func_param);
+          }
+     });
+  }
+}
+function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
+  var call_crossref_api = "https://api.crossref.org/works/";
+
+  if (str_doi != undefined) {
+    var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
+    //var result_data = "...";
+    $.ajax({
+          dataType: "json",
+          url: call_url,
+          type: 'GET',
+          async: async_bool,
+          success: function( res_obj ) {
+              var func_param = [];
+              func_param.push(index, key_full_name, res_obj, data_field, async_bool);
+              Reflect.apply(callbk_func,undefined,func_param);
+          }
+     });
+  }
 }
