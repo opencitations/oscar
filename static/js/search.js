@@ -5,6 +5,7 @@ var search = (function () {
 		var cat_conf = {};
 		var sparql_results;
 		var sparql_query_add;
+		var ext_data_calls_cache = {};
 		//var cache_data = {};
 		var async_call;
 		var table_conf ={
@@ -554,6 +555,7 @@ var search = (function () {
 
 						table_conf.data.results.bindings[i][key_full_name] = {"value":"", "label":""};
 						var ext_res = _exec_ext_data(
+									key_func_name,
 									func_obj,
 									table_conf.data.results.bindings[i][table_conf.data_key].value,
 									async_val,
@@ -719,10 +721,10 @@ var search = (function () {
  			}
  		}
 		/*retrieve the externa data*/
-		function _exec_ext_data(func_obj, index, async_bool, callbk_func, key_full_name, func_name, data, data_field){
+		function _exec_ext_data(key_func_name, func_obj, index, async_bool, callbk_func, key_full_name, func_name, data, data_field){
 
 					//my func params
-					var func_param = []
+					var func_param = [];
 					var func_param_fields = func_obj['param']['fields'];
 					var func_param_values = func_obj['param']['values'];
 
@@ -741,31 +743,77 @@ var search = (function () {
 						}
 					}
 
-					func_param.push(conf_params);
-					func_param.push(index, async_bool, callbk_func, key_full_name, data_field);
-					var res = Reflect.apply(func_name,undefined,func_param);
+					var ext_key = _build_ext_key(key_func_name,conf_params);
+					if (ext_key in ext_data_calls_cache) {
+						//in case its already in cache
+						func_param.push(index, key_full_name, data_field, async_bool, key_func_name, conf_params);
+
+						if (ext_data_calls_cache[ext_key].value != null) {
+							var res_obj = ext_data_calls_cache[ext_key].value;
+							func_param.push(res_obj);
+							Reflect.apply(callbk_func,undefined,func_param);
+						}else {
+							ext_data_calls_cache[ext_key].waiting_elems.push(func_param);
+						}
+
+					}else {
+						ext_data_calls_cache[ext_key] = {"value":null,"waiting_elems":[]};
+						func_param.push(conf_params);
+						func_param.push(index, async_bool, callbk_func, key_full_name, data_field, key_func_name);
+						var res = Reflect.apply(func_name,undefined,func_param);
+					}
 		}
 
-		function callbk_update_data_entry_val(index_entry, key_full_name, res_obj, data_field, async_bool){
-			var new_val = util.get_obj_key_val(res_obj,data_field);
-			if (new_val == -1) {
-				new_val = "";
+		function _build_ext_key(func_name, conf_params) {
+			var ext_key = func_name+":";
+			for (var i = 0; i < conf_params.length; i++) {
+				if (i == conf_params.length - 1) {
+					ext_key = ext_key + conf_params[i];
+					break;
+				}
+				ext_key = ext_key + conf_params[i] + ",";
+			}
+			return ext_key;
+		}
+
+		function callbk_update_data_entry_val(index_entry, key_full_name, data_field, async_bool, func_name, conf_params, res_obj){
+
+			//update dictionary
+			var ext_key = _build_ext_key(func_name,conf_params);
+			ext_data_calls_cache[ext_key].value = res_obj;
+
+			_update_single_callbk(index_entry, key_full_name, data_field, async_bool, func_name, conf_params, res_obj);
+
+			//call same function for all the waiting elems
+			for (var i = 0; i < ext_data_calls_cache[ext_key].waiting_elems.length; i++) {
+				var new_params = ext_data_calls_cache[ext_key].waiting_elems[i];
+				_update_single_callbk(new_params[0], new_params[1], new_params[2], new_params[3], new_params[4], new_params[5], res_obj);
+				//util.sleep(1000);
+
 			}
 
-			if (async_bool) {
-				//init the data
-				var obj = _update_all_data_entry_field(index_entry, key_full_name, new_val);
-				//visualize it in current table page
-				htmldom.update_tab_entry_field(table_conf.data_key, index_entry, key_full_name, obj);
-
-				//check if it should be a filter field
-				if (util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]) != -1) {
-					_gen_data_checkboxes();
+			function _update_single_callbk(index_entry, key_full_name, data_field, async_bool, func_name, conf_params, res_obj){
+				var new_val = util.get_obj_key_val(res_obj,data_field);
+				if (new_val == -1) {
+					new_val = "";
 				}
 
-			}else {
-				_update_data_type(table_conf.data.results.bindings,index_entry, key_full_name, new_val);
+				if (async_bool) {
+					//init the data
+					var obj = _update_all_data_entry_field(index_entry, key_full_name, new_val);
+					//visualize it in current table page
+					htmldom.update_tab_entry_field(table_conf.data_key, index_entry, key_full_name, obj);
+
+					//check if it should be a filter field
+					if (util.index_in_arrjsons(table_conf.filters.fields, ["value"], [key_full_name]) != -1) {
+						_gen_data_checkboxes();
+					}
+
+				}else {
+					_update_data_type(table_conf.data.results.bindings,index_entry, key_full_name, new_val);
+				}
 			}
+
 			//console.log(table_conf.data.results.bindings);
 			function _update_all_data_entry_field(data_key_val, field, new_val) {
 				var init_obj = {"value": new_val, "label": new_val};
@@ -1337,6 +1385,16 @@ var search = (function () {
 
 var util = (function () {
 
+	function sleep(milliseconds) {
+	  var start = new Date().getTime();
+	  for (var i = 0; i < 1e7; i++) {
+	    if ((new Date().getTime() - start) > milliseconds){
+	      break;
+	    }
+	  }
+	}
+
+
 	/*updates the original obj with new pairs of (key,value) given in an array*/
 	function update_obj(original_obj, arr_new_vals) {
 		if (arr_new_vals != null) {
@@ -1711,6 +1769,7 @@ var util = (function () {
 	}
 
 	return {
+		sleep: sleep,
 		update_obj: update_obj,
 		get_obj_key_val: get_obj_key_val,
 		printobj: printobj,

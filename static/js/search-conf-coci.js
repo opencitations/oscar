@@ -49,7 +49,7 @@ var search_conf = {
     {
       "name":"oci",
       "label": "Citation resource",
-      "placeholder": "OCI Identifier",
+      "placeholder": "OCI",
       "advanced": true,
       "freetext": false,
       "category": "citation",
@@ -203,32 +203,10 @@ function short_version(str, max_chars = 20) {
   }
   return new_str+"...";
 }
-function get_citation_format(str, index, async_bool, callbk_func, key_full_name, data_field ){
-  var call_api = "https://doi.org/";
-
-  // Accept: text/x-bibliography; style=apa
-  if (str != undefined) {
-    var call_url =  call_api+ encodeURIComponent(str);
-    //var result_data = "...";
-    $.ajax({
-          dataType: "json",
-          url: call_url,
-          type: 'GET',
-          async: async_bool,
-          headers: {"Accept": "text/x-bibliography", "style":"apa"},
-          success: function( res_obj ) {
-              console.log(res_obj);
-              var func_param = [];
-              func_param.push(index, key_full_name, res_obj, data_field, async_bool);
-              Reflect.apply(callbk_func,undefined,func_param);
-          }
-     });
-  }
-}
-function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
+function call_crossref(conf_params, index, async_bool, callbk_func, key_full_name, data_field, func_name ){
   var call_crossref_api = "https://api.crossref.org/works/";
 
-  console.log(str_doi);
+  var str_doi = conf_params[0];
   if (str_doi != undefined) {
     var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
     //var result_data = "...";
@@ -239,16 +217,18 @@ function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, d
           async: async_bool,
           success: function( res_obj ) {
               var func_param = [];
-              func_param.push(index, key_full_name, res_obj, data_field, async_bool);
+              func_param.push(index, key_full_name, data_field, async_bool, func_name, conf_params, res_obj);
               Reflect.apply(callbk_func,undefined,func_param);
           }
      });
   }
 }
 //https://citation.crosscite.org/format?doi=10.1145%2F2783446.2783605&style=apa&lang=en-US
-function call_crossref_4citation(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
+function call_crossref_4citation(conf_params, index, async_bool, callbk_func, key_full_name, data_field, func_name ){
   var call_crossref_api = "https://citation.crosscite.org/format?doi=";
   var suffix = "&style=apa&lang=en-US";
+
+  var str_doi = conf_params[0];
 
   if (str_doi != undefined) {
     var call_url =  call_crossref_api+str_doi+suffix;
@@ -260,7 +240,7 @@ function call_crossref_4citation(str_doi, index, async_bool, callbk_func, key_fu
           success: function( res ) {
               var res_obj = {"reference": res};
               var func_param = [];
-              func_param.push(index, key_full_name, res_obj, data_field, async_bool);
+              func_param.push(index, key_full_name, data_field, async_bool, func_name, conf_params, res_obj);
               Reflect.apply(callbk_func,undefined,func_param);
           }
      });
