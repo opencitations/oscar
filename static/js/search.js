@@ -358,6 +358,7 @@ var search = (function () {
 			htmldom.reset_html_structure();
 
 			_init_data(res_data);
+			htmldom.build_extra_elems(cat_conf.extra_elems);
 			_build_filter_sec();
 			_limit_results();
 			_gen_data_checkboxes();
@@ -2164,6 +2165,40 @@ var htmldom = (function () {
 		return str_html;
 	}
 
+	function build_extra_elems(extra_elems){
+		var str_html = "";
+		if (extra_elems == undefined) {
+			return -1;
+		}
+		for (var i = 0; i < extra_elems.length; i++) {
+
+			var elem_type = extra_elems[i].elem_type;
+			var elem_value = extra_elems[i].elem_value;
+			var elem_class = extra_elems[i].elem_class;
+			var elem_innerhtml = extra_elems[i].elem_innerhtml;
+
+			if (elem_type != undefined) {
+				var new_elem = document.createElement(elem_type);
+				if (elem_value != undefined) {
+					new_elem.setAttribute("value",elem_value);
+				}
+				if (elem_class != undefined) {
+					new_elem.setAttribute("class",elem_class);
+				}
+				if (elem_innerhtml != undefined) {
+					new_elem.innerHTML = elem_innerhtml;
+				}
+				if (extra_elems[i].others != undefined) {
+					for (var keyfield in extra_elems[i].others) {
+						new_elem.setAttribute(keyfield,extra_elems[i].others[keyfield]);
+					}
+				}
+				str_html = str_html + new_elem.outerHTML;
+			}
+		}
+		extra_container.innerHTML = str_html;
+	}
+
 	/*creates the advanced search interface*/
 	function build_advanced_search(arr_categories, arr_rules, adv_cat_selected, search_base_path){
 
@@ -2702,6 +2737,7 @@ var htmldom = (function () {
 		page_limit: page_limit,
 		sort_box: sort_box,
 		main_entry: main_entry,
+		build_extra_elems: build_extra_elems,
 		build_advanced_search: build_advanced_search,
 		filter_btns: filter_btns,
 		limit_filter: limit_filter,

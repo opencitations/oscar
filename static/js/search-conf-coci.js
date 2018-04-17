@@ -1,6 +1,6 @@
 var search_conf = {
 //"sparql_endpoint": "http://localhost:8080/sparql",
-"sparql_endpoint": "http://localhost:8080/sparql/coci",
+"sparql_endpoint": "http://localhost:8080/index/coci/sparql",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},
     {"prefix":"dcterms","iri":"http://purl.org/dc/terms/"},
@@ -98,6 +98,11 @@ var search_conf = {
         "citing_doi_citation": {"name": call_crossref_4citation, "param": {"fields":["citing_doi"]}, "async": true},
         "cited_doi_citation": {"name": call_crossref_4citation, "param": {"fields":["cited_doi"]}, "async": true}
       },
+      "extra_elems":[
+        {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Back to search", "others": {"href": "/index/coci/search"}},
+        {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
+        {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
+      ]
     },
   ],
 
