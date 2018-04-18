@@ -108,7 +108,7 @@ var search_conf = {
 
 "page_limit": [5,10,15,20,30,40,50],
 "def_results_limit": 1,
-"search_base_path": "coci.html",
+"search_base_path": "search",
 "advanced_search": true,
 "def_adv_category": "citation",
 
@@ -116,7 +116,7 @@ var search_conf = {
           "visible": true,
           "title":"Searching the COCI Corpus ...",
           "subtitle":"Be patient - this search might take several seconds!",
-          "abort":{"title":"Abort Search","href_link":"coci.html"}
+          "abort":{"title":"Abort Search","href_link":"search"}
         }
 }
 

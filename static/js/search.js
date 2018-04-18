@@ -1079,7 +1079,7 @@ var search = (function () {
 				var field_val = ".value";
 
 				if (field != null) {
-					var field_parts = field.split(".")
+					var field_parts = field.split(".");
 					if (field_parts.length > 1) {
 						field_val = "";
 					}
