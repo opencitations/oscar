@@ -90,8 +90,8 @@ var search_conf = {
         {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
         {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
         {"value": "ext_data.cited_doi_citation.reference", "title": "Cited reference", "column_width":"19%", "type": "text"},
-        {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"}},
-        {"value":"timespan", "value_map":[timespan_in_days], "title": "Timespan (days)", "column_width":"13%", "type": "text", "sort":{"value": "timespan", "type":"int"}}
+        {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"},"filter":{"type_sort": "int", "min": 10000, "sort": "sum", "order": "desc"}},
+        {"value":"timespan", "value_map":[timespan_in_days], "title": "Timespan (days)", "column_width":"13%", "type": "text", "sort":{"value": "timespan", "type":"int"}, "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}}
       ],
       "ext_data": {
         //"citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
