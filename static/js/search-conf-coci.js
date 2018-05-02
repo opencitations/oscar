@@ -107,9 +107,13 @@ var search_conf = {
   ],
 
 "page_limit": [5,10,15,20,30,40,50],
+//the initial default percentage of results number to visualize  1=all, 0.5=half ...
 "def_results_limit": 1,
+//the html page to address the queries on
 "search_base_path": "search",
+//include the advanced search
 "advanced_search": true,
+//the default category to show in the advanced search
 "def_adv_category": "citation",
 
 "progress_loader":{
@@ -133,39 +137,6 @@ function decodeURIStr(str) {
 }
 function encodeURIStr(str) {
   return encodeURIComponent(str);
-}
-function timespan_translate(str) {
-  var new_str = "";
-  var years = 0;
-  var months = 0;
-  var days = 0;
-
-  let reg = /(\d{1,})Y/g;
-  let match;
-  while (match = reg.exec(str)) {
-    if (match.length >= 2) {
-      years = match[1] ;
-      new_str = new_str + years +" Years "
-    }
-  }
-
-  reg = /(\d{1,})M/g;
-  while (match = reg.exec(str)) {
-    if (match.length >= 2) {
-      months = match[1] ;
-      new_str = new_str + months +" Months "
-    }
-  }
-
-  reg = /(\d{1,})D/g;
-  while (match = reg.exec(str)) {
-    if (match.length >= 2) {
-      days = match[1] ;
-      new_str = new_str + days +" Days "
-    }
-  }
-
-  return new_str;
 }
 function timespan_in_days(str) {
   var new_str = "";
