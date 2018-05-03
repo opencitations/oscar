@@ -85,11 +85,49 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
-        {"value":"citing_doi", "value_map": [decodeURIStr],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
-        {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
-        {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
-        {"value": "ext_data.cited_doi_citation.reference", "title": "Cited reference", "column_width":"19%", "type": "text"},
+        {
+          "iskey": true,
+          "value":"short_iri",
+          "value_map": [],
+          "value_text_len": 20,
+          "title": "COCI IRI",
+          "column_width":"10%",
+          "type": "text",
+          "sort":{"value": "short_iri", "type":"text"},
+          "link":{"field":"iri","prefix":""}
+        },
+        {
+          "value":"citing_doi",
+          "value_map": [decodeURIStr],
+          "title": "Citing DOI",
+          "column_width":"12%",
+          "type": "text",
+          "sort":{"value": "citing_doi", "type":"text"},
+          "link":{"field":"citing_doi_iri","prefix":""}
+        },
+        {
+          "value": "ext_data.citing_doi_citation.reference",
+          "title": "Citing reference",
+          //"value_text_len": 80,
+          "column_width":"19%",
+          "type": "text"
+        },
+        {
+          "value":"cited_doi",
+          "value_map": [decodeURIStr],
+          "title": "Cited DOI",
+          "column_width":"12%",
+          "type": "text",
+          "sort":{"value": "cited_doi", "type":"text"},
+          "link":{"field":"cited_doi_iri","prefix":""}
+        },
+        {
+          "value": "ext_data.cited_doi_citation.reference",
+          "title": "Cited reference",
+          //"value_text_len": 80,
+          "column_width":"19%",
+          "type": "text"
+        },
         {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"},"filter":{"type_sort": "int", "min": 10000, "sort": "sum", "order": "desc"}},
         {"value":"timespan", "value_map":[timespan_in_days], "title": "Timespan (days)", "column_width":"13%", "type": "text", "sort":{"value": "timespan", "type":"int"}, "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}}
       ],
