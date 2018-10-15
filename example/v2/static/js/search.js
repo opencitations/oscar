@@ -148,7 +148,7 @@ var search = (function () {
 				for (var i = 0; i < rules.length; i++) {
 					var re = new RegExp(rules[i].regex,'i');
 					var qtext_match = qtext_arr[i].match(re);
-					if (qtext_match.length > 1) {
+					if (qtext_match != null) {
 						qtext_arr[i] = qtext_arr[i].match(re)[0];
 					}else {
 						continue;
@@ -325,11 +325,16 @@ var search = (function () {
 						url: query_contact_tp,
 						type: 'GET',
 						async: async_call,
+						timeout: util.get_obj_key_val(search_conf_json,"timeout.value"),
+						error: function(jqXHR, textStatus, errorThrown) {
+        				if(textStatus==="timeout") {
+									window.location.replace(util.get_obj_key_val(search_conf_json,"timeout.link"));
+        				}
+    				},
 						success: function( res_data ) {
 								if (util.get_obj_key_val(search_conf_json,"progress_loader.visible") == true) {
 									htmldom.loader(false);
 								}
-								//console.log(JSON.parse(JSON.stringify(res_data)));
 
 								if ((rule_index >= rules.length -1) || (res_data.results.bindings.length > 0)) {
 									sparql_results = res_data;
@@ -342,6 +347,7 @@ var search = (function () {
 					 				 Reflect.apply(callbk_fun,undefined,[query_text, JSON.parse(JSON.stringify(res_data))]);
 									 return JSON.parse(JSON.stringify(res_data));
 					 			 	}
+									console.log(res_data);
 									build_table(res_data);
 
 								}else {
@@ -351,7 +357,7 @@ var search = (function () {
 												_call_ts(r_cat, rules, rule_index + 1, sparql_query, query_text, query_text, callbk_fun);
 										}else {
 											//in this case we have no more rules
-											window.location.href(search_conf_json.timeout.link);
+											window.location.replace(search_conf_json.timeout.link);
 										}
 								}
 						}
@@ -1362,7 +1368,7 @@ var search = (function () {
 			htmldom.filter_checkboxes(table_conf);
 		}
 		function switch_adv_category(adv_category){
-			htmldom.build_advanced_search(search_conf_json.categories, search_conf_json.rules, adv_category, search_conf_json.search_base_path);
+			htmldom.build_advanced_search(search_conf_json.categories, search_conf_json.rules, adv_category, search_conf_json.search_base_path, search_conf_json.adv_btn_title);
 		}
 
 		return {
@@ -2266,7 +2272,7 @@ var htmldom = (function () {
 	}
 
 	/*creates the advanced search interface*/
-	function build_advanced_search(arr_categories, arr_rules, adv_cat_selected, search_base_path){
+	function build_advanced_search(arr_categories, arr_rules, adv_cat_selected, search_base_path, adv_btn_title){
 
 		var str_lis = __build_cat_menu(arr_categories, arr_rules, adv_cat_selected);
 		var str_options = _build_rules_options(arr_rules, adv_cat_selected);
@@ -2286,7 +2292,7 @@ var htmldom = (function () {
 									"</div>"+
 									"<div class='adv-search-footer'>"+
 										"<div class='input-group-btn'>"+
-											"<button class='btn btn-default theme-color' id='advsearch_btn'> <span class='search-btn-text'> Search inside OC </span><i class='glyphicon glyphicon-search large-icon'></i></button>"+
+											"<button class='btn btn-default theme-color' id='advsearch_btn'> <span class='search-btn-text'>"+adv_btn_title+"</span><i class='glyphicon glyphicon-search large-icon'></i></button>"+
 											"<button type='button' class='btn btn-default theme-color' id='add_rule_btn'> <span class='add-btn-text'> Add Rule </span><i class='glyphicon glyphicon-plus normal-icon'></i></button>"+
 										"</div>"+
 									"</div>"+
@@ -2569,7 +2575,13 @@ var htmldom = (function () {
 					str_html_subtitle = "<p><div class='searchloader subtitle'>"+subtitle_obj+"</div></p>";
 				}
 
-				var str_html = str_html_title + str_html_subtitle + str_html_abort;
+				var spinner_obj = progress_loader.spinner;
+				var str_html_spinner = "";
+				if ((spinner_obj != undefined) && (spinner_obj == true)){
+					str_html_spinner = "<p><div class='searchloader loader-spinner'></div></p>";
+				}
+
+				var str_html = str_html_title + str_html_subtitle + str_html_spinner + str_html_abort;
 				parser = new DOMParser()
 	  		//var dom = parser.parseFromString(str_html, "text/xml").firstChild;
 				//header_container.appendChild(dom);

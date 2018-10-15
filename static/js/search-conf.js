@@ -271,7 +271,7 @@ var search_conf = {
 "page_limit": [5,10,15,20,30,40,50],
 "page_limit_def": 10,
 "def_results_limit": 1,
-"search_base_path": "search",
+"search_base_path": "wikidata.html",
 "advanced_search": true,
 "def_adv_category": "document",
 
@@ -281,6 +281,11 @@ var search_conf = {
           "subtitle":"Be patient - this search might take several seconds!",
           "abort":{"title":"Abort Search","href_link":"/search"}
         }
+},
+
+"timeout":{
+  "time": 60,
+  "link": "/search"
 }
 
 //heuristic functions
