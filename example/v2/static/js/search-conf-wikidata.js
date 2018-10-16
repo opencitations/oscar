@@ -67,10 +67,33 @@ var search_conf = {
       "regex":"[-'a-zA-Z ]+$",
       "query": [
           "{",
-          "?author wdt:P31 wd:Q5.",
-          //"FILTER (regex(?familyName, '[[VAR]]'))",
+          "?object wdt:P31 wd:Q13442814",
+          "; wdt:P50 ?author .",
+          //"?author rdfs:label ?lbl1 .",
+          //"FILTER (langMatches( lang(?lbl1), 'EN' ))",
+          //"FILTER (regex(?lbl1, '[[VAR]]'))",
           "?author wdt:P734 ?famName .",
           "?famName rdfs:label '[[VAR]]'@en .",
+          "}"
+      ]
+    },
+    {
+      "name":"firstname",
+      "label": "First name",
+      "advanced": true,
+      "freetext": false,
+      "heuristics": [[lower_case,capitalize_1st_letter]],
+      "category": "author",
+      "regex":"[-'a-zA-Z ]+$",
+      "query": [
+          "{",
+          "?object wdt:P31 wd:Q13442814",
+          "; wdt:P50 ?author .",
+          //"?author rdfs:label ?lbl1 .",
+          //"FILTER (langMatches( lang(?lbl1), 'EN' ))",
+          //"FILTER (regex(?lbl1, '[[VAR]]'))",
+          "?author wdt:P735 ?gName .",
+          "?gName rdfs:label '[[VAR]]'@en .",
           "}"
       ]
     }
@@ -168,7 +191,6 @@ var search_conf = {
       ]
     }
   ],
-
 
   "page_limit": [5,10,15,20,30,40,50],
   "page_limit_def": 10,
