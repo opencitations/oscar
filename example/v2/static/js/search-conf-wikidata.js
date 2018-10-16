@@ -52,7 +52,25 @@ var search_conf = {
       "regex":"([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4})",
       "query": [
           "{",
+          "?author wdt:P31 wd:Q5.",
           "?author wdt:P496 '[[VAR]]'.",
+          "}"
+      ]
+    },
+    {
+      "name":"lastname",
+      "label": "Last name",
+      "advanced": true,
+      "freetext": false,
+      "heuristics": [[lower_case,capitalize_1st_letter]],
+      "category": "author",
+      "regex":"[-'a-zA-Z ]+$",
+      "query": [
+          "{",
+          "?author wdt:P31 wd:Q5.",
+          //"FILTER (regex(?familyName, '[[VAR]]'))",
+          "?author wdt:P734 ?famName .",
+          "?famName rdfs:label '[[VAR]]'@en .",
           "}"
       ]
     }
@@ -61,9 +79,9 @@ var search_conf = {
 "categories": [
     {
       "name": "document",
-      "label": "Document",
+      "label": "Scholarly article",
       "macro_query": [
-        "select ?work ?short_iri ?title ?venueLabel (STR(YEAR (?alldate)) as ?date) ?volume ?author ?authorname ?issue ?pages ?license ?doi ?url ?type where {",
+        "select ?work ?short_iri ?short_iri_id ?title ?venueLabel (STR(YEAR (?alldate)) as ?date) ?volume ?author ?authorname ?issue ?pages ?license ?doi ?url ?type where {",
             "[[RULE]]",
             "?work wdt:P31 wd:Q13442814.",
             "optional { ?work wdt:P1476 ?title .}",
@@ -73,6 +91,7 @@ var search_conf = {
               "FILTER (langMatches( lang(?authorname), 'EN' ) )",
             "}",
             "BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .",
+            "BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .",
             "optional { ?work wdt:P1433 ?venue . }",
             "optional { ?work wdt:P577 ?alldate . }",
             "optional { ?work wdt:P478 ?volume . }",
@@ -85,10 +104,24 @@ var search_conf = {
             "LIMIT 500"
       ],
       "fields": [
-        {"value":"short_iri", "title": "Resource IRI","column_width":"15%","type": "text", "link":{"field":"work","prefix":""}},
-        {"value":"title", "title": "Work title","column_width":"35%","type": "text"},
-        {"value":"authorname", "title": "Authors", "column_width":"30%","type": "int", "link":{"field":"author","prefix":""}},
-        {"value":"date", "title": "Date", "column_width":"20%","type": "text"}
+        {
+          "value":"short_iri", "title": "Resource IRI","column_width":"15%","type": "text",
+          "label":{"field":"short_iri_id"},
+          "link":{"field":"work","prefix":""},
+          "sort":{"value": "short_iri.label", "type":"int"}
+        },
+        {
+          "value":"title", "title": "Work title","column_width":"35%","type": "text",
+          "sort":{"value": "title", "type":"text"}
+        },
+        {
+          "value":"authorname", "title": "Authors", "column_width":"38%","type": "int",
+          "link":{"field":"author","prefix":""}
+        },
+        {
+          "value":"date", "title": "Date", "column_width":"12%","type": "text",
+          "sort":{"value": "date", "type":"int"}
+        }
       ],
       "group_by": {"keys":["work"], "concats":["authorname"]},
       "extra_elems":[
@@ -111,10 +144,27 @@ var search_conf = {
         "LIMIT 500"
       ],
       "fields": [
-        {"value":"short_iri", "title": "Resource IRI","column_width":"20%","type": "text", "link":{"field":"author","prefix":""}},
-        {"value":"authorLabel", "title": "Full Name","column_width":"30%","type": "text", "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true}},
-        {"value":"countryLabel", "title": "Country","column_width":"25%","type": "text"},
-        {"value":"occupationLabel", "title": "Occupation","column_width":"25%","type": "text"}
+        {
+          "value":"short_iri", "title": "Resource IRI","column_width":"20%","type": "text",
+          "link":{"field":"author","prefix":""}
+        },
+        {
+          "value":"authorLabel", "title": "Full Name","column_width":"30%","type": "text",
+          "sort":{"value": "authorLabel", "type":"text"}
+        },
+        {
+          "value":"countryLabel", "title": "Country","column_width":"25%","type": "text",
+          "sort":{"value": "countryLabel", "type":"text"}
+        },
+        {
+          "value":"occupationLabel", "title": "Occupation","column_width":"25%","type": "text",
+          "sort":{"value": "occupationLabel", "type":"text"}
+        }
+      ],
+      "extra_elems":[
+        {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Back to search", "others": {"href": "wikidata.html"}},
+        {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
+        {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
       ]
     }
   ],
@@ -132,10 +182,19 @@ var search_conf = {
             "visible": true,
             "title":"Searching the Wikidata corpus ...",
             "subtitle":"Be patient - this search might take several seconds!",
-            "abort":{"title":"Abort Search","href_link":"/search"}
+            "abort":{"title":"Abort Search","href_link":"wikidata.html"}
           },
   "timeout":{
     "time": 60,
     "link": "/search"
   }
+}
+
+//heuristic functions
+//you can define your own heuristic functions here
+function lower_case(str){
+  return str.toLowerCase();
+}
+function capitalize_1st_letter(str){
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
