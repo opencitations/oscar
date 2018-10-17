@@ -143,7 +143,8 @@ var search_conf = {
         },
         {
           "value":"date", "title": "Date", "column_width":"12%","type": "text",
-          "sort":{"value": "date", "type":"int"}
+          "sort":{"value": "date", "type":"int"},
+          "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}
         }
       ],
       "group_by": {"keys":["work"], "concats":["authorname"]},
@@ -202,6 +203,7 @@ var search_conf = {
 
   "progress_loader":{
             "visible": true,
+            "spinner": true,
             "title":"Searching the Wikidata corpus ...",
             "subtitle":"Be patient - this search might take several seconds!",
             "abort":{"title":"Abort Search","href_link":"wikidata.html"}
