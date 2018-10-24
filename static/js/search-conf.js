@@ -1,5 +1,6 @@
 var search_conf = {
-"sparql_endpoint": "http://localhost:8080/sparql",
+//"sparql_endpoint": "http://localhost:8080/sparql",
+"sparql_endpoint": "https://w3id.org/oc/sparql",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},
     {"prefix":"dcterms","iri":"http://purl.org/dc/terms/"},
@@ -11,7 +12,9 @@ var search_conf = {
     {"prefix":"bds","iri":"http://www.bigdata.com/rdf/search#"},
     {"prefix":"fabio","iri":"http://purl.org/spar/fabio/"},
     {"prefix":"pro","iri":"http://purl.org/spar/pro/"},
-    {"prefix":"rdf","iri":"http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
+    {"prefix":"oco","iri":"https://w3id.org/oc/ontology/"},
+    {"prefix":"rdf","iri":"http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
+    {"prefix":"prism","iri":"http://prismstandard.org/namespaces/basic/2.0/"}
   ],
 
 "rules":  [
@@ -70,7 +73,7 @@ var search_conf = {
       "advanced": true,
       "freetext": true,
       "category": "author",
-      "regex":"([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4})",
+      "regex":"([\\S]{4}-[\\S]{4}-[\\S]{4}-[\\S]{4})",
       "query": [
               "{",
               //"?lit bds:search ?orcid_txt . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
@@ -144,8 +147,8 @@ var search_conf = {
               "?lit_au bds:maxRank '300' .",
 
               "?myra foaf:familyName ?lit_au .",
-              "?role pro:isHeldBy ?myra .",
-              "?iri pro:isDocumentContextFor ?role .",
+              "?q_role pro:isHeldBy ?myra .",
+              "?iri pro:isDocumentContextFor ?q_role .",
               "}"
       ]
     },
@@ -163,15 +166,9 @@ var search_conf = {
               "?lit bds:relevance ?score .",
               "?lit bds:minRelevance '0.2' .",
               "?lit bds:maxRank '300' .",
-              /*"{",
-                "?entry c4o:hasContent ?lit .",
-                "?entry biro:references ?iri .",
-              "}",
-              "UNION",*/
                 "{?iri dcterms:title  ?lit }",
               "UNION",
                 "{?iri fabio:hasSubtitle ?lit}",
-              ".",
               "}"
       ]
     }
@@ -182,41 +179,49 @@ var search_conf = {
       "name": "document",
       "label": "Document",
       "macro_query": [
-        "SELECT DISTINCT ?iri ?short_iri ?short_iri_id ?browser_iri ?doi ?title ?year ?author ?author_lbl ?author_iri ?author_browser_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
-            "WHERE  {",
-              "[[RULE]]",
-              "OPTIONAL {",
-                "?iri rdf:type ?type .",
-                "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
-                "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/br/', '', 'i') as ?short_iri_id) .",
-                "BIND(REPLACE(STR(?iri), '/corpus/', '/browser/', 'i') as ?browser_iri) .",
-                "OPTIONAL {?iri dcterms:title  ?title .}",
-                "OPTIONAL {?iri fabio:hasSubtitle  ?subtitle .}",
-                "OPTIONAL {?iri fabio:hasPublicationYear ?year .}",
-                "OPTIONAL {?iri cito:cites ?cited .}",
-                "OPTIONAL {?cited_by cito:cites ?iri .}",
-                "OPTIONAL {",
-                 "?iri datacite:hasIdentifier [",
-                  "datacite:usesIdentifierScheme datacite:doi ;",
-               "literal:hasLiteralValue ?doi",
-                   "]",
-               "}",
-            "",
-               "OPTIONAL {",
-                     "?iri pro:isDocumentContextFor [",
-                         "pro:withRole pro:author ;",
-                         "pro:isHeldBy ?author_iri",
-                     "].",
-                     "?author_iri foaf:familyName ?fname .",
-                     "?author_iri foaf:givenName ?name .",
-                     "BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .",
-                     "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
-                     "BIND(CONCAT(STR(?fname),', ', STR(?name)) as ?author_lbl) .",
-               "}",
-              "}",
-            "}GROUP BY ?iri ?short_iri ?short_iri_id ?browser_iri ?doi ?title ?year ?score ?author ?author_lbl ?author_iri ?author_browser_iri ",
-            //"ORDER BY DESC(?score) ",
-            "LIMIT 2000"
+        //"SELECT DISTINCT ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where{",
+          "  SELECT DISTINCT ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) (count(?next) as ?tot)",
+          "  Where{",
+          "      [[RULE]]",
+          //"      OPTIONAL {",
+          "          {",
+          "             ?iri rdf:type ?type .",
+          "        	    OPTIONAL {?iri cito:cites ?cites .}",
+          "      	 	    OPTIONAL {?cited_by cito:cites ?iri .}",
+          "             BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
+          "        	    BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/br/', '', 'i') as ?short_iri_id) .",
+          "             BIND(REPLACE(STR(?iri), '/corpus/', '/browser/', 'i') as ?browser_iri) .",
+          "			        OPTIONAL {?iri dcterms:title ?title .}",
+          "			        BIND(REPLACE(STR(?type), 'http://purl.org/spar/fabio/', '', 'i') as ?short_type) .",
+          "			        OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}",
+          "			        OPTIONAL {?iri prism:publicationDate ?year .}",
+          "             OPTIONAL {",
+          "                      ?iri datacite:hasIdentifier [",
+          "                      datacite:usesIdentifierScheme datacite:doi ;",
+          "                      literal:hasLiteralValue ?doi",
+          "                      ]",
+          "               }",
+          "          }",
+          "          {",
+          "              ?iri rdfs:label ?label .",
+          "               OPTIONAL {",
+          "                          ?iri pro:isDocumentContextFor ?role .",
+          "                          ?role pro:withRole pro:author ; pro:isHeldBy [",
+          "                              foaf:familyName ?f_name ;",
+          "                              foaf:givenName ?g_name",
+          "                          ] .",
+          "                          ?role pro:isHeldBy ?author_iri .",
+          "                          OPTIONAL { ",
+          "                              ?role oco:hasNext* ?next . ",
+          "                          }",
+          "                          BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .",
+          "                          BIND(CONCAT(?g_name,' ',?f_name) as ?author) .			",
+          "              }",
+          "          }",
+          //"      }",
+          "  } GROUP BY ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri ORDER BY DESC(?tot)",
+          "",
+          //"} GROUP BY ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri"
       ],
       "fields": [
         {"iskey": true, "value":"short_iri", "label":{"field":"short_iri_id"}, "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": "short_iri.label", "type":"int"}, "link":{"field":"browser_iri","prefix":""}},
@@ -271,23 +276,24 @@ var search_conf = {
 "page_limit": [5,10,15,20,30,40,50],
 "page_limit_def": 10,
 "def_results_limit": 1,
-"search_base_path": "wikidata.html",
+"search_base_path": "search",
 "advanced_search": true,
 "def_adv_category": "document",
+"adv_btn_title": "Search the OCC Corpus",
 
 "progress_loader":{
           "visible": true,
+          "spinner": true,
           "title":"Searching the OpenCitations Corpus ...",
           "subtitle":"Be patient - this search might take several seconds!",
           "abort":{"title":"Abort Search","href_link":"/search"}
-        }
-},
-
+        },
 "timeout":{
-  "time": 60,
+  "value": 90000,
   "link": "/search"
 }
 
+};
 //heuristic functions
 //you can define your own heuristic functions here
 function lower_case(str){

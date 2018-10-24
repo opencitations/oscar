@@ -49,7 +49,7 @@ var search_conf = {
       "advanced": true,
       "freetext": false,
       "category": "author",
-      "regex":"([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4})",
+      "regex":"([\\S]{4}-[\\S]{4}-[\\S]{4}-[\\S]{4})",
       "query": [
           "{",
           "?author wdt:P31 wd:Q5.",
@@ -128,7 +128,7 @@ var search_conf = {
       ],
       "fields": [
         {
-          "value":"short_iri", "title": "Resource IRI","column_width":"15%","type": "text",
+          "value":"short_iri", "title": "Q-ID","column_width":"15%","type": "text",
           "label":{"field":"short_iri_id"},
           "link":{"field":"work","prefix":""},
           "sort":{"value": "short_iri.label", "type":"int"}
@@ -169,7 +169,7 @@ var search_conf = {
       ],
       "fields": [
         {
-          "value":"short_iri", "title": "Resource IRI","column_width":"20%","type": "text",
+          "value":"short_iri", "title": "Q-ID","column_width":"20%","type": "text",
           "link":{"field":"author","prefix":""}
         },
         {
