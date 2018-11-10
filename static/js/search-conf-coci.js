@@ -1,6 +1,5 @@
 var search_conf = {
-//"sparql_endpoint": "http://localhost:8080/sparql",
-"sparql_endpoint": "http://localhost:8080/index/coci/sparql",
+"sparql_endpoint": "https://w3id.org/oc/index/coci/sparql",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},
     {"prefix":"dcterms","iri":"http://purl.org/dc/terms/"},
@@ -85,49 +84,11 @@ var search_conf = {
             //"LIMIT 2000"
       ],
       "fields": [
-        {
-          "iskey": true,
-          "value":"short_iri",
-          "value_map": [],
-          "value_text_len": 20,
-          "title": "COCI IRI",
-          "column_width":"10%",
-          "type": "text",
-          "sort":{"value": "short_iri", "type":"text"},
-          "link":{"field":"iri","prefix":""}
-        },
-        {
-          "value":"citing_doi",
-          "value_map": [decodeURIStr],
-          "title": "Citing DOI",
-          "column_width":"12%",
-          "type": "text",
-          "sort":{"value": "citing_doi", "type":"text"},
-          "link":{"field":"citing_doi_iri","prefix":""}
-        },
-        {
-          "value": "ext_data.citing_doi_citation.reference",
-          "title": "Citing reference",
-          //"value_text_len": 80,
-          "column_width":"19%",
-          "type": "text"
-        },
-        {
-          "value":"cited_doi",
-          "value_map": [decodeURIStr],
-          "title": "Cited DOI",
-          "column_width":"12%",
-          "type": "text",
-          "sort":{"value": "cited_doi", "type":"text"},
-          "link":{"field":"cited_doi_iri","prefix":""}
-        },
-        {
-          "value": "ext_data.cited_doi_citation.reference",
-          "title": "Cited reference",
-          //"value_text_len": 80,
-          "column_width":"19%",
-          "type": "text"
-        },
+        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"value":"citing_doi", "value_map": [decodeURIStr],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
+        {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
+        {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
+        {"value": "ext_data.cited_doi_citation.reference", "title": "Cited reference", "column_width":"19%", "type": "text"},
         {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"},"filter":{"type_sort": "int", "min": 10000, "sort": "sum", "order": "desc"}},
         {"value":"timespan", "value_map":[timespan_in_days], "title": "Timespan (days)", "column_width":"13%", "type": "text", "sort":{"value": "timespan", "type":"int"}, "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}}
       ],
@@ -144,23 +105,21 @@ var search_conf = {
     },
   ],
 
-"page_limit": [5,10,15,20,30,40,50],
-//the initial default percentage of results number to visualize  1=all, 0.5=half ...
-"def_results_limit": 1,
-//the html page to address the queries on
-"search_base_path": "search",
-//include the advanced search
-"advanced_search": true,
-//the default category to show in the advanced search
-"def_adv_category": "citation",
+  "page_limit": [5,10,15,20,30,40,50],
+  "def_results_limit": 1,
+  "search_base_path": "search",
+  "advanced_search": true,
+  "def_adv_category": "citation",
+  "adv_btn_title": "Search the COCI Corpus",
 
-"progress_loader":{
-          "visible": true,
-          "title":"Searching the COCI Corpus ...",
-          "subtitle":"Be patient - this search might take several seconds!",
-          "abort":{"title":"Abort Search","href_link":"search"}
-        }
-}
+  "progress_loader":{
+            "visible": true,
+            "spinner": true,
+            "title":"Searching the COCI Corpus ...",
+            "subtitle":"Be patient - this search might take several seconds!",
+            "abort":{"title":"Abort Search","href_link":"search"}
+          }
+  }
 
 //heuristic functions
 //you can define your own heuristic functions here
@@ -175,6 +134,39 @@ function decodeURIStr(str) {
 }
 function encodeURIStr(str) {
   return encodeURIComponent(str);
+}
+function timespan_translate(str) {
+  var new_str = "";
+  var years = 0;
+  var months = 0;
+  var days = 0;
+
+  let reg = /(\d{1,})Y/g;
+  let match;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      years = match[1] ;
+      new_str = new_str + years +" Years "
+    }
+  }
+
+  reg = /(\d{1,})M/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      months = match[1] ;
+      new_str = new_str + months +" Months "
+    }
+  }
+
+  reg = /(\d{1,})D/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      days = match[1] ;
+      new_str = new_str + days +" Days "
+    }
+  }
+
+  return new_str;
 }
 function timespan_in_days(str) {
   var new_str = "";

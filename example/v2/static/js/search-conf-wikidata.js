@@ -39,7 +39,7 @@ var search_conf = {
           "?work rdfs:label ?lbl1 .",
           "?work wdt:P31 wd:Q13442814.",
           "FILTER (langMatches( lang(?lbl1), 'EN' ) )",
-          "FILTER( regex(?lbl1, '[[VAR]]' ))",
+          "FILTER( regex(?lbl1, '[[VAR]]','i'))",
         "}"
       ]
     },
@@ -209,7 +209,7 @@ var search_conf = {
             "abort":{"title":"Abort Search","href_link":"wikidata.html"}
           },
   "timeout":{
-    "time": 60,
+    "time": 120,
     "link": "/search"
   }
 }
