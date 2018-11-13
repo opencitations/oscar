@@ -492,6 +492,15 @@ var search = (function () {
 
 			json_data.results.bindings = _init_uris(json_data.results.bindings);
 			json_data.results.bindings = _init_lbls(json_data.results.bindings);
+
+			// order by the rows
+			var order_by = category_conf_obj.order_by;
+			if (order_by != undefined) {
+					if ((order_by.keys != []) && (order_by.concats != [])) {
+						json_data.results.bindings = util.order_by(json_data.results.bindings, order_by.keys, order_by.types, order = order_by.order);
+					}
+			}
+
 			// group by the rows
 			var group_by = category_conf_obj.group_by;
 			if (group_by != undefined) {
@@ -499,6 +508,10 @@ var search = (function () {
 					json_data.results.bindings = util.group_by(json_data.results.bindings, group_by.keys, group_by.concats);
 				}
 			}
+
+
+
+
 			//console.log("After linking and grouping :");
 			//console.log(JSON.parse(JSON.stringify(json_data)));
 
@@ -1585,6 +1598,59 @@ var util = (function () {
     }
 	}
 
+	/*order_by on the given keys Max 2 keys*/
+	function order_by(arr_objs, keys, types, order='asc', fixed=null) {
+
+		//console.log(keys, types, order, fixed);
+
+		if ((keys.length == 0) || (types.length == 0)){
+			return arr_objs;
+		}
+
+		var my_key = keys.splice(0, 1)[0];
+		var my_type = types.splice(0, 1)[0];
+
+		if (fixed == null) {
+			var arr_ordered_bykey = util.sort_objarr_by_key(arr_objs,order,my_key+".value",my_type);
+			return order_by(arr_ordered_bykey, keys, types, order= order, fixed = my_key);
+
+		}else {
+
+			var final_arr = [];
+
+				for (var i = 0; i < arr_objs.length; i++) {
+					var partial_arr = [];
+					var fixed_item = arr_objs[i][fixed].value;
+					while (true) {
+						partial_arr.push(arr_objs[i]);
+						i = i + 1;
+
+						if (i >= arr_objs.length) {
+							break;
+						}
+						if (arr_objs[i][fixed].value != fixed_item){
+							//to riconsider it next time
+							i = i - 1;
+							break;
+						}
+					}
+					console.log(partial_arr);
+					//order partial array
+					final_arr = final_arr.concat(
+								util.sort_objarr_by_key(
+									partial_arr,
+									order,
+									my_key+".value",
+									my_type
+								)
+					);
+				}
+
+			return order_by(final_arr, keys, types, order= order, fixed = my_key);
+		}
+
+	}
+
 	/*group by the 'arr_objs' elements following the distinct 'keys' and by concatinating
 	the fields in 'arr_fields_concat'*/
 	function group_by(arr_objs, keys, arr_fields_concat){
@@ -1845,6 +1911,7 @@ var util = (function () {
 		remove_val_in_arr: remove_val_in_arr,
 		is_undefined_key: is_undefined_key,
 		group_by: group_by,
+		order_by: order_by,
 		collect_values: collect_values,
 		get_sub_arr: get_sub_arr,
 		sort_objarr_by_key: sort_objarr_by_key,

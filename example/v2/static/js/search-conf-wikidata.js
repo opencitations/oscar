@@ -36,10 +36,9 @@ var search_conf = {
       "regex":"[-'a-zA-Z ]+$",
       "query": [
         "{",
-          "?work rdfs:label ?lbl1 .",
-          "?work wdt:P31 wd:Q13442814.",
-          "FILTER (langMatches( lang(?lbl1), 'EN' ) )",
-          "FILTER( regex(?lbl1, '[[VAR]]','i'))",
+          //"?work rdfs:label ?lbl1 .",
+          "FILTER (langMatches( lang(?label), 'EN' ) )",
+          "filter contains(?label,'[[VAR]]')",
         "}"
       ]
     },
@@ -104,27 +103,36 @@ var search_conf = {
       "name": "document",
       "label": "Scholarly article",
       "macro_query": [
-        "select ?work ?short_iri ?short_iri_id ?title ?venueLabel (STR(YEAR (?alldate)) as ?date) ?volume ?author ?authorname ?issue ?pages ?license ?doi ?url ?type where {",
-            "[[RULE]]",
-            "?work wdt:P31 wd:Q13442814.",
-            "optional { ?work wdt:P1476 ?title .}",
-            "optional {",
-              "?work wdt:P50 ?author .",
-              "?author rdfs:label ?authorname .",
-              "FILTER (langMatches( lang(?authorname), 'EN' ) )",
-            "}",
-            "BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .",
-            "BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .",
-            "optional { ?work wdt:P1433 ?venue . }",
-            "optional { ?work wdt:P577 ?alldate . }",
-            "optional { ?work wdt:P478 ?volume . }",
-            "optional { ?work wdt:P433 ?issue . }",
-            "optional { ?work wdt:P304 ?pages . }",
-            "optional { ?work wdt:P275 ?license_ .}",
-            "optional { ?work wdt:P356 ?doi . }",
-            "optional { ?work wdt:P953 ?url . }",
-            "}",
-            "LIMIT 500"
+        `
+        SELECT DISTINCT ?work ?title ?short_iri ?short_iri_id ?author_resource ?author_str ?s_ordinal WHERE {
+
+                  ?work wdt:P31 wd:Q13442814.
+                  ?work rdfs:label ?label .
+                  optional { ?work wdt:P1476 ?title .}
+                  BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .
+                  BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .
+
+                  OPTIONAL {
+                            ?work p:P50 [
+                              pq:P1545 ?s_ordinal;
+                              ps:P50 ?author_resource;
+                              ps:P50/rdfs:label ?author_str;
+                            ]
+                            FILTER(LANGMATCHES(LANG(?author_str), "EN"))
+                  }
+
+                  OPTIONAL {
+                              ?work p:P2093 [
+                                pq:P1545 ?s_ordinal;
+                                ps:P2093 ?author_str;
+                              ]
+                  }
+
+                  filter langMatches(lang(?label),"en")
+                  filter contains(?label,"machine")
+          }
+          LIMIT 500
+        `
       ],
       "fields": [
         {
@@ -138,8 +146,8 @@ var search_conf = {
           "sort":{"value": "title", "type":"text"}
         },
         {
-          "value":"authorname", "title": "Authors", "column_width":"38%","type": "int",
-          "link":{"field":"author","prefix":""}
+          "value":"author_str", "title": "Authors", "column_width":"38%","type": "int",
+          "link":{"field":"author_resource","prefix":""}
         },
         {
           "value":"date", "title": "Date", "column_width":"12%","type": "text",
@@ -147,7 +155,8 @@ var search_conf = {
           "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}
         }
       ],
-      "group_by": {"keys":["work"], "concats":["authorname"]},
+      "order_by": {"keys":["work","s_ordinal"], "types":["text","int"]},
+      "group_by": {"keys":["work"], "concats":["author_str"]},
       "extra_elems":[
         {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Back to search", "others": {"href": "wikidata.html"}},
         {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
