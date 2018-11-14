@@ -33,13 +33,14 @@ var search_conf = {
       "advanced": true,
       "freetext": false,
       "category": "document",
-      "regex":"[-'a-zA-Z ]+$",
-      "query": [
-        "{",
-          //"?work rdfs:label ?lbl1 .",
-          "FILTER (langMatches( lang(?label), 'EN' ) )",
-          "filter contains(?label,'[[VAR]]')",
-        "}"
+      "regex":"(^\\w+)",
+      "query": [`
+        {
+          ?work rdfs:label ?label .
+          FILTER (langMatches( lang(?label), 'EN' ) )
+          filter contains(?label,'[[VAR]]')
+        }
+        `
       ]
     },
     {
@@ -106,30 +107,33 @@ var search_conf = {
         `
         SELECT DISTINCT ?work ?title ?short_iri ?short_iri_id ?author_resource ?author_str ?s_ordinal WHERE {
 
+                  #Scholarly article type
                   ?work wdt:P31 wd:Q13442814.
-                  ?work rdfs:label ?label .
+
+                  #Filtering Rule
+                  [[RULE]]
+
+                  # Article Fields
                   optional { ?work wdt:P1476 ?title .}
                   BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .
                   BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .
 
-                  OPTIONAL {
-                            ?work p:P50 [
-                              pq:P1545 ?s_ordinal;
-                              ps:P50 ?author_resource;
-                              ps:P50/rdfs:label ?author_str;
-                            ]
-                            FILTER(LANGMATCHES(LANG(?author_str), "EN"))
+                  # Article Authors
+                  {
+                      ?work p:P50 [
+                          pq:P1545 ?s_ordinal;
+                          ps:P50 ?author_resource;
+                          ps:P50/rdfs:label ?author_str;
+                      ]
+                      FILTER(LANGMATCHES(LANG(?author_str), "EN"))
                   }
-
-                  OPTIONAL {
-                              ?work p:P2093 [
-                                pq:P1545 ?s_ordinal;
-                                ps:P2093 ?author_str;
-                              ]
+                  UNION
+                  {
+                      ?work p:P2093 [
+                          pq:P1545 ?s_ordinal;
+                          ps:P2093 ?author_str;
+                      ]
                   }
-
-                  filter langMatches(lang(?label),"en")
-                  filter contains(?label,"machine")
           }
           LIMIT 500
         `
