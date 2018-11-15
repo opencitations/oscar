@@ -30,7 +30,7 @@ var search_conf = {
     },
     {
       "name":"citing_documents",
-      "label": "DOI",
+      "label": "citing_documents",
       "advanced": false,
       "freetext": false,
       //"heuristics": [[lower_case]],
@@ -39,6 +39,36 @@ var search_conf = {
       "query": [`
         {
         ?work wdt:P2860 <http://www.wikidata.org/[[VAR]]> .
+        }
+        `
+      ]
+    },
+    {
+      "name":"cited_documents",
+      "label": "cited_documents",
+      "advanced": false,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "document",
+      "regex": "(entity.+)",
+      "query": [`
+        {
+        <http://www.wikidata.org/[[VAR]]> wdt:P2860 ?work .
+        }
+        `
+      ]
+    },
+    {
+      "name":"author_works",
+      "label": "author_works",
+      "advanced": false,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "document",
+      "regex": "(entity.+)",
+      "query": [`
+        {
+        ?work wdt:P50 <http://www.wikidata.org/[[VAR]]> .
         }
         `
       ]
@@ -223,7 +253,7 @@ var search_conf = {
         },
         {
           "value":"in_cits", "title": "Cited", "column_width":"12%","type": "int",
-          "sort":{"value": "out_cits", "type":"int"},
+          "sort":{"value": "in_cits", "type":"int"},
           "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}
         },
         {

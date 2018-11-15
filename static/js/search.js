@@ -1637,7 +1637,7 @@ var util = (function () {
 							break;
 						}
 					}
-					console.log(partial_arr);
+					//console.log(partial_arr);
 					//order partial array
 					final_arr = final_arr.concat(
 								util.sort_objarr_by_key(
