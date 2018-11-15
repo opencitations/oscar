@@ -21,10 +21,27 @@ var search_conf = {
       //"heuristics": [[lower_case]],
       "category": "document",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
-      "query": [
-        "{",
-        "?work wdt:P356 '[[VAR]]' .",
-        "}"
+      "query": [`
+        {
+        ?work wdt:P356 '[[VAR]]' .
+        }
+        `
+      ]
+    },
+    {
+      "name":"min_year",
+      "label": "Minimum publication year",
+      "advanced": true,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "document",
+      "regex":"\\d{1,}",
+      "query": [`
+        {
+          ?work wdt:P577 ?alldate_f .
+          FILTER (xsd:integer(YEAR (?alldate_f)) >= '[[VAR]]'^^xsd:integer )
+        }
+        `
       ]
     },
     {
@@ -39,6 +56,35 @@ var search_conf = {
           ?work rdfs:label ?label .
           FILTER (langMatches( lang(?label), 'EN' ) )
           filter contains(?label,'[[VAR]]')
+        }
+        `
+      ]
+    },
+    {
+      "name":"title",
+      "label": "Title",
+      "advanced": true,
+      "freetext": false,
+      "category": "document",
+      "regex":".{1,}",
+      "query": [`
+        {
+          ?work wdt:P1476 '[[VAR]]' .
+        }
+        `
+      ]
+    },
+    {
+      "name":"qid",
+      "label": "Q-ID",
+      "advanced": true,
+      "freetext": false,
+      "category": "document",
+      "regex":"\\d{1,}",
+      "query": [`
+        {
+          ?work wdt:P31 wd:Q13442814.
+          BIND(<http://www.wikidata.org/entity/Q[[VAR]]> as ?work) .
         }
         `
       ]
@@ -105,7 +151,7 @@ var search_conf = {
       "label": "Scholarly article",
       "macro_query": [
         `
-        SELECT DISTINCT ?work ?title ?short_iri ?short_iri_id ?author_resource ?author_str ?s_ordinal WHERE {
+        SELECT DISTINCT ?work ?title ?short_iri ?short_iri_id ?date (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited) AS ?in_cits) ?author_resource ?author_str ?s_ordinal WHERE {
 
                   #Scholarly article type
                   ?work wdt:P31 wd:Q13442814.
@@ -117,6 +163,12 @@ var search_conf = {
                   optional { ?work wdt:P1476 ?title .}
                   BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .
                   BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .
+                  optional{ ?work wdt:P2860 ?cites .}
+                  optional{ ?cited wdt:P2860 ?work .}
+                  optional{
+                    ?work wdt:P577 ?alldate .
+                    BIND(STR(YEAR (?alldate)) as ?date).
+                  }
 
                   # Article Authors
                   {
@@ -135,6 +187,7 @@ var search_conf = {
                       ]
                   }
           }
+          Group by ?work ?title ?short_iri ?short_iri_id ?date ?author_resource ?author_str ?s_ordinal
           LIMIT 500
         `
       ],
@@ -152,6 +205,11 @@ var search_conf = {
         {
           "value":"author_str", "title": "Authors", "column_width":"38%","type": "int",
           "link":{"field":"author_resource","prefix":""}
+        },
+        {
+          "value":"in_cits", "title": "Cited", "column_width":"12%","type": "int",
+          "sort":{"value": "out_cits", "type":"int"},
+          "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}
         },
         {
           "value":"date", "title": "Date", "column_width":"12%","type": "text",
