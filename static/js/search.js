@@ -150,10 +150,12 @@ var search = (function () {
 					var qtext_match = qtext_arr[i].match(re);
 					if (qtext_match != null) {
 						qtext_arr[i] = qtext_arr[i].match(re)[0];
+
 					}else {
 						continue;
 					}
 				}
+
 
 				//define category from the first rule
 				var category = _get_rule_by_name(rule_names[0]).category;
@@ -457,6 +459,7 @@ var search = (function () {
 				}else{
 					//console.log("It's an advanced search!");
 					//it's an advanced query
+
 					var sparql_query = build_adv_sparql_query(
 											query_comp.values,
 											query_comp.rules,

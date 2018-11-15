@@ -29,6 +29,21 @@ var search_conf = {
       ]
     },
     {
+      "name":"citing_documents",
+      "label": "DOI",
+      "advanced": false,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "document",
+      "regex": "(entity.+)",
+      "query": [`
+        {
+        ?work wdt:P2860 <http://www.wikidata.org/[[VAR]]> .
+        }
+        `
+      ]
+    },
+    {
       "name":"min_year",
       "label": "Minimum publication year",
       "advanced": true,
@@ -66,7 +81,7 @@ var search_conf = {
       "advanced": true,
       "freetext": false,
       "category": "document",
-      "regex":".{1,}",
+      "regex":"[-'a-zA-Z ]+$",
       "query": [`
         {
           ?work wdt:P1476 '[[VAR]]' .
