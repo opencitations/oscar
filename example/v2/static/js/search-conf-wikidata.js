@@ -107,20 +107,6 @@ var search_conf = {
       ]
     },
     {
-      "name":"orcid",
-      "label": "ORCID",
-      "advanced": true,
-      "freetext": true,
-      "category": "author",
-      "regex":"([\\S]{4}-[\\S]{4}-[\\S]{4}-[\\S]{4})",
-      "query": [
-          "{",
-          "?author wdt:P31 wd:Q5.",
-          "?author wdt:P496 '[[VAR]]'.",
-          "}"
-      ]
-    },
-    {
       "name":"qid",
       "label": "Q-ID",
       "advanced": true,
@@ -163,6 +149,23 @@ var search_conf = {
           ?work rdfs:label ?label .
           FILTER (langMatches( lang(?label), 'EN' ) )
           filter contains(?label,'[[VAR]]')
+        }
+        `
+      ]
+    },
+    {
+      "name":"orcid",
+      "label": "ORCID",
+      "advanced": true,
+      "freetext": false,
+      "category": "author",
+      "regex":"([\\S]{4}-[\\S]{4}-[\\S]{4}-[\\S]{4})",
+      "query": [
+        `
+        {
+          #?author wdt:P31 wd:Q5.
+          ?author wdt:P496 '[[VAR]]'.
+          #FILTER (langMatches( lang(?authorLabel), 'EN' ) )
         }
         `
       ]
@@ -215,7 +218,7 @@ var search_conf = {
       "label": "Scholarly article",
       "macro_query": [
         `
-        SELECT DISTINCT ?work ?title ?short_iri ?short_iri_id ?date (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited) AS ?in_cits) ?author_resource ?author_str ?s_ordinal WHERE {
+        SELECT DISTINCT ?work ?title ?short_iri ?short_iri_id ?date (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited) AS ?in_cits) ?author_resource ?author_short_iri ?author_str ?s_ordinal WHERE {
 
                   #Scholarly article type
                   ?work wdt:P31 wd:Q13442814.
@@ -241,6 +244,7 @@ var search_conf = {
                           ps:P50 ?author_resource;
                           ps:P50/rdfs:label ?author_str;
                       ]
+                      BIND(REPLACE(STR(?author_resource), 'http://www.wikidata.org/entity/', '', 'i') as ?author_short_iri) .
                       FILTER(LANGMATCHES(LANG(?author_str), "EN"))
                   }
                   UNION
@@ -251,7 +255,7 @@ var search_conf = {
                       ]
                   }
           }
-          Group by ?work ?title ?short_iri ?short_iri_id ?date ?author_resource ?author_str ?s_ordinal
+          Group by ?work ?title ?short_iri ?short_iri_id ?date ?author_resource ?author_short_iri ?author_str ?s_ordinal
           LIMIT 500
         `
       ],
@@ -269,7 +273,7 @@ var search_conf = {
         },
         {
           "value":"author_str", "title": "Authors", "column_width":"38%","type": "int",
-          "link":{"field":"author_resource","prefix":""}
+          "link":{"field":"author_short_iri","prefix":"https://opencitations.github.io/lucinda/example/wikidata/browser.html?browse="}
         },
         {
           "value":"in_cits", "title": "Cited", "column_width":"12%","type": "int",
@@ -294,14 +298,31 @@ var search_conf = {
       "name": "author",
       "label": "Author",
       "macro_query": [
-        "SELECT DISTINCT ?author ?short_iri ?authorLabel ?countryLabel ?occupationLabel WHERE {",
-          "[[RULE]]",
-          "BIND(REPLACE(STR(?author), 'http://www.wikidata.org/', '', 'i') AS ?short_iri)",
-          "OPTIONAL {?author wdt:P27 ?country.}",
-          "OPTIONAL { ?author wdt:P106 ?occupation.}",
-          "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. }",
-        "}",
-        "LIMIT 500"
+        `
+        SELECT DISTINCT ?author ?short_iri ?short_iri_id ?genderLabel ?dateLabel ?employerLabel ?educationLabel ?orcid ?authorLabel ?countryLabel ?occupationLabel (COUNT(distinct ?work) AS ?works) WHERE {
+            ?work wdt:P31 wd:Q13442814;
+                wdt:P50 ?author .
+
+            #Filters
+            [[RULE]]
+
+            #Fields
+            BIND(REPLACE(STR(?author), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .
+            BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .
+
+            OPTIONAL {?author wdt:P27 ?country.}
+            OPTIONAL {?author wdt:P496 ?orcid.}
+            OPTIONAL {?author wdt:P21 ?gender.}
+            OPTIONAL {?author wdt:P569 ?date_dt.}
+            BIND(CONCAT(STR(DAY(?date_dt)), "/", STR(MONTH(?date_dt)), "/", STR(YEAR(?date_dt))) as ?date ) .
+            OPTIONAL {?author wdt:P108 ?employer.}
+            OPTIONAL {?author wdt:P69 ?education}
+            OPTIONAL {?author wdt:P106 ?occupation.}
+            SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. }
+        }
+        GROUP BY ?author ?short_iri ?short_iri_id ?genderLabel ?dateLabel ?employerLabel ?educationLabel ?orcid ?authorLabel ?countryLabel ?occupationLabel
+        LIMIT 500
+        `
       ],
       "fields": [
         {
@@ -310,7 +331,8 @@ var search_conf = {
         },
         {
           "value":"authorLabel", "title": "Full Name","column_width":"30%","type": "text",
-          "sort":{"value": "authorLabel", "type":"text"}
+          "sort":{"value": "authorLabel", "type":"text"},
+          "link":{"field":"short_iri_id","prefix":"https://opencitations.github.io/lucinda/example/wikidata/browser.html?browse=Q"}
         },
         {
           "value":"countryLabel", "title": "Country","column_width":"25%","type": "text",
@@ -319,6 +341,10 @@ var search_conf = {
         {
           "value":"occupationLabel", "title": "Occupation","column_width":"25%","type": "text",
           "sort":{"value": "occupationLabel", "type":"text"}
+        },
+        {
+          "value":"works", "title": "Works","column_width":"25%","type": "text",
+          "sort":{"value": "works", "type":"int"}
         }
       ],
       "extra_elems":[
