@@ -15,7 +15,8 @@ var search_conf = {
 "rules":  [
     {
       "name":"doi",
-      "label": "DOI",
+      "label": "With a specific DOI",
+      "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
       "advanced": true,
       "freetext": true,
       //"heuristics": [[lower_case]],
@@ -30,7 +31,8 @@ var search_conf = {
     },
     {
       "name":"journal",
-      "label": "Journal name",
+      "label": "Of a specific Journal",
+      "placeholder": "Journal Name e.g. scientometrics",
       "advanced": true,
       "freetext": false,
       //"heuristics": [[lower_case]],
@@ -47,7 +49,41 @@ var search_conf = {
     },
     {
       "name":"citing_documents",
-      "label": "citing_documents",
+      "label": "Citing a specific article",
+      "placeholder": "DOI e.g. 10.1007/978-3-319-11955-7_42",
+      "advanced": true,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "document",
+      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
+      "query": [`
+        {
+        ?cited_art wdt:P356 '[[VAR]]' .
+        ?work wdt:P2860 ?cited_art .
+        }
+        `
+      ]
+    },
+    {
+      "name":"cited_documents",
+      "label": "In the reference list of an article",
+      "placeholder": "DOI e.g. 10.1007/978-3-642-25073-6_30",
+      "advanced": true,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "document",
+      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
+      "query": [`
+        {
+        ?cited_art wdt:P356 '[[VAR]]' .
+        ?cited_art wdt:P2860 ?work .
+        }
+        `
+      ]
+    },
+    {
+      "name":"citing_documents",
+      "label": "The citing articles",
       "advanced": false,
       "freetext": false,
       //"heuristics": [[lower_case]],
@@ -62,7 +98,7 @@ var search_conf = {
     },
     {
       "name":"cited_documents",
-      "label": "cited_documents",
+      "label": "The list of references",
       "advanced": false,
       "freetext": false,
       //"heuristics": [[lower_case]],
@@ -92,7 +128,8 @@ var search_conf = {
     },
     {
       "name":"min_year",
-      "label": "Minimum publication year",
+      "label": "With a minimum publication year",
+      "placeholder": "Year e.g. 2010",
       "advanced": true,
       "freetext": false,
       //"heuristics": [[lower_case]],
@@ -108,7 +145,8 @@ var search_conf = {
     },
     {
       "name":"qid",
-      "label": "Q-ID",
+      "label": "With a Q-ID",
+      "placeholder": "Q-ID e.g. Q56083889",
       "advanced": true,
       "freetext": true,
       "category": "document",
@@ -155,7 +193,8 @@ var search_conf = {
     },
     {
       "name":"orcid",
-      "label": "ORCID",
+      "label": "With ORCID",
+      "placeholder": "ORCID e.g. 0000-0003-0530-4305",
       "advanced": true,
       "freetext": false,
       "category": "author",
@@ -172,7 +211,8 @@ var search_conf = {
     },
     {
       "name":"lastname",
-      "label": "Last name",
+      "label": "With a Last name",
+      "placeholder": "Last name e.g. Shotton",
       "advanced": true,
       "freetext": false,
       "heuristics": [[lower_case,capitalize_1st_letter]],
@@ -192,7 +232,8 @@ var search_conf = {
     },
     {
       "name":"firstname",
-      "label": "First name",
+      "label": "With a First name",
+      "placeholder": "First name e.g. Silvio",
       "advanced": true,
       "freetext": false,
       "heuristics": [[lower_case,capitalize_1st_letter]],

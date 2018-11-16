@@ -2157,11 +2157,14 @@ var htmldom = (function () {
 		var str_options = _build_rules_options(arr_rules, adv_cat_selected);
 
 		var first_placeholder = "";
-		if (arr_rules.length > 0) {
-			first_placeholder = arr_rules[0].placeholder;
-			if (first_placeholder == undefined) {
-				first_placeholder = "";
-			}
+		for (var i = 0; i < arr_rules.length; i++) {
+		  if (arr_rules[i].category == adv_cat_selected) {
+				first_placeholder = arr_rules[i].placeholder;
+				if (first_placeholder == undefined) {
+					first_placeholder = "";
+				}
+				break;
+		  }
 		}
 
 		var param0 = "adv_input_box_"+entryid;
@@ -2183,12 +2186,12 @@ var htmldom = (function () {
 		return str_html;
 	}
 	function adv_placeholder(inputbox_id, select_id) {
-		console.log(inputbox_id);
-		console.log(select_id);
+		//console.log(inputbox_id);
+		//console.log(select_id);
 
 		var e = document.getElementById(select_id);
 		var selected_opt_placeholder = e.options[e.selectedIndex].getAttribute("my_placeholder");
-		console.log(selected_opt_placeholder);
+		//console.log(selected_opt_placeholder);
 
 		document.getElementById(inputbox_id).setAttribute('placeholder',selected_opt_placeholder);
 	}
