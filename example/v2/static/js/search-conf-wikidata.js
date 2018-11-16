@@ -37,19 +37,18 @@ var search_conf = {
       "freetext": false,
       //"heuristics": [[lower_case]],
       "category": "document",
-      "regex":"[:-'a-zA-Z ]+$",
+      "regex":".*",
       "query": [`
         {
-          ?work wdt:P1433/wdt:P1476 ?pub .
-          FILTER(STR(?pub) = '[[VAR]]')
-          #FILTER(CONTAINS(?pub,'[[VAR]]'))
+          ?work wdt:P1433/wdt:P1476 ?pub_f .
+          FILTER(STR(?pub_f) = "[[VAR]]")
         }
         `
       ]
     },
     {
       "name":"citing_documents",
-      "label": "Citing a specific article",
+      "label": "List of the citing articles",
       "placeholder": "DOI e.g. 10.1007/978-3-319-11955-7_42",
       "advanced": true,
       "freetext": false,
@@ -66,7 +65,7 @@ var search_conf = {
     },
     {
       "name":"cited_documents",
-      "label": "In the reference list of an article",
+      "label": "The reference list",
       "placeholder": "DOI e.g. 10.1007/978-3-642-25073-6_30",
       "advanced": true,
       "freetext": false,
@@ -82,8 +81,8 @@ var search_conf = {
       ]
     },
     {
-      "name":"citing_documents",
-      "label": "The citing articles",
+      "name":"entity_citing_documents",
+      "label": "List of the citing articles",
       "advanced": false,
       "freetext": false,
       //"heuristics": [[lower_case]],
@@ -97,7 +96,7 @@ var search_conf = {
       ]
     },
     {
-      "name":"cited_documents",
+      "name":"entity_cited_documents",
       "label": "The list of references",
       "advanced": false,
       "freetext": false,
@@ -162,7 +161,7 @@ var search_conf = {
     {
       "name":"title",
       "label": "Title",
-      "advanced": true,
+      "advanced": false,
       "freetext": false,
       "category": "document",
       "regex":".*",
@@ -177,7 +176,8 @@ var search_conf = {
     },
     {
       "name":"keyword",
-      "label": "Keywords",
+      "label": "Containing in its title",
+      "placeholder": "Free text e.g. machine learning ",
       "advanced": true,
       "freetext": false,
       "category": "document",
@@ -271,6 +271,10 @@ var search_conf = {
                   optional { ?work wdt:P1476 ?title .}
                   BIND(REPLACE(STR(?work), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .
                   BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .
+                  optional{
+                    ?work wdt:P1433/wdt:P1476 ?pub_r .
+                    BIND(xsd:string(?pub_r) as ?pub).
+                  }
                   optional{ ?work wdt:P2860 ?cites .}
                   optional{ ?cited wdt:P2860 ?work .}
                   optional{
