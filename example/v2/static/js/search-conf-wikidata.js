@@ -17,13 +17,30 @@ var search_conf = {
       "name":"doi",
       "label": "DOI",
       "advanced": true,
-      "freetext": false,
+      "freetext": true,
       //"heuristics": [[lower_case]],
       "category": "document",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [`
         {
         ?work wdt:P356 '[[VAR]]' .
+        }
+        `
+      ]
+    },
+    {
+      "name":"journal",
+      "label": "Journal name",
+      "advanced": true,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "document",
+      "regex":"[:-'a-zA-Z ]+$",
+      "query": [`
+        {
+          ?work wdt:P1433/wdt:P1476 ?pub .
+          FILTER(STR(?pub) = '[[VAR]]')
+          #FILTER(CONTAINS(?pub,'[[VAR]]'))
         }
         `
       ]
@@ -90,6 +107,51 @@ var search_conf = {
       ]
     },
     {
+      "name":"orcid",
+      "label": "ORCID",
+      "advanced": true,
+      "freetext": true,
+      "category": "author",
+      "regex":"([\\S]{4}-[\\S]{4}-[\\S]{4}-[\\S]{4})",
+      "query": [
+          "{",
+          "?author wdt:P31 wd:Q5.",
+          "?author wdt:P496 '[[VAR]]'.",
+          "}"
+      ]
+    },
+    {
+      "name":"qid",
+      "label": "Q-ID",
+      "advanced": true,
+      "freetext": true,
+      "category": "document",
+      "regex":"Q\\d{1,}",
+      "query": [`
+        {
+          ?work wdt:P31 wd:Q13442814.
+          BIND(<http://www.wikidata.org/entity/[[VAR]]> as ?work) .
+        }
+        `
+      ]
+    },
+    {
+      "name":"title",
+      "label": "Title",
+      "advanced": true,
+      "freetext": false,
+      "category": "document",
+      "regex":".*",
+      "query": [`
+        {
+          ?work wdt:P1476 ?title_f .
+          FILTER(STR(?title_f) = '[[VAR]]')
+          #FILTER(CONTAINS(?title_f,'[[VAR]]'))
+        }
+        `
+      ]
+    },
+    {
       "name":"keyword",
       "label": "Keywords",
       "advanced": true,
@@ -103,49 +165,6 @@ var search_conf = {
           filter contains(?label,'[[VAR]]')
         }
         `
-      ]
-    },
-    {
-      "name":"title",
-      "label": "Title",
-      "advanced": true,
-      "freetext": false,
-      "category": "document",
-      "regex":"[-'a-zA-Z ]+$",
-      "query": [`
-        {
-          ?work wdt:P1476 '[[VAR]]' .
-        }
-        `
-      ]
-    },
-    {
-      "name":"qid",
-      "label": "Q-ID",
-      "advanced": true,
-      "freetext": false,
-      "category": "document",
-      "regex":"\\d{1,}",
-      "query": [`
-        {
-          ?work wdt:P31 wd:Q13442814.
-          BIND(<http://www.wikidata.org/entity/Q[[VAR]]> as ?work) .
-        }
-        `
-      ]
-    },
-    {
-      "name":"orcid",
-      "label": "ORCID",
-      "advanced": true,
-      "freetext": false,
-      "category": "author",
-      "regex":"([\\S]{4}-[\\S]{4}-[\\S]{4}-[\\S]{4})",
-      "query": [
-          "{",
-          "?author wdt:P31 wd:Q5.",
-          "?author wdt:P496 '[[VAR]]'.",
-          "}"
       ]
     },
     {
@@ -245,6 +264,7 @@ var search_conf = {
         },
         {
           "value":"title", "title": "Work title","column_width":"35%","type": "text",
+          "link":{"field":"short_iri_id","prefix":"https://opencitations.github.io/lucinda/example/wikidata/browser.html?browse=Q"},
           "sort":{"value": "title", "type":"text"}
         },
         {
