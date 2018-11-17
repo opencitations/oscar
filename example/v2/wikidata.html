@@ -32,13 +32,40 @@
               <h1 style="color:#669900;">OSCAR 2.0 with Wikidata</h1>
               <p style="text-align:left;">This interface let you perform queries on the <b><a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">Wikidata</a></b> triplestore.
               It is made through <b><a href="https://github.com/ivanhb/OSCAR">OSCAR</a></b>: an RDF search engine. We have decided to limit the range of data to be searched to bibliographic entities within the scholarly domain.
-              You can try to type: <b>DOIs, ORCIDs and free textual inputs</b>. Here we list some examples:</p>
-              <ul style="text-align:left; font-size: 125%;">
-                <li>DOI: <a href="wikidata.html?text=10.1186%2F1471-2105-10-S6-S19&rule=doi">10.1186/1471-2105-10-S6-S19</a> </li>
+              You can try to type: <b>DOIs, ORCIDs and free textual inputs</b>. Here we list some examples.</p>
+              <p style="text-align:left; font-size: 115%;"> <u> <b>NOTE:</b> Searches might take several seconds, please be patient.</u></p>
+
+
+              <form class="input-group" action="wikidata.html" method="get">
+                <div style="width: 40%; float:right;">
+                <input type="text" class="form-control" placeholder="Search for wikidata scholarly articles..." name="text">
+                <div class="input-group-btn">
+                  <button style="float:right;" class="btn btn-default oc-purple" type="submit"><i class="glyphicon glyphicon-search"></i>   Search in Wikidata</button>
+                </div>
+                </div>
+              </form>
+
+              <p style="text-align:left; font-size: 130%;"> Try these <b>Free text searches</b>:
+              <ul style="text-align:left; font-size: 115%;">
+                <li>Typing a DOI equal to '10.1007/978-3-319-11955-7_42' <a href="wikidata.html?text=10.1007/978-3-319-11955-7_42"> Try it -> </a></li>
+                <li>Typing an article Q-ID equal to 'Q56083889' <a href="wikidata.html?text=Q56083889"> Try it -> </a> </li>
+                <li>Typing the keyword 'semantic' <u> (Note: this search is very slow)</u> <a href="wikidata.html?text=semantic">  Try it -> </a> </li>
+              </ul>
+              </p>
+
+              <p style="text-align:left; font-size: 130%;"> Try these <b>Advanced searches</b>:
+              <ul style="text-align:left; font-size: 115%;">
+                <li>Retrieve the reference list of 10.1016/J.WEBSEM.2012.08.001 with a minimum publication year equal to 2002 <a href="wikidata.html?text=10.1016%2FJ.WEBSEM.2012.08.001&rule=citing_documents&bc=and&text=2015&rule=min_year">Try it -> </a>  </li>
+                <li>Retrieve the articles citing 10.1145/2362499.2362502 published in 'Journal of Documentation' <a href="wikidata.html?text=10.1145%2F2362499.2362502&rule=citing_documents&bc=and&text=Journal+of+Documentation&rule=journal">Try it -> </a>  </li>
+                <li>Retrieve all the authors which have contributed on '10.3897/RIO.3.E12431' and their occupation is 'Researcher' <a href="wikidata.html?text=10.3897%2FRIO.3.E12431&rule=authors_of_work&bc=and&text=researcher&rule=occupation">Try it -> </a></li>
+              </ul>
+              </p>
+
+              <!--
                 <li>ORCID: <a href="wikidata.html?text=0000-0003-0530-4305&rule=orcid">0000-0003-0530-4305</a> </li>
                 <li>Document titles with keyword: <a href="wikidata.html?text=semantic&rule=keyword">"semantic"</a></li>
-              </ul>
-              <p style="text-align:left;"> <u> <b>NOTE:</b> Searches might take several seconds, please be patient.</u></p>
+              -->
+
               <!--
               <input style="width:80%; display:inline;" id="input_box" name="query" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
               <span>
@@ -47,14 +74,7 @@
               -->
           </form>
 
-          <div style="width: 40%; float:right;">
-          <form class="input-group" action="wikidata.html" method="get">
-            <input type="text" class="form-control" placeholder="Search for wikidata scholarly articles..." name="text">
-            <div class="input-group-btn">
-              <button class="btn btn-default oc-purple" type="submit"><i class="glyphicon glyphicon-search"></i></button>
-            </div>
-          </form>
-          </div>
+
 
             <div class="cover">
 

@@ -31,7 +31,7 @@ var search_conf = {
     },
     {
       "name":"journal",
-      "label": "Of a specific Journal",
+      "label": "Published into a specific Journal",
       "placeholder": "Journal Name e.g. scientometrics",
       "advanced": true,
       "freetext": false,
@@ -40,15 +40,15 @@ var search_conf = {
       "regex":".*",
       "query": [`
         {
-          ?work wdt:P1433/wdt:P1476 ?pub_f .
-          FILTER(STR(?pub_f) = "[[VAR]]")
+          ?work wdt:P1433/wdt:P1476 ?pub_f.
+          filter(STR(?pub_f) = "[[VAR]]")
         }
         `
       ]
     },
     {
       "name":"citing_documents",
-      "label": "List of the citing articles",
+      "label": "Which cite a specifc article",
       "placeholder": "DOI e.g. 10.1007/978-3-319-11955-7_42",
       "advanced": true,
       "freetext": false,
@@ -65,7 +65,7 @@ var search_conf = {
     },
     {
       "name":"cited_documents",
-      "label": "The reference list",
+      "label": "Which are refered to by a specifc article",
       "placeholder": "DOI e.g. 10.1007/978-3-642-25073-6_30",
       "advanced": true,
       "freetext": false,
@@ -176,10 +176,10 @@ var search_conf = {
     },
     {
       "name":"keyword",
-      "label": "Containing in its title",
+      "label": "Matching a specific textual input in their title",
       "placeholder": "Free text e.g. machine learning ",
       "advanced": true,
-      "freetext": false,
+      "freetext": true,
       "category": "document",
       "regex":"(^\\w+)",
       "query": [`
@@ -210,8 +210,41 @@ var search_conf = {
       ]
     },
     {
+      "name":"authors_of_work",
+      "label": "Which contributed on a specific work",
+      "placeholder": "DOI e.g. 10.1007/978-3-319-11955-7_42",
+      "advanced": true,
+      "freetext": false,
+      //"heuristics": [[lower_case]],
+      "category": "author",
+      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
+      "query": [`
+        {
+        ?work wdt:P356 '[[VAR]]' .
+        }
+        `
+      ]
+    },
+    {
+      "name":"occupation",
+      "label": "With a specifc occupation",
+      "placeholder": "An occupation e.g. Researcher",
+      "advanced": true,
+      "freetext": false,
+      "heuristics": [[lower_case]],
+      "category": "author",
+      "regex":".*",
+      "query": [`
+          {
+          ?author wdt:P106 ?occupation_f.
+          ?occupation_f rdfs:label '[[VAR]]'@en .
+          }
+          `
+      ]
+    },
+    {
       "name":"lastname",
-      "label": "With a Last name",
+      "label": "With a last name",
       "placeholder": "Last name e.g. Shotton",
       "advanced": true,
       "freetext": false,
@@ -232,7 +265,7 @@ var search_conf = {
     },
     {
       "name":"firstname",
-      "label": "With a First name",
+      "label": "With a first name",
       "placeholder": "First name e.g. Silvio",
       "advanced": true,
       "freetext": false,
@@ -318,12 +351,12 @@ var search_conf = {
         },
         {
           "value":"author_str", "title": "Authors", "column_width":"38%","type": "int",
-          "link":{"field":"author_short_iri","prefix":"https://opencitations.github.io/lucinda/example/wikidata/browser.html?browse="}
+          "link":{"field":"author_short_iri","prefix":"https://opencitations.github.io/lucinda/example/wikidata/browser.html?browse="},
+          "filter":{"type_sort": "text", "min": 10000, "sort": "value", "order": "asc"}
         },
         {
           "value":"in_cits", "title": "Cited", "column_width":"12%","type": "int",
-          "sort":{"value": "in_cits", "type":"int"},
-          "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}
+          "sort":{"value": "in_cits", "type":"int"}
         },
         {
           "value":"date", "title": "Date", "column_width":"12%","type": "text",
@@ -344,7 +377,7 @@ var search_conf = {
       "label": "Author",
       "macro_query": [
         `
-        SELECT DISTINCT ?author ?short_iri ?short_iri_id ?genderLabel ?dateLabel ?employerLabel ?educationLabel ?orcid ?authorLabel ?countryLabel ?occupationLabel (COUNT(distinct ?work) AS ?works) WHERE {
+        SELECT DISTINCT ?author ?short_iri ?short_iri_id ?genderLabel ?dateLabel ?employerLabel ?educationLabel ?orcid ?authorLabel ?countryLabel ?occupationLabel (COUNT(distinct ?a_work) AS ?works) WHERE {
             ?work wdt:P31 wd:Q13442814;
                 wdt:P50 ?author .
 
@@ -355,6 +388,10 @@ var search_conf = {
             BIND(REPLACE(STR(?author), 'http://www.wikidata.org/', '', 'i') as ?short_iri) .
             BIND(REPLACE(STR(?short_iri), 'entity/Q', '', 'i') as ?short_iri_id) .
 
+            OPTIONAL {
+              ?a_work wdt:P31 wd:Q13442814;
+                  wdt:P50 ?author .
+            }
             OPTIONAL {?author wdt:P27 ?country.}
             OPTIONAL {?author wdt:P496 ?orcid.}
             OPTIONAL {?author wdt:P21 ?gender.}
@@ -381,17 +418,20 @@ var search_conf = {
         },
         {
           "value":"countryLabel", "title": "Country","column_width":"25%","type": "text",
-          "sort":{"value": "countryLabel", "type":"text"}
+          "sort":{"value": "countryLabel", "type":"text"},
+          "filter":{"type_sort": "text", "min": 10000, "sort": "value", "order": "desc"}
         },
         {
           "value":"occupationLabel", "title": "Occupation","column_width":"25%","type": "text",
-          "sort":{"value": "occupationLabel", "type":"text"}
+          "sort":{"value": "occupationLabel", "type":"text"},
+          "filter":{"type_sort": "text", "min": 10000, "sort": "value", "order": "desc"}
         },
         {
           "value":"works", "title": "Works","column_width":"25%","type": "text",
           "sort":{"value": "works", "type":"int"}
         }
       ],
+      "group_by": {"keys":["author"], "concats":["occupationLabel"]},
       "extra_elems":[
         {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Back to search", "others": {"href": "wikidata.html"}},
         {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
