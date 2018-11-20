@@ -339,7 +339,7 @@ var search_conf = {
       ],
       "fields": [
         {
-          "value":"short_iri", "title": "Q-ID","column_width":"15%","type": "text",
+          "value":"short_iri_id", "title": "Q-ID","column_width":"15%","type": "text",
           "label":{"field":"short_iri_id"},
           "link":{"field":"work","prefix":""},
           "sort":{"value": "short_iri.label", "type":"int"}
