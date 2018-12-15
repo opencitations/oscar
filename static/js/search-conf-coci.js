@@ -59,6 +59,18 @@ var search_conf = {
             "}"
       ]
     },
+    {
+      "name":"cits_stats",
+      "advanced": false,
+      "freetext": false,
+      "category": "br_stats",
+      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
+      "query": [
+            "{",
+            "BIND(<http://dx.doi.org/[[VAR]]> as ?doi_iri) .",
+            "}"
+      ]
+    }
   ],
 
 "categories": [
@@ -103,6 +115,43 @@ var search_conf = {
         {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
       ]
     },
+    {
+      "name": "br_stats",
+      "interface": false,
+      "macro_query": [`
+        SELECT ?doi_iri ?date ?type ?count
+            WHERE  {
+          			  {
+                          Select ?doi_iri ?date ?type (COUNT (DISTINCT ?ci_in) as ?count){
+                        			  [[RULE]]
+                                ?doi_iri ^cito:hasCitedEntity ?ci_in .
+                                ?ci_in cito:hasCitationCreationDate ?creation_date_in .
+                        			  BIND(SUBSTR(str(?creation_date_in), 0, 4) as ?date) .
+                        			  values ?type { "cits_in" }
+                          		  #BIND(YEAR(?creation_date_in) as ?creation_date_in_year)
+                          }GROUP BY ?doi_iri ?date ?type
+          			  }
+          			  UNION
+          			  {
+                          Select ?doi_iri ?date ?type (COUNT (DISTINCT ?ci_out) as ?count){
+                        			  [[RULE]]
+                                ?doi_iri ^cito:hasCitedEntity ?ci_out .
+                                ?ci_out cito:hasCitationCreationDate ?creation_date_out .
+                        			  BIND(SUBSTR(str(?creation_date_out), 0, 4) as ?date) .
+                  				      values ?type { "cits_out" }
+                        			  #BIND(YEAR(?creation_date_out) as ?creation_date_out_year)
+                          }GROUP BY ?doi_iri ?date ?type
+          			  }
+          }ORDER BY ?date
+        `
+      ],
+      "fields": [
+        {"iskey": true, "value":"doi_iri", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text"},
+        {"value":"date", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "int"},
+        {"value":"type", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text"},
+        {"value":"count", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "int"}
+      ]
+    }
   ],
 
   "page_limit": [5,10,15,20,30,40,50],

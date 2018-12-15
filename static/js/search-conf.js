@@ -20,17 +20,17 @@ var search_conf = {
 "rules":  [
     {
       "name":"doi",
-      "label": "DOI",
+      "label": "With a specific DOI",
+      "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
       "advanced": true,
       "freetext": true,
       "heuristics": [[lower_case]],
       "category": "document",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
-      "query": [
-            "{",
-            //"?lit bds:search ?doi_txt .  ?lit bds:matchAllTerms 'true' .  ?lit bds:relevance ?score .  ?lit bds:maxRank '1' .",
-            "?iri datacite:hasIdentifier/literal:hasLiteralValue '[[VAR]]' .",
-            "}"
+      "query": [`
+            {
+            ?iri datacite:hasIdentifier/literal:hasLiteralValue '[[VAR]]' .
+            }`
       ]
     },
     {
@@ -69,7 +69,8 @@ var search_conf = {
     },
     {
       "name":"orcid",
-      "label": "ORCID",
+      "label": "With a specific ORCID",
+      "placeholder": "ORCID e.g. 0000-0001-5506-523X",
       "advanced": true,
       "freetext": true,
       "category": "author",
@@ -83,7 +84,8 @@ var search_conf = {
     },
     {
       "name":"author_lname",
-      "label": "Author last name",
+      "label": "With a specific last name",
+      "placeholder": "Free-text e.g. Peroni",
       "advanced": true,
       "heuristics": [[lower_case,capitalize_1st_letter]],
       "category": "author",
@@ -96,7 +98,8 @@ var search_conf = {
     },
     {
       "name":"author_fname",
-      "label": "Author first name",
+      "label": "With a specific first name",
+      "placeholder": "Free-text e.g. Silvio",
       "advanced": true,
       "heuristics": [[lower_case,capitalize_1st_letter]],
       "category": "author",
@@ -133,7 +136,8 @@ var search_conf = {
     },
     {
       "name":"author_text",
-      "label": "Author last name",
+      "label": "Having an author (last name)",
+      "placeholder": "Free-text e.g. Shotton",
       "advanced": true,
       "freetext": true,
       "category": "document",
@@ -155,6 +159,7 @@ var search_conf = {
     {
       "name":"any_text",
       "label": "Title, Subtitle, Keywords",
+      "placeholder": "Free-text e.g. Semantic web",
       "advanced": true,
       "freetext": true,
       "category": "document",
@@ -179,49 +184,48 @@ var search_conf = {
       "name": "document",
       "label": "Document",
       "macro_query": [
-        //"SELECT DISTINCT ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where{",
-          "  SELECT DISTINCT ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) (count(?next) as ?tot)",
-          "  Where{",
-          "      [[RULE]]",
-          //"      OPTIONAL {",
-          "          {",
-          "             ?iri rdf:type ?type .",
-          "        	    OPTIONAL {?iri cito:cites ?cites .}",
-          "      	 	    OPTIONAL {?cited_by cito:cites ?iri .}",
-          "             BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
-          "        	    BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/br/', '', 'i') as ?short_iri_id) .",
-          "             BIND(REPLACE(STR(?iri), '/corpus/', '/browser/', 'i') as ?browser_iri) .",
-          "			        OPTIONAL {?iri dcterms:title ?title .}",
-          "			        BIND(REPLACE(STR(?type), 'http://purl.org/spar/fabio/', '', 'i') as ?short_type) .",
-          "			        OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}",
-          "			        OPTIONAL {?iri prism:publicationDate ?year .}",
-          "             OPTIONAL {",
-          "                      ?iri datacite:hasIdentifier [",
-          "                      datacite:usesIdentifierScheme datacite:doi ;",
-          "                      literal:hasLiteralValue ?doi",
-          "                      ]",
-          "               }",
-          "          }",
-          "          {",
-          "              ?iri rdfs:label ?label .",
-          "               OPTIONAL {",
-          "                          ?iri pro:isDocumentContextFor ?role .",
-          "                          ?role pro:withRole pro:author ; pro:isHeldBy [",
-          "                              foaf:familyName ?f_name ;",
-          "                              foaf:givenName ?g_name",
-          "                          ] .",
-          "                          ?role pro:isHeldBy ?author_iri .",
-          "                          OPTIONAL { ",
-          "                              ?role oco:hasNext* ?next . ",
-          "                          }",
-          "                          BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .",
-          "                          BIND(CONCAT(?g_name,' ',?f_name) as ?author) .			",
-          "              }",
-          "          }",
-          //"      }",
-          "  } GROUP BY ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri ORDER BY DESC(?tot)",
-          "",
-          //"} GROUP BY ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri"
+        `
+        SELECT DISTINCT ?iri ?type ?short_iri ?short_iri_id ?browser_iri ?short_type ?title ?doi ?subtitle ?year ?label ?author ?author_browser_iri (COUNT(distinct ?cites) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) (count(?next) as ?tot)
+        Where{
+               [[RULE]]
+               {
+                   	?iri rdf:type ?type .
+                    BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .
+                    BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/br/', '', 'i') as ?short_iri_id) .
+                    BIND(REPLACE(STR(?iri), '/corpus/', '/browser/', 'i') as ?browser_iri) .
+                    BIND(REPLACE(STR(?type), 'http://purl.org/spar/fabio/', '', 'i') as ?short_type) .
+
+                    #Doc attributes
+                    OPTIONAL {?iri cito:cites ?cites .}
+                    OPTIONAL {?iri ^cito:cites ?cited_by .}
+                    OPTIONAL {?iri dcterms:title ?title .}
+                    OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}
+                    OPTIONAL {?iri prism:publicationDate ?year .}
+                    OPTIONAL {
+                        ?iri datacite:hasIdentifier [
+                        datacite:usesIdentifierScheme datacite:doi ;
+                        literal:hasLiteralValue ?doi
+                        ]
+                    }
+                }
+
+                #list of the doc authors
+                {
+                    ?iri rdfs:label ?label .
+                     OPTIONAL {
+                          ?iri pro:isDocumentContextFor ?role .
+                          ?role pro:withRole pro:author ; pro:isHeldBy [
+                              foaf:familyName ?f_name ;
+                              foaf:givenName ?g_name
+                          ] .
+                          ?role pro:isHeldBy ?author_iri .
+                          OPTIONAL {?role oco:hasNext* ?next .}
+                          BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .
+                          BIND(CONCAT(?g_name,' ',?f_name) as ?author) .
+                    }
+                }
+            } GROUP BY ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri ORDER BY DESC(?tot)
+           `
       ],
       "fields": [
         {"iskey": true, "value":"short_iri", "label":{"field":"short_iri_id"}, "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": "short_iri.label", "type":"int"}, "link":{"field":"browser_iri","prefix":""}},
@@ -241,28 +245,32 @@ var search_conf = {
     {
       "name": "author",
       "label": "Author",
-      "macro_query": [
-        "SELECT ?author_iri ?author_browser_iri ?short_iri ?short_iri_id ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
-            "[[RULE]]",
-            "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .",
-            "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus/ra/', '', 'i') as ?short_iri_id) .",
-            "BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .",
-            "OPTIONAL {?author_iri datacite:hasIdentifier[",
-                      "datacite:usesIdentifierScheme datacite:orcid ;",
-             			    "literal:hasLiteralValue ?orcid].}",
-            "?author_iri rdfs:label ?label .",
-            "OPTIONAL {",
-                    "?author_iri foaf:familyName ?fname .",
-                    "?author_iri foaf:givenName ?name .",
-                    "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
-             "}",
-             "",
-             "OPTIONAL {",
-                  "?role pro:isHeldBy ?author_iri .",
-                  "?role pro:isHeldBy ?author_iri .",
-                  "?doc pro:isDocumentContextFor ?role.",
-             "}",
-        "}GROUP BY ?author_iri ?author_browser_iri ?short_iri ?short_iri_id ?orcid ?author"
+      "macro_query": [`
+        SELECT ?author_iri ?author_browser_iri ?short_iri ?short_iri_id ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {
+            [[RULE]]
+            BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .
+            BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus/ra/', '', 'i') as ?short_iri_id) .
+            BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .
+            ?author_iri rdfs:label ?label .
+
+            #author attributes
+            OPTIONAL {?author_iri datacite:hasIdentifier[
+                      datacite:usesIdentifierScheme datacite:orcid ;
+             			    literal:hasLiteralValue ?orcid].}
+            OPTIONAL {
+                    ?author_iri foaf:familyName ?fname .
+                    ?author_iri foaf:givenName ?name .
+                    BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .
+            }
+
+            #all his documents
+            OPTIONAL {
+                  ?role pro:isHeldBy ?author_iri .
+                  ?doc pro:isDocumentContextFor ?role.
+            }
+
+        }GROUP BY ?author_iri ?author_browser_iri ?short_iri ?short_iri_id ?orcid ?author
+        `
       ],
       "fields": [
         {"value":"short_iri", "title": "Corpus ID", "label":{"field":"short_iri_id"}, "column_width":"25%", "type": "text", "sort":{"value": "short_iri.label", "type":"int"}, "link":{"field":"author_browser_iri","prefix":""}},

@@ -90,7 +90,7 @@ var search = (function () {
 				}
 
 				//decode all boolean connectors
-				reg = /bc=(.+?)(?=&text)/g;
+				reg = /bc_\d{1,}=(and|or|and_not)/g;
 				while (match = reg.exec(qtext)) {
 					res.bcs.push(match[1]);
 				}
@@ -334,8 +334,11 @@ var search = (function () {
         				}
     				},
 						success: function( res_data ) {
-								if (util.get_obj_key_val(search_conf_json,"progress_loader.visible") == true) {
-									htmldom.loader(false);
+
+								if (util.get_obj_key_val(search_conf_json,"interface") != false) {
+									if (util.get_obj_key_val(search_conf_json,"progress_loader.visible") == true) {
+										htmldom.loader(false);
+									}
 								}
 								//console.log(JSON.parse(JSON.stringify(res_data)));
 
@@ -347,8 +350,7 @@ var search = (function () {
 									//in this case don't build the table directly
 									if (callbk_fun != null) {
 									 //look at the rule name
-					 				 Reflect.apply(callbk_fun,undefined,[query_text, JSON.parse(JSON.stringify(res_data))]);
-									 return JSON.parse(JSON.stringify(res_data));
+									 _init_data(res_data,callbk = callbk_fun, callbk_query = query_text);
 					 			 	}
 									build_table(res_data);
 
@@ -374,6 +376,7 @@ var search = (function () {
 			htmldom.reset_html_structure();
 
 			_init_data(res_data);
+
 			htmldom.build_extra_elems(cat_conf.extra_elems);
 			_build_filter_sec();
 			_limit_results();
@@ -482,7 +485,7 @@ var search = (function () {
 
 
 		/*init all the local data*/
-		function _init_data(json_data){
+		function _init_data(json_data, callbk = null, callbk_query = null){
 
 			table_conf.category = cat_conf.name;
 			var category_conf_obj = cat_conf;
@@ -648,6 +651,11 @@ var search = (function () {
 						table_conf.view.sort.order = fields[i].sort.default.order;
 						table_conf.view.sort.type = fields[i].sort.type;
 				}
+			}
+
+			if (callbk != null){
+				Reflect.apply(callbk,undefined,[callbk_query, JSON.parse(JSON.stringify(table_conf.data.results.bindings))]);
+				return JSON.parse(JSON.stringify(table_conf.data.results.bindings));
 			}
 		}
 		/*map the fields with their corresponding links*/
@@ -2400,21 +2408,21 @@ var htmldom = (function () {
 
 		id_rows++;
 		var str_html = ''+
-			'<fieldset>'+
-			'<div class="adv btn-group" data-toggle="buttons">'+
-				'<label class="btn btn-secondary active">'+
-				'<input name="bc" value="and" type="radio" entryid="'+id_rows+'" class="btn btn-default" checked>And'+
-				'</label>'+
-				'<label class="btn btn-secondary" value="or">'+
-				'<input name="bc" value="or" type="radio" entryid="'+id_rows+'" class="btn btn-default">Or'+
-				'</label>'+
-				'<label class="btn btn-secondary" value="and_not">'+
-				'<input name="bc" value="and_not" type="radio" entryid="'+id_rows+'" class="btn btn-default">And Not'+
-				'</label>'+
-			'</div>'+
-			'<div class="adv btn remove">'+
-			'<button entryid="'+id_rows+'" class="btn btn-default theme-color" id="remove_rule_btn" onclick="htmldom.remove_adv_rule('+id_rows+')" class="remove-rule-btn">Remove <i class="glyphicon glyphicon-minus normal-icon"></i> </button>'+
-			'</div>'+
+			'<fieldset id="'+id_rows+'">'+
+				'<div class="adv btn-group" data-toggle="buttons">'+
+					'<label class="btn btn-secondary active">'+
+					'<input name="bc_'+id_rows+'" value="and" type="radio" entryid="'+id_rows+'" class="btn btn-default" checked>And'+
+					'</label>'+
+					'<label class="btn btn-secondary" value="or">'+
+					'<input name="bc_'+id_rows+'" value="or" type="radio" entryid="'+id_rows+'" class="btn btn-default">Or'+
+					'</label>'+
+					'<label class="btn btn-secondary" value="and_not">'+
+					'<input name="bc_'+id_rows+'" value="and_not" type="radio" entryid="'+id_rows+'" class="btn btn-default">And Not'+
+					'</label>'+
+				'</div>'+
+				'<div class="adv btn remove">'+
+				'<button entryid="'+id_rows+'" class="btn btn-default theme-color" id="remove_rule_btn" onclick="htmldom.remove_adv_rule('+id_rows+')" class="remove-rule-btn">Remove <i class="glyphicon glyphicon-minus normal-icon"></i> </button>'+
+				'</div>'+
 			'</fieldset>'+
 			_build_rule_entry(id_rows, arr_rules, adv_cat_selected)+
 			'';
