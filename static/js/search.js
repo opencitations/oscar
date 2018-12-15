@@ -39,6 +39,7 @@ var search = (function () {
 		/*get rule entry with given name*/
 		function _get_rule_by_name(name){
 			for (i = 0; i < search_conf_json["rules"].length; i++) {
+				console.log(search_conf_json["rules"][i]['name'],name);
 				if (search_conf_json["rules"][i]['name'] == name) {
 					return search_conf_json["rules"][i];
 				}

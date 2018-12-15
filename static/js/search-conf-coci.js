@@ -17,8 +17,8 @@ var search_conf = {
 "rules":  [
     {
       "name":"citingdoi",
-      "label": "References",
-      "placeholder": "DOI",
+      "label": "References of a specific document",
+      "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
       "advanced": true,
       "freetext": false,
       "heuristics": [[encodeURIStr]],
@@ -32,8 +32,8 @@ var search_conf = {
     },
     {
       "name":"citeddoi",
-      "label": "Citations",
-      "placeholder": "DOI",
+      "label": "Citations of a specific document",
+      "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
       "advanced": true,
       "freetext": false,
       "heuristics": [[encodeURIStr]],
@@ -47,8 +47,8 @@ var search_conf = {
     },
     {
       "name":"oci",
-      "label": "Citation resource",
-      "placeholder": "OCI",
+      "label": "Having a specific resource ID",
+      "placeholder": "OCI e.g: 0200101...-0200101...",
       "advanced": true,
       "freetext": false,
       "category": "citation",
