@@ -53,7 +53,7 @@ var search_conf = {
       "query": [
             "{",
             //"<[[VAR]]> cito:cites ?iri .",
-            "?iri cito:ˆcites <[[VAR]]> .",
+            "<[[VAR]]> cito:cites ?iri .",
             "}"
       ]
     },
@@ -64,7 +64,7 @@ var search_conf = {
       "regex": "(https:\/\/w3id\\.org\/oc\/corpus\/br\/\\d{1,})",
       "query": [
             "{",
-            "?iri cito:cites <[[VAR]]> .",
+            "<[[VAR]]> ^cito:cites ?iri  .",
             "}"
       ]
     },
