@@ -682,8 +682,13 @@ var search = (function () {
 			}
 
 			if (callbk != null){
-				Reflect.apply(callbk,undefined,[callbk_query, JSON.parse(JSON.stringify(table_conf)), JSON.parse(JSON.stringify(cat_conf))]);
-				return JSON.parse(JSON.stringify(table_conf.data.results.bindings));
+				Reflect.apply(callbk,undefined,[
+							callbk_query,
+							JSON.parse(JSON.stringify(table_conf)),
+							JSON.parse(JSON.stringify(cat_conf)),
+							table_conf.data.results.bindings.length == 0]
+				);
+				//return JSON.parse(JSON.stringify(table_conf.data.results.bindings));
 			}
 		}
 		/*map the fields with their corresponding links*/
