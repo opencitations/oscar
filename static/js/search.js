@@ -16,6 +16,34 @@ var search = (function () {
 				view: {"data": null, "page": 0, "page_limit": null, "fields_filter_index":{}, "sort": {"field":null, "order":null, "type":null}}
 		}
 
+		function init_oscar_obj(){
+			return {
+					'search_conf_json' : {},
+					'cat_conf' : {},
+					'sparql_results' : null,
+					'sparql_query_add' : null,
+					'ext_data_calls_cache' : {},
+					'async_call': null,
+					'table_conf' : {
+							'data_key' : null,
+							'data': null,
+							'category': "",
+							'filters' : {"limit":null, "arr_entries":[], "fields":[], "data":null},
+							'view': {"data": null, "page": 0, "page_limit": null, "fields_filter_index":{}, "sort": {"field":null, "order":null, "type":null}}
+					}
+			}
+		}
+
+		function reload_oscar_obj(obj){
+			search_conf_json = obj['search_conf_json'];
+			cat_conf = obj['cat_conf'];
+			sparql_results = obj['sparql_results'];
+			sparql_query_add = obj['sparql_query_add'];
+			ext_data_calls_cache = obj['ext_data_calls_cache'];
+			async_call = obj['async_call'];
+			table_conf = obj['table_conf'];
+		}
+
 
 		/* get the rules that matches my query_text*/
 		function _get_rules(query_text) {
@@ -351,8 +379,9 @@ var search = (function () {
 									if (callbk_fun != null) {
 									 //look at the rule name
 									 _init_data(res_data,callbk = callbk_fun, callbk_query = query_text);
-					 			 	}
-									build_table(res_data);
+								 }else {
+								 	build_table(res_data);
+								 }
 
 								}else {
 										var sparql_query = _build_sparql_query(rules[rule_index+1], query_text);
@@ -369,18 +398,20 @@ var search = (function () {
 			 return sparql_results;
 		}
 
-		function build_table(results_data){
+		function build_table(results_data, do_init = true){
 			var res_data = JSON.parse(JSON.stringify(results_data));
 
 			//reset all doms
 			htmldom.reset_html_structure();
 
-			_init_data(res_data);
+			if (do_init) {
+				_init_data(res_data);
+			}
 
 			htmldom.build_extra_elems(cat_conf.extra_elems);
 			_build_filter_sec();
 			_limit_results();
-			_gen_data_checkboxes();
+			//_gen_data_checkboxes();
 			htmldom.filter_checkboxes(table_conf);
 			_build_header_sec();
 			_sort_results();
@@ -409,7 +440,7 @@ var search = (function () {
 			if (native) {
 				my_search_conf_json = search_conf;
 				if (config_mod != null) {
-					my_search_conf_json = util.update_obj(my_search_conf_json, config_mod);
+					my_search_conf_json = JSON.parse(JSON.stringify(util.update_obj(my_search_conf_json, config_mod)));
 				}
 			}
 
@@ -486,10 +517,8 @@ var search = (function () {
 
 		/*init all the local data*/
 		function _init_data(json_data, callbk = null, callbk_query = null){
-
 			table_conf.category = cat_conf.name;
 			var category_conf_obj = cat_conf;
-
 			//Adapt the resulting data
 			// init uri values
 
@@ -620,7 +649,6 @@ var search = (function () {
 			table_conf.filters.arr_entries = [];
 			//init all the view fields
 			table_conf.view.data = JSON.parse(JSON.stringify(table_conf.data));
-
 			table_conf.view.page = 0;
 
 			if (search_conf_json.page_limit != undefined) {
@@ -654,7 +682,7 @@ var search = (function () {
 			}
 
 			if (callbk != null){
-				Reflect.apply(callbk,undefined,[callbk_query, JSON.parse(JSON.stringify(table_conf.data.results.bindings))]);
+				Reflect.apply(callbk,undefined,[callbk_query, JSON.parse(JSON.stringify(table_conf)), JSON.parse(JSON.stringify(cat_conf))]);
 				return JSON.parse(JSON.stringify(table_conf.data.results.bindings));
 			}
 		}
@@ -1218,7 +1246,6 @@ var search = (function () {
 		function _gen_data_checkboxes(myfields = table_conf.filters.fields){
 
 			//table_conf.filters.arr_entries = [];
-
 			var new_arr_entries = [];
 			// create the list of values I can filter
 			for (var i = 0; i < myfields.length; i++) {
