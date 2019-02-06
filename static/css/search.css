@@ -489,6 +489,9 @@ input[type=range]::-moz-range-track {
 
 
 @media only screen and (max-width: 700px) {
+  #search_header{
+    font-size: 85%;
+  }
   #rows_per_page {
     display:block;
     float:left;
@@ -503,7 +506,7 @@ input[type=range]::-moz-range-track {
 
   #export_results{
     display:block;
-    float:right;
+    float:left;
   }
 
   .results-tab th {
@@ -513,9 +516,11 @@ input[type=range]::-moz-range-track {
     display: table-row;
   }
   .results-tab tr {
-    border-bottom: 2px solid;
-    margin-top: 1px;
+    border-bottom: 1px solid;
+    margin-top: 2px;
     display: table;
     width: 100%;
   }
+  .tab-nav-btn.next{float:right; margin-top: 10px; margin-right: 10px;}
+  .tab-nav-btn.prev{float:left; margin-top: 10px; margin-left: 10px;}
 }
