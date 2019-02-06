@@ -500,13 +500,14 @@ input[type=range]::-moz-range-track {
 
   #sort_results {
     display:block;
-    float:left;
+    float:right;
     margin-right:3%;
   }
 
   #export_results{
     display:block;
     float:left;
+    margin-right: 20px;
   }
 
   .results-tab th {
