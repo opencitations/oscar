@@ -485,3 +485,37 @@ input[type=range]::-moz-range-track {
 .slider-footer{
 }
 /* ========================== Slider class */
+
+
+
+@media only screen and (max-width: 700px) {
+  #rows_per_page {
+    display:block;
+    float:left;
+    margin-left:26%;
+  }
+
+  #sort_results {
+    display:block;
+    float:left;
+    margin-right:3%;
+  }
+
+  #export_results{
+    display:block;
+    float:right;
+  }
+
+  .results-tab th {
+    display: table-row;
+  }
+  .results-tab td {
+    display: table-row;
+  }
+  .results-tab tr {
+    border-bottom: 2px solid;
+    margin-top: 1px;
+    display: table;
+    width: 100%;
+  }
+}
