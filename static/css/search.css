@@ -492,6 +492,35 @@ input[type=range]::-moz-range-track {
   #search_header{
     font-size: 85%;
   }
+
+  #search_filters{
+    border-top: solid;
+    border-color: #f2f2f2;
+    margin-top: 10px;
+    float:left;
+    width: 100%;
+  }
+  .limit-results {
+    margin-top: 20px;
+    display: inline-block;
+    font-size: 120%;
+    float:left;
+    width: 100%;
+    text-align: center;
+  }
+  .slider-container{
+    width: 100%;
+  }
+  .filters-btns {
+    float: none;
+    margin-top: 8%;
+    margin-bottom:4%;
+  }
+  #filter_values_list{
+    width: 100%;
+  }
+
+
   #rows_per_page {
     display:block;
     float:left;
@@ -509,7 +538,9 @@ input[type=range]::-moz-range-track {
     float:left;
     margin-right: 20px;
   }
-
+  #search_results{
+    width: 100%;
+  }
   .results-tab th {
     display: table-row;
   }
