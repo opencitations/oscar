@@ -368,7 +368,6 @@ var search = (function () {
 										htmldom.loader(false);
 									}
 								}
-								//console.log(JSON.parse(JSON.stringify(res_data)));
 
 								if ((rule_index >= rules.length -1) || (res_data.results.bindings.length > 0)) {
 									sparql_results = res_data;
@@ -524,10 +523,8 @@ var search = (function () {
 
 			//TODOO function for oscar
 			json_data.results.bindings = _init_val_map(json_data.results.bindings);
-
 			json_data.results.bindings = _init_uris(json_data.results.bindings);
 			json_data.results.bindings = _init_lbls(json_data.results.bindings);
-
 			// order by the rows
 			var order_by = category_conf_obj.order_by;
 			if (order_by != undefined) {
@@ -535,7 +532,6 @@ var search = (function () {
 						json_data.results.bindings = util.order_by(json_data.results.bindings, order_by.keys, order_by.types, order = order_by.order);
 					}
 			}
-
 			// group by the rows
 			var group_by = category_conf_obj.group_by;
 			if (group_by != undefined) {
@@ -544,17 +540,9 @@ var search = (function () {
 				}
 			}
 
-
-
-
-			//console.log("After linking and grouping :");
-			//console.log(JSON.parse(JSON.stringify(json_data)));
-
-			//init global data
-			//results_data = JSON.parse(JSON.stringify(json_data));
-
 			//init the data
 			table_conf.data = JSON.parse(JSON.stringify(json_data));
+			console.log(JSON.parse(JSON.stringify(json_data)));
 			// keep only the fields I want
 			var fields = category_conf_obj.fields;
 

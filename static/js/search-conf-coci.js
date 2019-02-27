@@ -81,6 +81,7 @@ var search_conf = {
         "SELECT DISTINCT ?iri ?short_iri ?shorter_coci ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan",
             "WHERE  {",
               "[[RULE]]",
+              "hint:Prior hint:runFirst true .",
               "OPTIONAL {",
                 "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/index/coci/ci/', '', 'i') as ?short_iri) .",
                 //"BIND(CONCAT(SUBSTR(STR(?short_iri), 0, 20), '...') as ?shorter_coci) .",
@@ -124,6 +125,7 @@ var search_conf = {
           			  {
                           Select ?doi_iri ?date ?type (COUNT (DISTINCT ?ci_in) as ?count){
                         			  [[RULE]]
+                        			  hint:Prior hint:runFirst true .
                                 ?doi_iri ^cito:hasCitedEntity ?ci_in .
                                 ?ci_in cito:hasCitationCreationDate ?creation_date_in .
                         			  BIND(SUBSTR(str(?creation_date_in), 0, 4) as ?date) .
@@ -135,6 +137,7 @@ var search_conf = {
           			  {
                           Select ?doi_iri ?date ?type (COUNT (DISTINCT ?ci_out) as ?count){
                         			  [[RULE]]
+                        			  hint:Prior hint:runFirst true .
                                 ?doi_iri ^cito:hasCitedEntity ?ci_out .
                                 ?ci_out cito:hasCitationCreationDate ?creation_date_out .
                         			  BIND(SUBSTR(str(?creation_date_out), 0, 4) as ?date) .

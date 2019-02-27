@@ -185,3 +185,127 @@ function lower_case(str){
 function capitalize_1st_letter(str){
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+function decodeURIStr(str) {
+  return decodeURIComponent(str);
+}
+function encodeURIStr(str) {
+  return encodeURIComponent(str);
+}
+function timespan_translate(str) {
+  var new_str = "";
+  var years = 0;
+  var months = 0;
+  var days = 0;
+
+  let reg = /(\d{1,})Y/g;
+  let match;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      years = match[1] ;
+      new_str = new_str + years +" Years "
+    }
+  }
+
+  reg = /(\d{1,})M/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      months = match[1] ;
+      new_str = new_str + months +" Months "
+    }
+  }
+
+  reg = /(\d{1,})D/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      days = match[1] ;
+      new_str = new_str + days +" Days "
+    }
+  }
+
+  return new_str;
+}
+function timespan_in_days(str) {
+  var new_str = "";
+  var years = 0;
+  var months = 0;
+  var days = 0;
+
+  let reg = /(\d{1,})Y/g;
+  let match;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      years = parseInt(match[1]) ;
+    }
+  }
+
+  reg = /(\d{1,})M/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      months = parseInt(match[1]) ;
+    }
+  }
+
+  reg = /(\d{1,})D/g;
+  while (match = reg.exec(str)) {
+    if (match.length >= 2) {
+      days = parseInt(match[1]) ;
+    }
+  }
+
+  return String(years * 365 + months * 30 + days);
+}
+function short_version(str, max_chars = 20) {
+  var new_str = "";
+  for (var i = 0; i < max_chars; i++) {
+    if (str[i] != undefined) {
+      new_str = new_str + str[i];
+    }else {
+      break;
+    }
+  }
+  return new_str+"...";
+}
+function call_crossref(conf_params, index, async_bool, callbk_func, key_full_name, data_field, func_name ){
+  var call_crossref_api = "https://api.crossref.org/works/";
+
+  var str_doi = conf_params[0];
+  if (str_doi != undefined) {
+    var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
+    //var result_data = "...";
+    $.ajax({
+          dataType: "json",
+          url: call_url,
+          type: 'GET',
+          async: async_bool,
+          success: function( res_obj ) {
+              var func_param = [];
+              func_param.push(index, key_full_name, data_field, async_bool, func_name, conf_params, res_obj);
+              Reflect.apply(callbk_func,undefined,func_param);
+          }
+     });
+  }
+}
+
+//https://citation.crosscite.org/format?doi=10.1145%2F2783446.2783605&style=apa&lang=en-US
+function call_crossref_4citation(conf_params, index, async_bool, callbk_func, key_full_name, data_field, func_name ){
+  var call_crossref_api = "https://citation.crosscite.org/format?doi=";
+  var suffix = "&style=apa&lang=en-US";
+
+  var str_doi = conf_params[0];
+
+  if (str_doi != undefined) {
+    var call_url =  call_crossref_api+str_doi+suffix;
+    //var result_data = "...";
+    $.ajax({
+          url: call_url,
+          type: 'GET',
+          async: async_bool,
+          success: function( res ) {
+              var res_obj = {"reference": res};
+              var func_param = [];
+              func_param.push(index, key_full_name, data_field, async_bool, func_name, conf_params, res_obj);
+              Reflect.apply(callbk_func,undefined,func_param);
+          }
+     });
+  }
+}
