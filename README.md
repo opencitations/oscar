@@ -1,5 +1,5 @@
 # OSCAR
-### a general [S]earch [A]pplication for [R]df data specially designed for [O]pen [C]itations  
+### The OpenCitations RDF Search Application,
 #### - [OSCAR paper for SAVE-SD2018](https://essepuntato.github.io/papers/oscar-savesd2018.html)  
 
 A  user friendly search platform applicable for any triplestore endpoint.  
@@ -10,3 +10,5 @@ One of the main characteristics of OSCAR is its adaptability to work with any ot
 * OpenCitations: [search.html](search.html)
 * Wikidata: [wikidata.html](example/wikidata.html)
 * ScholarlyData: [scholarlydata.html](example/scholarlydata.html)
+
+![OSCAR](doc/oscar_logo.png)
