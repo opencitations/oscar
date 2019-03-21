@@ -1,5 +1,5 @@
 var search_conf = {
-"sparql_endpoint": "https://w3id.org/oc/index/coci/sparql",
+"sparql_endpoint": "https://w3id.org/oc/index/sparql",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},
     {"prefix":"dcterms","iri":"http://purl.org/dc/terms/"},
@@ -53,10 +53,11 @@ var search_conf = {
       "freetext": false,
       "category": "citation",
       "regex":"(\\d{1,}-\\d{1,})",
-      "query": [
-            "{",
-            "BIND(<https://w3id.org/oc/index/coci/ci/[[VAR]]> as ?iri) .",
-            "}"
+      "query": [`
+        {
+          VALUES ?iri { <https://w3id.org/oc/index/coci/ci/[[VAR]]> <https://w3id.org/oc/index/croci/ci/[[VAR]]> }
+        }
+        `
       ]
     },
     {
@@ -78,26 +79,29 @@ var search_conf = {
       "name": "citation",
       "label": "Citation",
       "macro_query": [
-        "SELECT DISTINCT ?iri ?short_iri ?shorter_coci ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan",
-            "WHERE  {",
-              "[[RULE]]",
-              "hint:Prior hint:runFirst true .",
-              "OPTIONAL {",
-                "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/index/coci/ci/', '', 'i') as ?short_iri) .",
-                //"BIND(CONCAT(SUBSTR(STR(?short_iri), 0, 20), '...') as ?shorter_coci) .",
-                "?iri cito:hasCitingEntity ?citing_doi_iri .",
-                "BIND(REPLACE(STR(?citing_doi_iri), 'http://dx.doi.org/', '', 'i') as ?citing_doi) .",
-                "?iri cito:hasCitedEntity ?cited_doi_iri .",
-                "BIND(REPLACE(STR(?cited_doi_iri), 'http://dx.doi.org/', '', 'i') as ?cited_doi) .",
-                "?iri cito:hasCitationCreationDate ?creationdate .",
-                "?iri cito:hasCitationTimeSpan ?timespan .",
-              "}",
-            "}",
-            //"ORDER BY DESC(?score) ",
-            //"LIMIT 2000"
+        `
+            SELECT DISTINCT ?iri ?short_iri ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan
+                        WHERE  {
+                        [[RULE]]
+                        hint:Prior hint:runFirst true .
+
+                        #Consider citing/cited DOI a must field
+                        BIND(STRAFTER(STR(?iri), '/ci/') as ?short_iri) .
+                        ?iri cito:hasCitingEntity ?citing_doi_iri .
+                        BIND(REPLACE(STR(?citing_doi_iri), 'http://dx.doi.org/', '', 'i') as ?citing_doi) .
+                        ?iri cito:hasCitedEntity ?cited_doi_iri .
+                        BIND(REPLACE(STR(?cited_doi_iri), 'http://dx.doi.org/', '', 'i') as ?cited_doi) .
+
+                        #we consider as optional only the creation date and the timespan of the citation
+                        OPTIONAL {
+                            ?iri cito:hasCitationCreationDate ?creationdate .
+                            ?iri cito:hasCitationTimeSpan ?timespan .
+                          }
+            }
+            `
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "Index IRI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
         {"value":"citing_doi", "value_map": [decodeURIStr],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
         {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
         {"value":"cited_doi", "value_map": [decodeURIStr], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
@@ -111,7 +115,7 @@ var search_conf = {
         "cited_doi_citation": {"name": call_crossref_4citation, "param": {"fields":["cited_doi"]}, "async": true}
       },
       "extra_elems":[
-        {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Back to search", "others": {"href": "/index/coci/search"}},
+        {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Back to search", "others": {"href": "/index/search"}},
         {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
         {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
       ]
@@ -119,6 +123,7 @@ var search_conf = {
     {
       "name": "br_stats",
       "interface": false,
+      "in_adv_menu": false,
       "macro_query": [`
         SELECT ?doi_iri ?date ?type ?count
             WHERE  {
@@ -149,10 +154,10 @@ var search_conf = {
         `
       ],
       "fields": [
-        {"iskey": true, "value":"doi_iri", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text"},
-        {"value":"date", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "int"},
-        {"value":"type", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "text"},
-        {"value":"count", "value_map": [], "limit_length": 20, "title": "COCI IRI","column_width":"10%", "type": "int"}
+        {"iskey": true, "value":"doi_iri", "value_map": [], "limit_length": 20, "title": "INDEX IRI","column_width":"10%", "type": "text"},
+        {"value":"date", "value_map": [], "limit_length": 20, "title": "INDEX IRI","column_width":"10%", "type": "int"},
+        {"value":"type", "value_map": [], "limit_length": 20, "title": "INDEX IRI","column_width":"10%", "type": "text"},
+        {"value":"count", "value_map": [], "limit_length": 20, "title": "INDEX IRI","column_width":"10%", "type": "int"}
       ]
     }
   ],
@@ -162,12 +167,12 @@ var search_conf = {
   "search_base_path": "search",
   "advanced_search": true,
   "def_adv_category": "citation",
-  "adv_btn_title": "Search the COCI Corpus",
+  "adv_btn_title": "Search in the OpenCitations Indexes",
 
   "progress_loader":{
             "visible": true,
             "spinner": true,
-            "title":"Searching the COCI Corpus ...",
+            "title":"Searching in the OpenCitations Indexes ...",
             "subtitle":"Be patient - this search might take several seconds!",
             "abort":{"title":"Abort Search","href_link":"search"}
           }

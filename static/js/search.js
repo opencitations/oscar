@@ -2410,6 +2410,11 @@ var htmldom = (function () {
 				return str_lis;
 			}
 			for (var i = 0; i < arr_categories.length; i++) {
+				if (arr_categories[i].in_adv_menu != undefined){
+					if (arr_categories[i].in_adv_menu == false) {
+						continue;
+					}
+				}
 				var is_active = "";
 				if (arr_categories[i].name == adv_cat_selected) {
 					is_active = "active";

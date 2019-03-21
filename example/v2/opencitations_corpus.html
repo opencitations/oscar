@@ -8,17 +8,11 @@
         <title>Search</title>
 
         <!-- Bootstrap core CSS -->
-        <link href="static/css/bootstrap.min.css" rel="stylesheet" />
-
-        <!-- Font Awesome -->
-        <link href="static/css/font-awesome.min.css" rel="stylesheet" />
-
-        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-        <link href="static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
+        <link href="../../static/css/bootstrap.min.css" rel="stylesheet" />
 
         <!-- Custom styles for this template -->
-        <link href="static/css/cover.css" rel="stylesheet" />
-        <link href="static/css/search.css" rel="stylesheet" />
+        <link href="static/css/opencitations/cover.css" rel="stylesheet" />
+        <link href="../../static/css/search.css" rel="stylesheet" />
 
     </head>
     <body>
@@ -27,7 +21,7 @@
 
         <div class="cover-container">
 
-          <form action="search.html" method="GET" accept-charset="ASCII">
+          <form action="opencitations_corpus.html" method="GET" accept-charset="ASCII">
               <input id="input_box" name="query" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
               <span>
                 <!--<button id="search_btn" class="btn btn-default oc-purple" type="submit"><i class="glyphicon glyphicon-search"></i></button>-->
@@ -64,15 +58,14 @@
         <!-- Bootstrap core JavaScript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="static/js/jquery.min.js"><![CDATA[ ]]></script>
+        <script src="../../static/js/jquery.min.js"><![CDATA[ ]]></script>
         <script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"><\/script>')</script>
-        <script src="static/js/bootstrap.min.js"><![CDATA[ ]]></script>
-        <script src="static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
+        <script src="../../static/js/bootstrap.min.js"><![CDATA[ ]]></script>
 
-        <script type="text/javascript" src="static/js/search-conf.js"></script>
-        <script type="text/javascript" src="static/js/search.js"></script>
+        <script type="text/javascript" src="static/js/search-conf-occ.js"></script>
+        <script type="text/javascript" src="../../static/js/search.js"></script>
         <script>
-        search_conf["search_base_path"] = "search.html";
+        search_conf["search_base_path"] = "opencitations_corpus.html";
         var escape_spaces = decodeURIComponent(window.location.search+'').replace(/\+/g, '%20');
         var queryt= escape_spaces.replace('?query=','?text=');
         //queryt = escape_spaces;
