@@ -1,4 +1,80 @@
 
+//GLOBALS
+var oscar_tags = document.getElementsByClassName("__oscar__");
+var oscar_doms = [];
+for (var i = 0; i < oscar_tags.length; i++) {
+	var oscar_container = oscar_tags[i];
+
+	var type = 'advanced';
+	if(oscar_container.getAttribute('type') != undefined){ type = oscar_container.getAttribute('type')}
+
+	var input = 'advanced';
+	if(oscar_container.getAttribute('input') != undefined){ input = oscar_container.getAttribute('input')}
+
+	var view_op = ['rows_per_page','sort_results','export_results'];
+	if(oscar_container.getAttribute('view_op') != undefined){
+		view_op = oscar_container.getAttribute('view_op');
+		view_op = view_op.split(" ");
+	}
+
+	var filter_op = ['limit_results','filter_fields'];
+	if(oscar_container.getAttribute('filter_op') != undefined){
+		filter_op = oscar_container.getAttribute('filter_op');
+		filter_op = filter_op.split(" ");
+	}
+
+	oscar_doms.push(
+		{
+			'container': oscar_container,
+			'type': type,
+			'view_op': view_op,
+			'filter_op': filter_op,
+			'input': input
+		}
+	);
+}
+
+//Build all the inner elements
+for (var i = 0; i < oscar_doms.length; i++) {
+
+	var str_html_inner = '<div id="search_extra" class="search-extra"></div>';
+	//OSCAR view section
+	if (oscar_doms[i].view_op.length != 0) {
+		str_html_inner = str_html_inner + '<div id="search_header" class="search-header">';
+		for (var j = 0; j < view_op.length; j++) {
+			str_html_inner = str_html_inner + '<div id='+view_op[j]+'></div>';
+		}
+		str_html_inner = str_html_inner + '</div>';
+	}
+	str_html_inner = str_html_inner + '<div id="search_body" class="search-body">';
+
+	//OSCAR filter section
+	if (oscar_doms[i].filter_op.length != 0) {
+		str_html_inner = str_html_inner + '<div id="search_filters" class="search-filters">';
+		for (var j = 0; j < filter_op.length; j++) {
+			switch (filter_op[j]) {
+				case 'limit_results':
+						str_html_inner = str_html_inner + '<div id='+filter_op[j]+'></div><div id="filter_btns"></div>';
+					break;
+				case 'filter_fields':
+							str_html_inner = str_html_inner + '<div id="filter_values_list"></div>';
+					break;
+				default:
+						str_html_inner = str_html_inner + '<div id='+filter_op[j]+'></div>';
+			}
+
+		}
+		str_html_inner = str_html_inner + '</div>';
+	}
+
+	//always put the table of results
+	str_html_inner = str_html_inner + '<div id="search_results" class="search-results"></div></div>';
+
+	//put it inside the page
+	oscar_doms[i]['container'].innerHTML = '<div id="search" class="search">'+ str_html_inner + '</div>';
+}
+
+
 var search = (function () {
 
 		var search_conf_json = {};
@@ -2811,8 +2887,8 @@ var htmldom = (function () {
 
 	function update_tab_entry_field(table_field_key, entry_data_key, entry_data_field, my_field_conf, obj_val){
 
-		console.log(entry_data_field);
-		console.log(obj_val);
+		//console.log(entry_data_field);
+		//console.log(obj_val);
 		var tab_res = document.getElementById("tab_res");
 		var tr_index = _get_index_of_tr(tab_res, table_field_key, entry_data_key);
 

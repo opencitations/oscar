@@ -34,36 +34,11 @@
               </ul>
               <p style="text-align:left;"> <u> <b>NOTE:</b> Searches might take several seconds, please be patient.</u></p>
               <br>
-              <!--
-              <input style="width:80%; display:inline;" id="input_box" name="query" name="input_box" type="text" autocomplete="on" class="form-control oc-purple" placeholder="Search...">
-              <span>
-                <button id="search_btn" class="btn btn-default oc-purple" type="submit"><i class="glyphicon glyphicon-search"></i></button>
-              </span>
-              -->
           </form>
 
-            <div class="cover">
 
-                <!-- The search page skeleton -->
-                <!--==========================-->
-                <div id="search" class="search">
-                  <div id="search_extra" class="search_extra"></div>
-                  <div id="search_header" class="search-header">
-                    <div id="rows_per_page"></div>
-                    <div id="sort_results"></div>
-                  </div>
-                  <div id="search_body" class="search-body">
-                    <div id="search_filters" class="search-filters">
-                      <div id="limit_results"></div>
-                      <div id="filter_btns"></div>
-                      <div id="filter_values_list"></div>
-                    </div>
-                    <div id="search_results" class="search-results"></div>
-                  </div>
-                </div>
-                <!--==========================-->
+          <div class="cover __oscar__" type="advanced" view_op="rows_per_page export_results sort_results" filter_op="limit_results filter_fields"></div>
 
-            </div>
 
         </div>
 
@@ -71,19 +46,16 @@
         <!-- Bootstrap core JavaScript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="../../static/js/jquery.min.js"><![CDATA[ ]]></script>
-        <script>window.jQuery || document.write('<script src="/../../static/js/jquery.min.js"><\/script>')</script>
-        <script src="../../static/js/bootstrap.min.js"><![CDATA[ ]]></script>
-        <script src="../../static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
+        <script src="../../static/js/jquery.min.js"></script>
+        <script src="../../static/js/bootstrap.min.js"></script>
 
         <script type="text/javascript" src="static/js/search-conf-index.js"></script>
         <script type="text/javascript" src="../../static/js/search.js"></script>
         <script>
-
-        var escape_spaces = decodeURIComponent(window.location.search.replace(/\+/g, '%20')+'');
-        var queryt= escape_spaces.replace('?query=','');
-        //console.log(queryt);
-        search.do_sparql_query(queryt);
+          var escape_spaces = decodeURIComponent(window.location.search.replace(/\+/g, '%20')+'');
+          var queryt= escape_spaces.replace('?query=','');
+          //console.log(queryt);
+          search.do_sparql_query(queryt);
         </script>
     </body>
 </html>
