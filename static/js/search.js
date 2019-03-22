@@ -2,6 +2,8 @@
 //GLOBALS
 var oscar_tags = document.getElementsByClassName("__oscar__");
 var oscar_doms = [];
+
+//Get OSCAR parameters from the HTML tag
 for (var i = 0; i < oscar_tags.length; i++) {
 	var oscar_container = oscar_tags[i];
 
@@ -73,6 +75,7 @@ for (var i = 0; i < oscar_doms.length; i++) {
 	//put it inside the page
 	oscar_doms[i]['container'].innerHTML = '<div id="search" class="search">'+ str_html_inner + '</div>';
 }
+
 
 
 var search = (function () {
