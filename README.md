@@ -15,16 +15,16 @@ One of the main characteristics of OSCAR is its adaptability to work with any ot
 
 **0) OSCAR Needs bootstrap and jquery:** 
 
-```<script src="path/to/jquery.min.js"></script>``` 
+```<script src="path/to/jquery.min.js"></script>```  
 ```<script src="path/to/bootstrap.min.js"></script>```
         
         
 **1) Insert in your HTML page the following block:** 
 
 ```<div class="__oscar__" type="..." view_op="..." filter_op="..."></div>``` 
-* **[[type]]**: *"advanced"/"free-text"*
+* **[[type]]**: *"advanced"/"free-text"*  
 e.g.  ```type="advanced"```
-* **[[view_op]]**= Combine: *"rows_per_page"* | *"export_results"* | *"sort_results"*. 
+* **[[view_op]]**= Combine: *"rows_per_page"* | *"export_results"* | *"sort_results"*.  
 e.g.  ```view_op="rows_per_page export_results"```
 * **[[filter_op]]**= Combine: *"limit_results"* | *"filter_fields"*  
 e.g.  ```filter_op="limit_results"```
@@ -32,7 +32,7 @@ e.g.  ```filter_op="limit_results"```
 
 **2) Include your configuration file and right after the 'search.js' script in your HTML page, like this:**
 
-```<script type="text/javascript" src="path/to/your/conf.js"></script>```
+```<script type="text/javascript" src="path/to/your/conf.js"></script>```  
 ```<script type="text/javascript" src="path/to/search.js""></script>```
 
 
