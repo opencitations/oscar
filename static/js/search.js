@@ -563,7 +563,7 @@ var search = (function () {
 					//one text box
 					var qtext = query_comp.values[0];
 					var rules = _get_rules(qtext);
-					if(rules != []){
+					if(rules.length != 0){
 						var sparql_query = _build_sparql_query(rules[0], qtext);
 						var r_cat = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[rules[0].category])];
 						_call_ts(r_cat, rules, 0, sparql_query, qtext, qtext, callbk_fun);
@@ -571,12 +571,13 @@ var search = (function () {
 				}else{
 					//console.log("It's an advanced search!");
 					//it's an advanced query
-
+					console.log(query_comp);
 					var sparql_query = build_adv_sparql_query(
 											query_comp.values,
 											query_comp.rules,
 											query_comp.bcs
 										);
+
 					var r_cat = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[_get_rule_by_name(query_comp.rules[0]).category])];
 					_call_ts(r_cat, [], 0, sparql_query, qtext, null, callbk_fun);
 				}
