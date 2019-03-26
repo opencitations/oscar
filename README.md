@@ -1,4 +1,5 @@
 <img src="doc/oscar_logo-v2.0.png" alt="drawing" width="350"/>
+
 ### The OpenCitations RDF Search Application,
 #### - [OSCAR paper for SAVE-SD2018](https://essepuntato.github.io/papers/oscar-savesd2018.html)
 
