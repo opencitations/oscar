@@ -7,31 +7,27 @@ var oscar_doms = [];
 for (var i = 0; i < oscar_tags.length; i++) {
 	var oscar_container = oscar_tags[i];
 
-	var type = 'advanced';
-	if(oscar_container.getAttribute('type') != undefined){ type = oscar_container.getAttribute('type')}
+	var data_type = 'advanced';
+	if(oscar_container.getAttribute('data-type') != undefined){ data_type = oscar_container.getAttribute('data-type')}
 
-	var input = 'advanced';
-	if(oscar_container.getAttribute('input') != undefined){ input = oscar_container.getAttribute('input')}
-
-	var view_op = ['rows_per_page','sort_results','export_results'];
-	if(oscar_container.getAttribute('view_op') != undefined){
-		view_op = oscar_container.getAttribute('view_op');
-		view_op = view_op.split(" ");
+	var data_view = ['rows_per_page','sort_results','export_results'];
+	if(oscar_container.getAttribute('data-view') != undefined){
+		data_view = oscar_container.getAttribute('data-view');
+		data_view = data_view.split(" ");
 	}
 
-	var filter_op = ['limit_results','filter_fields'];
-	if(oscar_container.getAttribute('filter_op') != undefined){
-		filter_op = oscar_container.getAttribute('filter_op');
-		filter_op = filter_op.split(" ");
+	var data_filter = ['limit_results','filter_fields'];
+	if(oscar_container.getAttribute('data-filter') != undefined){
+		data_filter = oscar_container.getAttribute('data-filter');
+		data_filter = data_filter.split(" ");
 	}
 
 	oscar_doms.push(
 		{
 			'container': oscar_container,
-			'type': type,
-			'view_op': view_op,
-			'filter_op': filter_op,
-			'input': input
+			'data-type': data_type,
+			'data-view': data_view,
+			'data-filter': data_filter
 		}
 	);
 }
@@ -41,28 +37,28 @@ for (var i = 0; i < oscar_doms.length; i++) {
 
 	var str_html_inner = '<div id="search_extra" class="search-extra"></div>';
 	//OSCAR view section
-	if (oscar_doms[i].view_op.length != 0) {
+	if (oscar_doms[i]["data-view"].length != 0) {
 		str_html_inner = str_html_inner + '<div id="search_header" class="search-header">';
-		for (var j = 0; j < view_op.length; j++) {
-			str_html_inner = str_html_inner + '<div id='+view_op[j]+'></div>';
+		for (var j = 0; j < data_view.length; j++) {
+			str_html_inner = str_html_inner + '<div id='+data_view[j]+'></div>';
 		}
 		str_html_inner = str_html_inner + '</div>';
 	}
 	str_html_inner = str_html_inner + '<div id="search_body" class="search-body">';
 
 	//OSCAR filter section
-	if (oscar_doms[i].filter_op.length != 0) {
+	if (oscar_doms[i]["data-filter"].length != 0) {
 		str_html_inner = str_html_inner + '<div id="search_filters" class="search-filters">';
-		for (var j = 0; j < filter_op.length; j++) {
-			switch (filter_op[j]) {
+		for (var j = 0; j < data_filter.length; j++) {
+			switch (data_filter[j]) {
 				case 'limit_results':
-						str_html_inner = str_html_inner + '<div id='+filter_op[j]+'></div><div id="filter_btns"></div>';
+						str_html_inner = str_html_inner + '<div id='+data_filter[j]+'></div><div id="filter_btns"></div>';
 					break;
 				case 'filter_fields':
 							str_html_inner = str_html_inner + '<div id="filter_values_list"></div>';
 					break;
 				default:
-						str_html_inner = str_html_inner + '<div id='+filter_op[j]+'></div>';
+						str_html_inner = str_html_inner + '<div id='+data_filter[j]+'></div>';
 			}
 
 		}
