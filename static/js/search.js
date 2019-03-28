@@ -507,7 +507,7 @@ var search = (function () {
 			cat_conf = JSON.parse(JSON.stringify(all_data.cat_conf));
 			search_conf_json = JSON.parse(JSON.stringify(all_data.search_conf_json));
 
-			//update in case we have external calls results now, the new table will be updated 
+			//update in case we have external calls results now, the new table will be updated
 			if (check_and_update) {
 					_update_ext_data_in_table();
 			}
@@ -639,7 +639,7 @@ var search = (function () {
 					}
 				}
 
-				console.log("CHECK AND UPDATE!!!");
+				//console.log("CHECK AND UPDATE!!!");
 				for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
 
 						for (var j = 0; j < ext_data_fields.length; j++) {
