@@ -436,14 +436,23 @@ var search = (function () {
 						timeout: util.get_obj_key_val(search_conf_json,"timeout.value"),
 						error: function(jqXHR, textStatus, errorThrown) {
         				if(textStatus==="timeout") {
-									window.location.replace(util.get_obj_key_val(search_conf_json,"timeout.link"));
+									var redirect_link = util.get_obj_key_val(search_conf_json,"timeout.link");
+									if (redirect_link != undefined) {
+										window.location.replace(redirect_link);
+									}else {
+										var redirect_text = util.get_obj_key_val(search_conf_json,"timeout.text");
+										if (redirect_text != undefined) {
+											htmldom.loader(false, search_conf_json["progress_loader"], on_remove_text = redirect_text);
+										}
+									}
+
         				}
     				},
 						success: function( res_data ) {
 
 								if (util.get_obj_key_val(search_conf_json,"interface") != false) {
 									if (util.get_obj_key_val(search_conf_json,"progress_loader.visible") == true) {
-										htmldom.loader(false);
+										htmldom.loader(false, search_conf_json["progress_loader"]);
 									}
 								}
 
@@ -2810,7 +2819,7 @@ var htmldom = (function () {
 	}
 
 	/*creates the loader panel (while waiting for the results)*/
-	function loader(build_bool, progress_loader, query_label=null){
+	function loader(build_bool, progress_loader, query_label=null, on_remove_text = null){
 		if (header_container != null) {
 			if (build_bool) {
 				if (query_label != null) {
@@ -2849,6 +2858,9 @@ var htmldom = (function () {
 			}else {
 				//var element = document.getElementById("search_loader");
 				//element.parentNode.removeChild(element);
+				if (on_remove_text != null) {
+					extra_container.innerHTML = on_remove_text;
+				}
 				extra_container.innerHTML = "";
 			}
 		}
