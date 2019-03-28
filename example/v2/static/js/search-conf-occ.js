@@ -24,7 +24,7 @@ var search_conf = {
       "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
       "advanced": true,
       "freetext": true,
-      "heuristics": [[lower_case]],
+      "heuristics": [["lower_case"]],
       "category": "document",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [`
@@ -48,11 +48,10 @@ var search_conf = {
     {
       "name":"doc_cites_list",
       "label": "List of documents cited by Bibiographic resource IRI",
-      "category": "lucinda_document",
+      "category": "document",
       "regex": "(https:\/\/w3id\\.org\/oc\/corpus\/br\/\\d{1,})",
       "query": [
             "{",
-            //"<[[VAR]]> cito:cites ?iri .",
             "<[[VAR]]> cito:cites ?iri .",
             "}"
       ]
@@ -60,7 +59,7 @@ var search_conf = {
     {
       "name":"doc_cites_me_list",
       "label": "List of documents who have cited the Bibiographic resource IRI",
-      "category": "lucinda_document",
+      "category": "document",
       "regex": "(https:\/\/w3id\\.org\/oc\/corpus\/br\/\\d{1,})",
       "query": [
             "{",
@@ -88,7 +87,7 @@ var search_conf = {
       "label": "With a specific last name",
       "placeholder": "Free-text e.g. Peroni",
       "advanced": true,
-      "heuristics": [[lower_case,capitalize_1st_letter]],
+      "heuristics": [["lower_case","capitalize_1st_letter"]],
       "category": "author",
       "regex":"[-'a-zA-Z ]+$",
       "query": [
@@ -102,7 +101,7 @@ var search_conf = {
       "label": "With a specific first name",
       "placeholder": "Free-text e.g. Silvio",
       "advanced": true,
-      "heuristics": [[lower_case,capitalize_1st_letter]],
+      "heuristics": [["lower_case","capitalize_1st_letter"]],
       "category": "author",
       "regex":"[-'a-zA-Z ]+$",
       "query": [
@@ -182,62 +181,6 @@ var search_conf = {
 
 "categories": [
     {
-        "name": "lucinda_document",
-        "label": "Document",
-        "in_adv_menu": false,
-        "macro_query": [
-          `
-          SELECT DISTINCT ?iri ?type ?short_iri ?short_iri_id ?browser_iri ?short_type ?title ?doi ?subtitle ?year ?label ?author ?author_browser_iri (count(?next) as ?tot)
-          Where{
-                 [[RULE]]
-                 hint:Prior hint:runFirst true .
-                 {
-                      ?iri rdf:type ?type .
-                      BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/', '', 'i') as ?short_iri) .
-                      BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus/br/', '', 'i') as ?short_iri_id) .
-                      BIND(REPLACE(STR(?iri), '/corpus/', '/browser/', 'i') as ?browser_iri) .
-                      BIND(REPLACE(STR(?type), 'http://purl.org/spar/fabio/', '', 'i') as ?short_type) .
-                      #Doc attributes
-                      OPTIONAL {?iri dcterms:title ?title .}
-                      OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}
-                      OPTIONAL {?iri prism:publicationDate ?year .}
-                      OPTIONAL {
-                          ?iri datacite:hasIdentifier [
-                          datacite:usesIdentifierScheme datacite:doi ;
-                          literal:hasLiteralValue ?doi
-                          ]
-                      }
-                  }
-                  #list of the doc authors
-                  {
-                      ?iri rdfs:label ?label .
-                       OPTIONAL {
-                            ?iri pro:isDocumentContextFor ?role .
-                            ?role pro:withRole pro:author ; pro:isHeldBy [
-                                foaf:familyName ?f_name ;
-                                foaf:givenName ?g_name
-                            ] .
-                            ?role pro:isHeldBy ?author_iri .
-                            OPTIONAL {?role oco:hasNext* ?next .}
-                            BIND(REPLACE(STR(?author_iri), '/corpus/', '/browser/', 'i') as ?author_browser_iri) .
-                            BIND(CONCAT(?g_name,' ',?f_name) as ?author) .
-                      }
-                  }
-              } GROUP BY ?iri ?doi ?short_iri ?short_iri_id ?browser_iri ?title ?subtitle ?year ?type ?short_type ?label ?author ?author_browser_iri ORDER BY DESC(?tot)
-             `
-        ],
-        "fields": [
-          {"iskey": true, "value":"short_iri", "label":{"field":"short_iri_id"}, "title": "Corpus ID","column_width":"8%","type": "text", "sort":{"value": "short_iri.label", "type":"int"}, "link":{"field":"browser_iri","prefix":""}},
-          {"value":"year", "title": "Year", "column_width":"8%","type": "int", "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}, "sort":{"value": "year", "type":"int"} },
-          {"value":"title", "title": "Title","column_width":"37%","type": "text", "sort":{"value": "title", "type":"text"}, "link":{"field":"browser_iri","prefix":""}},
-          {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": "author", "type":"text"}, "filter":{"type_sort": "text", "min": 10000, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}}
-        ],
-        "group_by": {"keys":["iri"], "concats":["author"]},
-        "ext_data": {
-          "crossref4doi": {"name": call_crossref, "param": {"fields":["doi"]}, "async": true}
-        },
-    },
-    {
       "name": "document",
       "label": "Document",
       "macro_query": [
@@ -288,13 +231,8 @@ var search_conf = {
         {"value":"title", "title": "Title","column_width":"30%","type": "text", "sort":{"value": "title", "type":"text"}, "link":{"field":"browser_iri","prefix":""}},
         {"value":"author", "label":{"field":"author_lbl"}, "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": "author", "type":"text"}, "filter":{"type_sort": "text", "min": 10000, "sort": "label", "order": "asc"}, "link":{"field":"author_browser_iri","prefix":""}},
         {"value":"in_cits", "title": "Cited by", "column_width":"10%","type": "int", "sort":{"value": "in_cits", "type":"int"}}
-        //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
-        //,{"value": "ext_data.crossref4doi.message.publisher", "title": "Publisher", "column_width":"13%", "type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 150, "sort": "label", "order": "asc"}, "link":{"field":"browser_iri","prefix":""}}
       ],
-      "group_by": {"keys":["iri"], "concats":["author"]},
-      "ext_data": {
-        "crossref4doi": {"name": call_crossref, "param": {"fields":["doi"]}, "async": true}
-      },
+      "group_by": {"keys":["iri"], "concats":["author"]}
     },
 
     {
@@ -347,40 +285,116 @@ var search_conf = {
           "spinner": true,
           "title":"Searching the OpenCitations Corpus ...",
           "subtitle":"Be patient - this search might take several seconds!",
-          "abort":{"title":"Abort Search","href_link":"/search"}
+          "abort":{"title":"Abort Search","href_link":"search.html"}
         },
 "timeout":{
   "value": 90000,
-  "link": "/search"
+  "link": "search.html"
 }
 
 };
+
+
 //heuristic functions
 //you can define your own heuristic functions here
-function lower_case(str){
-  return str.toLowerCase();
-}
-function capitalize_1st_letter(str){
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+var heuristics = (function () {
 
-//"FUNC" {"name": call_crossref, "param":{"fields":[],"vlaues":[]}}
-function call_crossref(str_doi, index, async_bool, callbk_func, key_full_name, data_field ){
-  var call_crossref_api = "https://api.crossref.org/works/";
+      function lower_case(str){
+        return str.toLowerCase();
+      }
+      function capitalize_1st_letter(str){
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+      function decodeURIStr(str) {
+        return decodeURIComponent(str);
+      }
+      function encodeURIStr(str) {
+        return encodeURIComponent(str);
+      }
 
-  if (str_doi != undefined) {
-    var call_url =  call_crossref_api+ encodeURIComponent(str_doi);
-    //var result_data = "...";
-    $.ajax({
-          dataType: "json",
-          url: call_url,
-          type: 'GET',
-          async: async_bool,
-          success: function( res_obj ) {
-              var func_param = [];
-              func_param.push(index, key_full_name, res_obj, data_field, async_bool);
-              Reflect.apply(callbk_func,undefined,func_param);
+      function timespan_translate(str) {
+        var new_str = "";
+        var years = 0;
+        var months = 0;
+        var days = 0;
+
+        let reg = /(\d{1,})Y/g;
+        let match;
+        while (match = reg.exec(str)) {
+          if (match.length >= 2) {
+            years = match[1] ;
+            new_str = new_str + years +" Years "
           }
-     });
-  }
-}
+        }
+
+        reg = /(\d{1,})M/g;
+        while (match = reg.exec(str)) {
+          if (match.length >= 2) {
+            months = match[1] ;
+            new_str = new_str + months +" Months "
+          }
+        }
+
+        reg = /(\d{1,})D/g;
+        while (match = reg.exec(str)) {
+          if (match.length >= 2) {
+            days = match[1] ;
+            new_str = new_str + days +" Days "
+          }
+        }
+
+        return new_str;
+      }
+      function timespan_in_days(str) {
+        var new_str = "";
+        var years = 0;
+        var months = 0;
+        var days = 0;
+
+        let reg = /(\d{1,})Y/g;
+        let match;
+        while (match = reg.exec(str)) {
+          if (match.length >= 2) {
+            years = parseInt(match[1]) ;
+          }
+        }
+
+        reg = /(\d{1,})M/g;
+        while (match = reg.exec(str)) {
+          if (match.length >= 2) {
+            months = parseInt(match[1]) ;
+          }
+        }
+
+        reg = /(\d{1,})D/g;
+        while (match = reg.exec(str)) {
+          if (match.length >= 2) {
+            days = parseInt(match[1]) ;
+          }
+        }
+
+        return String(years * 365 + months * 30 + days);
+      }
+      function short_version(str, max_chars = 20) {
+        var new_str = "";
+        for (var i = 0; i < max_chars; i++) {
+          if (str[i] != undefined) {
+            new_str = new_str + str[i];
+          }else {
+            break;
+          }
+        }
+        return new_str+"...";
+      }
+
+
+      return {
+        lower_case: lower_case,
+        capitalize_1st_letter: capitalize_1st_letter,
+        decodeURIStr: decodeURIStr,
+        encodeURIStr: encodeURIStr,
+        short_version: short_version,
+        timespan_in_days: timespan_in_days,
+        timespan_translate: timespan_translate
+       }
+})();

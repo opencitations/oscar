@@ -134,8 +134,14 @@ var search_conf = {
             "spinner": true,
             "title":"Searching in the OpenCitations Indexes ...",
             "subtitle":"Be patient - this search might take several seconds!",
-            "abort":{"title":"Abort Search","href_link":"search"}
+            "abort":{"title":"Abort Search","href_link":"search_index.html"}
+          },
+
+   "timeout":{
+            "value": 90000,
+            "link": "search_index.html"
           }
+
   }
 
 
