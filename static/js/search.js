@@ -32,6 +32,8 @@ for (var i = 0; i < oscar_tags.length; i++) {
 	);
 }
 
+console.log(oscar_doms);
+
 //Build all the inner elements
 for (var i = 0; i < oscar_doms.length; i++) {
 
@@ -208,7 +210,7 @@ var search = (function () {
 				var re = new RegExp(rule.regex,'i');
 				var val_qtext = qtext.match(re)[0];
 
-				var cat_conf = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[rule.category])];
+				cat_conf = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[rule.category])];
 
 				var rule_query = _build_turtle_query(rule.query);
 				var res_heuristics = _apply_heuristics(rule,val_qtext);
@@ -261,8 +263,9 @@ var search = (function () {
 
 
 				//define category from the first rule
-				var category = _get_rule_by_name(rule_names[0]).category;
-				cat_conf = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[category])];
+				//var category = _get_rule_by_name(rule_names[0]).category;
+				//cat_conf = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[category])];
+
 				var composed_query = _build_turtle_prefixes() + _build_turtle_query(cat_conf["macro_query"]);
 				var query_allrules = _connect_rules(qtext_arr, rules, lconnectors);
 
@@ -386,7 +389,7 @@ var search = (function () {
 						var heuristic_val_text = val_qtext;
 						for (var j = 0; j < heuristic_arr_elem.length; j++) {
 							var heuristic_fun = heuristic_arr_elem[j];
-							heuristic_val_text = Reflect.apply(heuristic_fun,undefined,[heuristic_val_text]);
+							heuristic_val_text = Reflect.apply(heuristics[heuristic_fun],undefined,[heuristic_val_text]);
 						}
 						//in case the value originated from the heuristic is different than the original one
 						if (heuristic_val_text != val_qtext) {
@@ -452,9 +455,9 @@ var search = (function () {
 									//in this case don't build the table directly
 									if (callbk_fun != null) {
 									 //look at the rule name
-									 _init_data(res_data,callbk = callbk_fun, callbk_query = query_text);
+									 _init_data(res_data,callbk = callbk_fun, callbk_query = query_text, check_and_update = false);
 								 }else {
-								 	build_table(res_data);
+								 	 build_table(res_data);
 								 }
 
 								}else {
@@ -480,6 +483,8 @@ var search = (function () {
 
 			if (do_init) {
 				_init_data(res_data);
+			}else {
+				_init_data(res_data, callbk = null, callbk_query = null, check_and_update = true);
 			}
 
 			htmldom.build_extra_elems(cat_conf.extra_elems);
@@ -497,38 +502,53 @@ var search = (function () {
 			};
 		}
 
-		function change_search_data(all_data){
+		function change_search_data(all_data, check_and_update = false){
 			table_conf = JSON.parse(JSON.stringify(all_data.table_conf));
 			cat_conf = JSON.parse(JSON.stringify(all_data.cat_conf));
 			search_conf_json = JSON.parse(JSON.stringify(all_data.search_conf_json));
-			//htmldom.update_res_table(table_conf,search_conf_json);
-			//__update_interface();
+
+			//update in case we have external calls results now, the new table will be updated 
+			if (check_and_update) {
+					_update_ext_data_in_table();
+			}
+
+
 			if (table_conf.data != null) {
 				_exec_operation();
 			}
 		}
 
-		function get_search_data(native = false, config_mod = null) {
+		function get_search_data(rule = null, native = false, config_mod = null) {
 			var my_search_conf_json = JSON.parse(JSON.stringify(search_conf_json));
 
 			if (native) {
-				my_search_conf_json = search_conf;
+				my_search_conf_json = JSON.parse(JSON.stringify(search_conf));
+				//in case of functions copy them again
+				my_search_conf_json = _scan_for_funcname(my_search_conf_json);
 				if (config_mod != null) {
-					my_search_conf_json = JSON.parse(JSON.stringify(util.update_obj(my_search_conf_json, config_mod)));
+					my_search_conf_json = util.update_obj(my_search_conf_json, config_mod);
 				}
 			}
-
 
 			return {
 				"table_conf": JSON.parse(JSON.stringify(table_conf)),
 				"cat_conf": JSON.parse(JSON.stringify(cat_conf)),
 				"search_conf_json": my_search_conf_json
 			};
+
+			function _scan_for_funcname(my_search_conf_json) {
+				for (var i = 0; i < my_search_conf_json['rules'].length; i++) {
+					if ('heuristics' in my_search_conf_json['rules'][i]){
+						my_search_conf_json['rules'][i]['heuristics'] = search_conf['rules'][i]['heuristics'];
+					}
+				}
+				return my_search_conf_json;
+			}
 		}
 
 		/*THE MAIN FUNCTION CALL
 		call the sparql endpoint and do the query 'qtext'*/
-		function do_sparql_query(qtext, alternative_conf = null , config_mod = null, async_bool= true, callbk_fun= null){
+		function do_sparql_query(qtext, alternative_conf = false , config_mod = null, async_bool= true, callbk_fun= null){
 
 			var query_comp =  _decode_uri_query_components(qtext);
 			console.log("This query is composed by:");
@@ -537,11 +557,12 @@ var search = (function () {
 			console.log("The boolean connectors are: "+query_comp.bcs);
 
 			//initialize and get the search_config_json
-			search_conf_json = search_conf;
-			if (alternative_conf != null) {
-				search_conf_json = alternative_conf;
+			if (!alternative_conf) {
+				search_conf_json = search_conf;
 			}
-			//util.printobj(search_conf_json);
+
+			//console.log("The search conf: ", JSON.parse(JSON.stringify(search_conf_json)));
+
 
 			//sync or async
 			async_call = async_bool;
@@ -550,8 +571,7 @@ var search = (function () {
 			sparql_query_add = qtext;
 
 			//modify config file
-			search_conf_json = util.update_obj(search_conf_json, config_mod);
-			//util.printobj(search_conf_json);
+			//search_conf_json = util.update_obj(search_conf_json, config_mod);
 
 			if (query_comp.values.length != 0) {
 				if (query_comp.rules.length == 0) {
@@ -565,9 +585,12 @@ var search = (function () {
 						_call_ts(r_cat, rules, 0, sparql_query, qtext, qtext, callbk_fun);
 					}else {}
 				}else{
-					//console.log("It's an advanced search!");
+
+					//in this case the category of results will follow any of the rules
+					var first_rule = search_conf_json.rules[util.index_in_arrjsons(search_conf_json.rules,["name"],[query_comp.rules[0]])];
+					cat_conf = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[first_rule.category])];
+
 					//it's an advanced query
-					console.log(query_comp);
 					var sparql_query = build_adv_sparql_query(
 											query_comp.values,
 											query_comp.rules,
@@ -589,11 +612,70 @@ var search = (function () {
 			 }
 		}
 
+		/*update the table data (ext calls))*/
+		function _update_ext_data_in_table() {
+				table_conf.category = cat_conf.name;
+				var category_conf_obj = cat_conf;
+				var fields = category_conf_obj.fields;
+
+				// check if there is ext_data columns also
+				var ext_data_fields = [];
+				for (var i = 0; i < fields.length; i++) {
+					if (fields[i].value.startsWith("ext_data")) {
+						var all_parts = fields[i].value.split(".");
+						var data_field = "";
+						var sep = ".";
+						for (var j = 2; j < all_parts.length; j++) {
+							if (j == all_parts.length-1) {
+								sep = "";
+							}
+							data_field = data_field + all_parts[j] + sep;
+						}
+						ext_data_fields.push({
+							"full_name": fields[i].value,
+							"func_name": all_parts[1],
+							"data_field": data_field
+						});
+					}
+				}
+
+				console.log("CHECK AND UPDATE!!!");
+				for (var i = 0; i < table_conf.data.results.bindings.length; i++) {
+
+						for (var j = 0; j < ext_data_fields.length; j++) {
+							var key_full_name = ext_data_fields[j]["full_name"];
+							var key_func_name = ext_data_fields[j]["func_name"];
+							var func_obj = category_conf_obj["ext_data"][key_func_name];
+							if (func_obj != undefined) {
+								var async_val = true;
+								if (func_obj["async"] != undefined) {
+										async_val = func_obj["async"];
+								}
+
+								table_conf.data.results.bindings[i][key_full_name] = {"value":"", "label":""};
+								var ext_res = _exec_ext_data(
+											key_func_name,
+											func_obj,
+											table_conf.data.results.bindings[i][table_conf.data_key].value,
+											async_val,
+											search.callbk_update_data_entry_val,
+											key_full_name,
+											func_obj.name,
+											table_conf.data.results.bindings[i],
+											ext_data_fields[j]["data_field"]
+								);
+
+							}
+						}
+				}
+		}
 
 		/*init all the local data*/
-		function _init_data(json_data, callbk = null, callbk_query = null){
+		function _init_data(json_data, callbk = null, callbk_query = null, check_and_update = false){
 			table_conf.category = cat_conf.name;
 			var category_conf_obj = cat_conf;
+
+
 			//Adapt the resulting data
 			// init uri values
 
@@ -651,7 +733,6 @@ var search = (function () {
 					});
 				}
 			}
-			//console.log(ext_data_fields);
 
 			// the header first
 			var new_header = [];
@@ -694,12 +775,6 @@ var search = (function () {
 						);
 
 					}
-				}
-
-				for (var key in table_conf.data.results.bindings[i]) {
-						if(util.index_in_arrjsons(fields,["value"],[key]) == -1){
-							delete table_conf.data.results.bindings[i][key];
-						}
 				}
 			}
 			//console.log(table_conf.data.results.bindings);
@@ -755,6 +830,7 @@ var search = (function () {
 				//return JSON.parse(JSON.stringify(table_conf.data.results.bindings));
 			}
 		}
+
 		/*map the fields with their corresponding links*/
 		function _init_uris(data){
 			var new_data = data;
@@ -805,7 +881,7 @@ var search = (function () {
 						var result = new_data[j][field_conf_obj.value].value;
 						for (var k = 0; k < field_conf_obj["value_map"].length; k++) {
 							var fname = field_conf_obj["value_map"][k];
-							result = Reflect.apply(fname,undefined,[result]);
+							result = Reflect.apply(heuristics[fname],undefined,[result]);
 						}
 						new_data[j][field_conf_obj.value].value = result;
 					}
@@ -880,6 +956,7 @@ var search = (function () {
 					}
 
 					var ext_key = _build_ext_key(key_func_name,conf_params);
+
 					if (ext_key in ext_data_calls_cache) {
 						//in case its already in cache
 						func_param.push(index, key_full_name, data_field, async_bool, key_func_name, conf_params);
@@ -896,7 +973,8 @@ var search = (function () {
 						ext_data_calls_cache[ext_key] = {"value":null,"waiting_elems":[]};
 						func_param.push(conf_params);
 						func_param.push(index, async_bool, callbk_func, key_full_name, data_field, key_func_name);
-						var res = Reflect.apply(func_name,undefined,func_param);
+						//console.log(func_param);
+						var res = Reflect.apply(callbackfunctions[func_name],undefined,func_param);
 					}
 		}
 
