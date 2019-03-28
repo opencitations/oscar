@@ -59,18 +59,6 @@ var search_conf = {
         }
         `
       ]
-    },
-    {
-      "name":"cits_stats",
-      "advanced": false,
-      "freetext": false,
-      "category": "br_stats",
-      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
-      "query": [
-            "{",
-            "BIND(<http://dx.doi.org/[[VAR]]> as ?doi_iri) .",
-            "}"
-      ]
     }
   ],
 
@@ -124,7 +112,7 @@ var search_conf = {
 
   "page_limit": [5,10,15,20,30,40,50],
   "def_results_limit": 1,
-  "search_base_path": "search",
+  "search_base_path": "search_index",
   "advanced_search": true,
   "def_adv_category": "citation",
   "adv_btn_title": "Search in the OpenCitations Indexes",
@@ -250,7 +238,6 @@ var heuristics = (function () {
         timespan_translate: timespan_translate
        }
 })();
-
 
 var callbackfunctions = (function () {
 

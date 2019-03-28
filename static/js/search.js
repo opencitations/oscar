@@ -32,8 +32,6 @@ for (var i = 0; i < oscar_tags.length; i++) {
 	);
 }
 
-console.log(oscar_doms);
-
 //Build all the inner elements
 for (var i = 0; i < oscar_doms.length; i++) {
 
@@ -445,7 +443,6 @@ var search = (function () {
 											htmldom.loader(false, search_conf_json["progress_loader"], on_remove_text = redirect_text);
 										}
 									}
-
         				}
     				},
 						success: function( res_data ) {
@@ -562,8 +559,8 @@ var search = (function () {
 			var query_comp =  _decode_uri_query_components(qtext);
 			console.log("This query is composed by:");
 			console.log("The values: "+query_comp.values);
-			console.log("The rules are: "+query_comp.rules);
-			console.log("The boolean connectors are: "+query_comp.bcs);
+			console.log("The rules: "+query_comp.rules);
+			console.log("The connectors: "+query_comp.bcs);
 
 			//initialize and get the search_config_json
 			if (!alternative_conf) {
@@ -709,7 +706,7 @@ var search = (function () {
 
 			//init the data
 			table_conf.data = JSON.parse(JSON.stringify(json_data));
-			console.log(JSON.parse(JSON.stringify(json_data)));
+			//console.log(JSON.parse(JSON.stringify(json_data)));
 			// keep only the fields I want
 			var fields = category_conf_obj.fields;
 
