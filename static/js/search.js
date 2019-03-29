@@ -443,7 +443,7 @@ var search = (function () {
 														JSON.parse(JSON.stringify(table_conf)),
 														JSON.parse(JSON.stringify(cat_conf)),
 														true]);
-														
+
 										 //_init_data({'results':{'bindings':[]}},callbk = callbk_fun, callbk_query = query_text, check_and_update = false);
 									 }else {
 									 	 	htmldom.loader(false, search_conf_json["progress_loader"], on_remove_text = redirect_text);
@@ -583,9 +583,6 @@ var search = (function () {
 
 			//sync or async
 			async_call = async_bool;
-
-			//the original query address
-			sparql_query_add = qtext;
 
 			//modify config file
 			//search_conf_json = util.update_obj(search_conf_json, config_mod);
