@@ -126,7 +126,7 @@ var search_conf = {
           },
 
    "timeout":{
-            "value": 90000,
+            "value": 9000,
             "link": "search_index.html"
           }
 

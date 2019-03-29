@@ -288,7 +288,7 @@ var search_conf = {
           "abort":{"title":"Abort Search","href_link":"search.html"}
         },
 "timeout":{
-  "value": 90000,
+  "value": 9000,
   "link": "search.html"
 }
 

@@ -434,13 +434,24 @@ var search = (function () {
 						timeout: util.get_obj_key_val(search_conf_json,"timeout.value"),
 						error: function(jqXHR, textStatus, errorThrown) {
         				if(textStatus==="timeout") {
-									var redirect_link = util.get_obj_key_val(search_conf_json,"timeout.link");
-									if (redirect_link != undefined) {
-										window.location.replace(redirect_link);
+									var redirect_text = util.get_obj_key_val(search_conf_json,"timeout.text");
+									if (redirect_text != undefined) {
+										if (callbk_fun != null) {
+
+											Reflect.apply(callbk_fun,undefined,[
+														callbk_query,
+														JSON.parse(JSON.stringify(table_conf)),
+														JSON.parse(JSON.stringify(cat_conf)),
+														true]);
+														
+										 //_init_data({'results':{'bindings':[]}},callbk = callbk_fun, callbk_query = query_text, check_and_update = false);
+									 }else {
+									 	 	htmldom.loader(false, search_conf_json["progress_loader"], on_remove_text = redirect_text);
+									 }
 									}else {
-										var redirect_text = util.get_obj_key_val(search_conf_json,"timeout.text");
-										if (redirect_text != undefined) {
-											htmldom.loader(false, search_conf_json["progress_loader"], on_remove_text = redirect_text);
+										var redirect_link = util.get_obj_key_val(search_conf_json,"timeout.link");
+										if (redirect_link != undefined) {
+											window.location.replace(redirect_link);
 										}
 									}
         				}
