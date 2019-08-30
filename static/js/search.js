@@ -584,6 +584,9 @@ var search = (function () {
 			//sync or async
 			async_call = async_bool;
 
+			//the original query address
+			sparql_query_add = qtext;
+
 			//modify config file
 			//search_conf_json = util.update_obj(search_conf_json, config_mod);
 
@@ -1462,6 +1465,7 @@ var search = (function () {
 		function _export_csv(){
 			var matrix = [];
 			//console.log(table_conf.view.data.results.bindings);
+
 			var tab_results = table_conf.view.data.results.bindings;
 
 			var row_elem = [];
@@ -1471,6 +1475,7 @@ var search = (function () {
 				var my_cat = search_conf_json.categories[index_cat];
 
 				var set_keys = [];
+				//first the header
 				for (var i = 0; i < my_cat.fields.length; i++) {
 					row_elem.push(my_cat.fields[i].title);
 					set_keys.push(my_cat.fields[i].value);
@@ -1480,10 +1485,13 @@ var search = (function () {
 				for (var i = 0; i < tab_results.length; i++) {
 					var row_elem = [];
 					for (var j = 0; j < set_keys.length; j++) {
-						row_elem.push(util.build_str(tab_results[i][set_keys[j]],"inline"));
+						//build_str(obj,concat_style=null, include_link = true)
+						row_elem.push(util.build_str(tab_results[i][set_keys[j]],"inline",false));
 					}
 					matrix.push(row_elem);
 				}
+				console.log(matrix);
+
 
 				var encodedUri = util.encode_matrix_to_csv(matrix);
 				htmldom.download_results(encodedUri);

@@ -1,0 +1,10 @@
+{
+  "title": "OSCAR",
+  "subtitle": "The OpenCitations RDF Search Application",
+  "description": "A user friendly search platform applicable for any triplestore endpoint. This idea came out with regard to the OpenCitations project, which contains an open repository of scholarly citation data in RDF format, we would like to make accesible for any user to search and explore. The current version of the tool is integrated inside the OpenCitations web interface. opencitations.net/search",
+  "date": "01/2018-11/2018",
+  "extra": [
+    {"type":"special","label":"Try it on OpenCitations website","value":"http://opencitations.net/search"},
+    {"type":"git_repository","label":"Go to repository","value":"https://github.com/opencitations/oscar"}
+  ]
+}
