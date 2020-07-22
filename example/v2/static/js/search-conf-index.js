@@ -21,7 +21,7 @@ var search_conf = {
       "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
       "advanced": true,
       "freetext": false,
-      "heuristics": [['encodeURIStr']],
+      "heuristics": [['decodeURIStr'],['encodeDOIURL']],
       "category": "citation",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
@@ -36,7 +36,7 @@ var search_conf = {
       "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
       "advanced": true,
       "freetext": false,
-      "heuristics": [['encodeURIStr']],
+      "heuristics": [['decodeURIStr'],['encodeDOIURL']],
       "category": "citation",
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
@@ -47,7 +47,7 @@ var search_conf = {
     },
     {
       "name":"oci",
-      "label": "Having a specific resource ID",
+      "label": "Having a specific Open Citation Identifier (OCI)",
       "placeholder": "OCI e.g: 0200101...-0200101...",
       "advanced": true,
       "freetext": false,
@@ -68,7 +68,7 @@ var search_conf = {
       "label": "Citation",
       "macro_query": [
         `
-            SELECT DISTINCT ?iri ?short_iri ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan
+            SELECT DISTINCT ?iri ?browser ?short_iri ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan
                         WHERE  {
                         [[RULE]]
                         hint:Prior hint:runFirst true .
@@ -85,11 +85,12 @@ var search_conf = {
                             ?iri cito:hasCitationCreationDate ?creationdate .
                             ?iri cito:hasCitationTimeSpan ?timespan .
                           }
+                        BIND(REPLACE(STR(?iri), '/index/', '/index/browser/', 'i') as ?browser) .
             }
             `
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "Index IRI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"iri","prefix":""}},
+        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "OCI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"browser","prefix":""}},
         {"value":"citing_doi", "value_map": ["decodeURIStr"],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
         {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
         {"value":"cited_doi", "value_map": ["decodeURIStr"], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
@@ -112,7 +113,7 @@ var search_conf = {
 
   "page_limit": [5,10,15,20,30,40,50],
   "def_results_limit": 1,
-  "search_base_path": "search_index",
+  "search_base_path": "search",
   "advanced_search": true,
   "def_adv_category": "citation",
   "adv_btn_title": "Search in the OpenCitations Indexes",
@@ -122,12 +123,12 @@ var search_conf = {
             "spinner": true,
             "title":"Searching in the OpenCitations Indexes ...",
             "subtitle":"Be patient - this search might take several seconds!",
-            "abort":{"title":"Abort Search","href_link":"search_index.html"}
+            "abort":{"title":"Abort Search","href_link":"search.html"}
           },
 
    "timeout":{
             "value": 9000,
-            "link": "search_index.html"
+            "link": "search.html"
           }
 
   }
@@ -149,7 +150,20 @@ var heuristics = (function () {
         return decodeURIComponent(str);
       }
       function encodeURIStr(str) {
-        return encodeURIComponent(str);
+        var dec_str = decodeURIStr(str);
+        return encodeURIComponent(dec_str).replace(/[!'()*]/g, function (c) {
+          return '%' + c.charCodeAt(0).toString(16);
+        });
+      }
+      function encodeDOIURL(str) {
+        //encode only the last part of the DOI
+        //e.g. 10.3241/<ENCODE THIS>
+        var dec_str = decodeURIStr(str);
+        var parts = dec_str.split('/');
+        var decoded_doi = parts[0] + "/" + encodeURIComponent(parts[1]).replace(/[!'()*]/g, function (c) {
+          return '%' + c.charCodeAt(0).toString(16);
+        });
+        return decoded_doi;
       }
 
       function timespan_translate(str) {
@@ -233,6 +247,7 @@ var heuristics = (function () {
         capitalize_1st_letter: capitalize_1st_letter,
         decodeURIStr: decodeURIStr,
         encodeURIStr: encodeURIStr,
+        encodeDOIURL: encodeDOIURL,
         short_version: short_version,
         timespan_in_days: timespan_in_days,
         timespan_translate: timespan_translate

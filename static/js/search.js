@@ -387,6 +387,7 @@ var search = (function () {
 						var heuristic_val_text = val_qtext;
 						for (var j = 0; j < heuristic_arr_elem.length; j++) {
 							var heuristic_fun = heuristic_arr_elem[j];
+							console.log(heuristic_fun);
 							heuristic_val_text = Reflect.apply(heuristics[heuristic_fun],undefined,[heuristic_val_text]);
 						}
 						//in case the value originated from the heuristic is different than the original one
