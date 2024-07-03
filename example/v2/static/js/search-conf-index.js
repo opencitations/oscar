@@ -1,53 +1,74 @@
 var search_conf = {
-"sparql_endpoint": "https://w3id.org/oc/index/sparql",
+"sparql_endpoint": "https://opencitations.net/index/sparql",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},
-    {"prefix":"dcterms","iri":"http://purl.org/dc/terms/"},
-    {"prefix":"datacite","iri":"http://purl.org/spar/datacite/"},
     {"prefix":"literal","iri":"http://www.essepuntato.it/2010/06/literalreification/"},
     {"prefix":"biro","iri":"http://purl.org/spar/biro/"},
-    {"prefix":"frbr","iri":"http://purl.org/vocab/frbr/core#"},
-    {"prefix":"c4o","iri":"http://purl.org/spar/c4o/"},
-    {"prefix":"bds","iri":"http://www.bigdata.com/rdf/search#"},
     {"prefix":"fabio","iri":"http://purl.org/spar/fabio/"},
-    {"prefix":"pro","iri":"http://purl.org/spar/pro/"},
-    {"prefix":"rdf","iri":"http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
+    {"prefix":"rdf","iri":"http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
+    {"prefix":"datacite","iri":"http://purl.org/spar/datacite/"}
   ],
 
 "rules":  [
     {
+      "name":"citedomid",
+      "label": "Citations of a bibliographic resource (OMID)",
+      "placeholder": "e.g. br/0612058700",
+      "advanced": true,
+      "freetext": true,
+      "category": "citation",
+      "regex":"(.+)",
+      "query": [`
+            {
+              BIND(<https://w3id.org/oc/meta/[[VAR]]> as ?cited) .
+              ?oci cito:hasCitedEntity ?cited .
+              ?oci cito:hasCitingEntity ?citing .
+            }`
+      ]
+    },
+    {
       "name":"citingdoi",
-      "label": "References of a specific document",
-      "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
+      "label": "References of a bibliographic resource (DOI, PMID, OMID)",
+      "placeholder": "e.g. 10.1016/J.WEBSEM.2012.08.001 | 37844613 | br/0612058700",
       "advanced": true,
       "freetext": false,
-      "heuristics": [['decodeURIStr'],['encodeDOIURL']],
+      "heuristics": [['lower_case']],
       "category": "citation",
-      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
-      "query": [
-            "{",
-            "?iri cito:hasCitingEntity <http://dx.doi.org/[[VAR]]> .",
-            "}"
+      "regex":"(.+)",
+      "query": [`
+            {
+              SERVICE <https://test.opencitations.net/meta/sparql> {
+                ?citing datacite:hasIdentifier ?identifier .
+                ?identifier literal:hasLiteralValue "[[VAR]]" .
+              }
+              ?oci cito:hasCitingEntity ?citing .
+              ?oci cito:hasCitedEntity ?cited .
+            }`
       ]
     },
     {
       "name":"citeddoi",
-      "label": "Citations of a specific document",
-      "placeholder": "DOI e.g. 10.1016/J.WEBSEM.2012.08.001",
+      "label": "Citations of a bibliographic resource (DOI, PMID, OMID)",
+      "placeholder": "e.g. 10.1016/J.WEBSEM.2012.08.001 | 37844613 | br/0612058700",
       "advanced": true,
-      "freetext": false,
-      "heuristics": [['decodeURIStr'],['encodeDOIURL']],
+      "freetext": true,
+      "heuristics": [['lower_case']],
       "category": "citation",
-      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
-      "query": [
-            "{",
-            "?iri cito:hasCitedEntity <http://dx.doi.org/[[VAR]]> .",
-            "}"
+      "regex":"(.+)",
+      "query": [`
+            {
+              SERVICE <https://test.opencitations.net/meta/sparql> {
+                ?cited datacite:hasIdentifier ?identifier .
+                ?identifier literal:hasLiteralValue "[[VAR]]" .
+              }
+              ?oci cito:hasCitedEntity ?cited .
+              ?oci cito:hasCitingEntity ?citing .
+            }`
       ]
     },
     {
       "name":"oci",
-      "label": "Having a specific Open Citation Identifier (OCI)",
+      "label": "Data of a specific citation (OCI)",
       "placeholder": "OCI e.g: 0200101...-0200101...",
       "advanced": true,
       "freetext": false,
@@ -55,7 +76,9 @@ var search_conf = {
       "regex":"(\\d{1,}-\\d{1,})",
       "query": [`
         {
-          VALUES ?iri { <https://w3id.org/oc/index/coci/ci/[[VAR]]> <https://w3id.org/oc/index/croci/ci/[[VAR]]> }
+          BIND(<https://w3id.org/oc/index/ci/[[VAR]]> as ?oci) .
+          ?oci cito:hasCitingEntity ?citing .
+          ?oci cito:hasCitedEntity ?cited .
         }
         `
       ]
@@ -68,45 +91,23 @@ var search_conf = {
       "label": "Citation",
       "macro_query": [
         `
-            SELECT DISTINCT ?iri ?browser ?short_iri ?citing_doi ?citing_doi_iri ?cited_doi ?cited_doi_iri ?creationdate ?timespan
-                        WHERE  {
-                        [[RULE]]
-                        hint:Prior hint:runFirst true .
-
-                        #Consider citing/cited DOI a must field
-                        BIND(STRAFTER(STR(?iri), '/ci/') as ?short_iri) .
-                        ?iri cito:hasCitingEntity ?citing_doi_iri .
-                        BIND(REPLACE(STR(?citing_doi_iri), 'http://dx.doi.org/', '', 'i') as ?citing_doi) .
-                        ?iri cito:hasCitedEntity ?cited_doi_iri .
-                        BIND(REPLACE(STR(?cited_doi_iri), 'http://dx.doi.org/', '', 'i') as ?cited_doi) .
-
-                        #we consider as optional only the creation date and the timespan of the citation
-                        OPTIONAL {
-                            ?iri cito:hasCitationCreationDate ?creationdate .
-                            ?iri cito:hasCitationTimeSpan ?timespan .
-                          }
-                        BIND(REPLACE(STR(?iri), '/index/', '/index/browser/', 'i') as ?browser) .
+            SELECT ?oci ?citing ?cited
+            WHERE  {
+              [[RULE]]
             }
             `
       ],
       "fields": [
-        {"iskey": true, "value":"short_iri", "value_map": [], "limit_length": 20, "title": "OCI","column_width":"10%", "type": "text", "sort":{"value": "short_iri", "type":"text"}, "link":{"field":"browser","prefix":""}},
-        {"value":"citing_doi", "value_map": ["decodeURIStr"],"title": "Citing DOI", "column_width":"12%", "type": "text", "sort":{"value": "citing_doi", "type":"text"}, "link":{"field":"citing_doi_iri","prefix":""}},
-        {"value": "ext_data.citing_doi_citation.reference", "title": "Citing reference", "column_width":"19%", "type": "text"},
-        {"value":"cited_doi", "value_map": ["decodeURIStr"], "title": "Cited DOI", "column_width":"12%", "type": "text", "sort":{"value": "cited_doi", "type":"text"}, "link":{"field":"cited_doi_iri","prefix":""}},
-        {"value": "ext_data.cited_doi_citation.reference", "title": "Cited reference", "column_width":"19%", "type": "text"},
-        {"value":"creationdate", "title": "Creation", "column_width":"8%", "type": "text", "sort":{"value": "creationdate", "type":"text"},"filter":{"type_sort": "int", "min": 10000, "sort": "sum", "order": "desc"}},
-        {"value":"timespan", "value_map":["timespan_in_days"], "title": "Timespan (days)", "column_width":"13%", "type": "text", "sort":{"value": "timespan", "type":"int"}, "filter":{"type_sort": "int", "min": 10000, "sort": "value", "order": "desc"}}
+        {"iskey": true, "value":"oci", "title": "Id","column_width":"15%", "type": "text", "link":{"field":"oci","oci":""}},
+        {"value":"ext_data.citing_ref.reference", "title": "Citing entity", "column_width":"40%", "type": "text"},
+        {"value":"ext_data.cited_ref.reference", "title": "Cited entity", "column_width":"40%", "type": "text"}
       ],
       "ext_data": {
-        //"citing_doi_citation": {"name": call_crossref, "param": {"fields":["citing_doi"]}, "async": true},
-        "citing_doi_citation": {"name": "call_crossref_4citation", "param": {"fields":["citing_doi"]}, "async": true},
-        "cited_doi_citation": {"name": "call_crossref_4citation", "param": {"fields":["cited_doi"]}, "async": true}
+        "citing_ref": {"name": "meta_call_to_get_ref", "param": {"fields":["citing"]}, "async": true},
+        "cited_ref": {"name": "meta_call_to_get_ref", "param": {"fields":["cited"]}, "async": true}
       },
       "extra_elems":[
-        {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Back to search", "others": {"href": "/index/search"}},
-        {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
-        {"elem_type": "br","elem_value": "" ,"elem_class": "" ,"elem_innerhtml": ""},
+        {"elem_type": "a","elem_value": "Back to search" ,"elem_class": "btn btn-primary left" ,"elem_innerhtml": "Show the search interface", "others": {"href": "/index/search"}}
       ]
     }
   ],
@@ -123,17 +124,17 @@ var search_conf = {
             "spinner": true,
             "title":"Searching in the OpenCitations Indexes ...",
             "subtitle":"Be patient - this search might take several seconds!",
-            "abort":{"title":"Abort Search","href_link":"search.html"}
+            "abort":{"title":"Abort Search","href_link":"/index/search"}
           },
 
    "timeout":{
             "value": 9000,
-            "link": "search.html"
+            "link": "/index/search"
           }
 
   }
 
-
+console.log(search_conf);
 
 
 var heuristics = (function () {
@@ -146,6 +147,13 @@ var heuristics = (function () {
       function capitalize_1st_letter(str){
         return str.charAt(0).toUpperCase() + str.slice(1);
       }
+      function ci_label(str) {
+        var a = str.split("/index/");
+        return a[a.length - 1];
+      }
+      function map_source(str) {
+        return str.toUpperCase().replace("/","");
+      }
       function decodeURIStr(str) {
         return decodeURIComponent(str);
       }
@@ -156,8 +164,6 @@ var heuristics = (function () {
         });
       }
       function encodeDOIURL(str) {
-        //encode only the last part of the DOI
-        //e.g. 10.3241/<ENCODE THIS>
         var dec_str = decodeURIStr(str);
         var parts = dec_str.split('/');
         var decoded_doi = parts[0] + "/" + encodeURIComponent(parts[1]).replace(/[!'()*]/g, function (c) {
@@ -199,7 +205,10 @@ var heuristics = (function () {
 
         return new_str;
       }
-      function timespan_in_days(str) {
+      function creation_year(str) {
+        return str.substring(0, 4);
+      }
+      function _timespan_parts(str) {
         var new_str = "";
         var years = 0;
         var months = 0;
@@ -227,7 +236,16 @@ var heuristics = (function () {
           }
         }
 
-        return String(years * 365 + months * 30 + days);
+        return {"years":years,"months":months,"days":days};
+
+      }
+      function timespan_in_days(str) {
+        var tparts = _timespan_parts(str);
+        return String(tparts.years * 365 + tparts.months * 30 + tparts.days);
+      }
+      function timespan_in_months(str) {
+        var tparts = _timespan_parts(str);
+        return String(tparts.years * 12 + tparts.months);
       }
       function short_version(str, max_chars = 20) {
         var new_str = "";
@@ -241,16 +259,61 @@ var heuristics = (function () {
         return new_str+"...";
       }
 
+      function get_omid(str_id) {
 
+        var id_pref = "";
+        // is DOI
+        if ( /^10\.\d{4,9}\/[-._;()/:a-zA-Z0-9]+$/.test(str_id)  ) {
+          id_pref = "doi:";
+        }
+        // is PMID
+        else if ( /^\d{1,}/.test(str_id) ) {
+          id_pref = "pmid:";
+        }
+        // is OMID
+        else if ( /^br\/\d{1,}/.test(str_id) ) {
+          id_pref = "omid:";
+        }
+        // is other ID
+        else {
+          id_pref = "";
+        }
+        var meta_api_url = 'https://opencitations.net/meta/api/v1/metadata/';
+        meta_api_url = meta_api_url + id_pref + str_id;
+
+        fetch(meta_api_url)
+          .then(response => {
+            if (response.status === 200) {
+                var meta_data = response.json();
+                const regex = /omid:([^\s]+)/;
+                const match = meta_data["id"].match(regex);
+                if (match) {
+                  return match[1].replace("omid:","");
+                }
+            } else {
+                return "";
+            }
+          })
+          .catch(error => {
+            return "";
+          });
+
+        return "";
+      }
       return {
         lower_case: lower_case,
         capitalize_1st_letter: capitalize_1st_letter,
+        ci_label: ci_label,
+        map_source: map_source,
         decodeURIStr: decodeURIStr,
         encodeURIStr: encodeURIStr,
         encodeDOIURL: encodeDOIURL,
         short_version: short_version,
+        creation_year: creation_year,
         timespan_in_days: timespan_in_days,
-        timespan_translate: timespan_translate
+        timespan_in_months: timespan_in_months,
+        timespan_translate: timespan_translate,
+        get_omid: get_omid
        }
 })();
 
@@ -277,7 +340,7 @@ var callbackfunctions = (function () {
       }
     }
     //https://citation.crosscite.org/format?doi=10.1145%2F2783446.2783605&style=apa&lang=en-US
-    function call_crossref_4citation(conf_params, index, async_bool, callbk_func, key_full_name, data_field, func_name ){
+    function ext_call_to_get_ref(conf_params, index, async_bool, callbk_func, key_full_name, data_field, func_name ){
       var call_crossref_api = "https://citation.crosscite.org/format?doi=";
       var suffix = "&style=apa&lang=en-US";
 
@@ -300,9 +363,123 @@ var callbackfunctions = (function () {
       }
     }
 
+    function meta_call_to_get_ref(conf_params, index, async_bool, callbk_func, key_full_name, data_field, func_name ){
+
+      var call_meta = "https://test.opencitations.net/meta/api/v1/metadata/";
+      // takes an omid url, e.g. "https://w3id.org/oc/meta/br/0610200888"
+      var str_id = conf_params[0];
+      var link_id = str_id;
+
+      if (str_id != undefined) {
+        //var call_id = "doi:"+str_id;
+        //if (/^\d{1,}$/.test(str_id)) {
+        //  call_id = "pmid:"+str_id;
+        //}
+        var call_id = "omid:"+str_id.split("meta/")[1];
+        console.log(call_id);
+        $.ajax({
+              url: call_meta + call_id,
+              type: 'GET',
+              async: async_bool,
+              success: function( call_res ) {
+
+                  if (call_res.length > 0) {
+                    // meta is supposed to return 1 entity only
+                    res = call_res[0];
+                    var entity_ref = "";
+                    var entity_ref_val = "";
+                    if (res != undefined){
+                      if ("title" in res) {
+                        if (res["title"] != "") {
+                          entity_ref_val += res["title"];
+                          entity_ref += "<p><i><strong><a href='"+link_id+"'>"+res["title"]+"</a></strong></i></p><br/>";
+                        }
+                      }
+                      if ("venue" in res) {
+                        if (res["venue"] != "") {
+                          entity_ref_val += " ;; ";
+                          str_venues = "";
+                          l_venues = res["venue"].split(";");
+                          for (var i = 0; i < l_venues.length; i++) {
+                            var a_venue = l_venues[i];
+                            var omid_matches = a_venue.match(/omid:br\/\d{1,}/);
+                            if (omid_matches) {
+                              entity_ref_val += a_venue + " ; ";
+                              a_venue = "<a href='https://w3id.org/oc/meta/"+omid_matches[0].split("omid:")[1]+"'>" + a_venue + "</a>";
+                            }
+                            str_venues += a_venue + "; ";
+                          }
+                          entity_ref += "<p><strong>Venue: </strong><i>"+str_venues+"</i></p>";
+                        }
+                      }
+                      if ("pub_date" in res) {
+                        if (res["pub_date"] != "") {
+                          entity_ref_val += " ;; ";
+                          entity_ref_val += res["pub_date"];
+                          entity_ref += "<p><strong>Publication date: </strong><i>"+res["pub_date"]+"</i></p>";
+                        }
+                      }
+                      if ("author" in res) {
+                        if (res["author"] != "") {
+                            entity_ref_val += " ;; ";
+                            str_authors = "";
+                            l_authors = res["author"].split(";");
+                            for (var i = 0; i < l_authors.length; i++) {
+                              var an_author = l_authors[i];
+                              var omid_matches = an_author.match(/omid:ra\/\d{1,}/);
+                              if (omid_matches) {
+                                entity_ref_val += an_author + "; ";
+                                an_author = "<a href='https://w3id.org/oc/meta/"+omid_matches[0].split("omid:")[1]+"'>" + an_author + "</a>";
+                              }
+                              str_authors += an_author + "; ";
+                            }
+                            entity_ref += "<p><strong>Author(s): </strong><i>"+str_authors+"</i></p>";
+                        }
+                      }
+
+                      if ("id" in res) {
+                        if (res["id"] != "") {
+                          var supported_ids = {
+                            "doi": "https://www.doi.org/",
+                            "pmid": "https://pubmed.ncbi.nlm.nih.gov/",
+                          };
+                          var l_ids = res["id"].split(" ");
+                          var html_ids = [];
+                          for (var i = 0; i < l_ids.length; i++) {
+                            for (var s_id in supported_ids) {
+                              if (l_ids[i].startsWith(s_id)) {
+                                id_val = l_ids[i].replace(s_id+":","");
+                                html_ids.push(s_id.toUpperCase()+": <a href='"+supported_ids[s_id]+id_val+"'>"+id_val+"</a>");
+                              }
+                            }
+                          }
+                          entity_ref += "<br/><p>"+html_ids.join("<br>")+"</p>";
+                        }
+                      }
+
+                    }
+                    var res_obj = {"reference": entity_ref};
+                    var func_param = [];
+                    func_param.push(index, key_full_name, data_field, async_bool, func_name, conf_params, res_obj);
+                    Reflect.apply(callbk_func,undefined,func_param);
+                  }
+              },
+              error: function (error)
+              {
+                  //var res_obj = {"reference_html": "<a href='"+link_id+"'>"+str_id +"</a><br/><br/>", "reference_value": ""};
+                  var res_obj = {"reference": "<a href='"+link_id+"'>"+str_id +"</a><br/><br/>"};
+                  var func_param = [];
+                  func_param.push(index, key_full_name, data_field, async_bool, func_name, conf_params, res_obj);
+                  Reflect.apply(callbk_func,undefined,func_param);
+              }
+         });
+      }
+    }
+
 
   return {
     call_crossref: call_crossref,
-    call_crossref_4citation: call_crossref_4citation
+    ext_call_to_get_ref: ext_call_to_get_ref,
+    meta_call_to_get_ref: meta_call_to_get_ref
    }
   })();
